@@ -1,13 +1,13 @@
-const { env } = require('../../lib')
-const { is } = require('../../lib/utils')
-const commonEffects = require('../../lib/commonEffects').default
-const channelEffects = require('../../lib/channelEffects').default
+import { env, is } from '../../src'
+import commonEffects from '../../src/commonEffects'
+import channelEffects from '../../src/channelEffects'
 
 const run = fn =>
-  env()
+  // env((result, isErr) => isErr && console.error(result))
+  env(() => null)
     .use(commonEffects)
     .use(channelEffects)
-    .use('echo', ([effect, arg], ctx, cb) => cb(arg))
+    .def('echo', ([effect, arg], ctx, cb) => cb(arg))
     .run(fn)
 
 test('saga iteration', async done => {

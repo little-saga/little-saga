@@ -60,3 +60,12 @@ export function createTaskIterator(fn, args) {
     throw new Error('Cannot create task iterator')
   }
 }
+
+export const actionCreators = new Proxy(
+  {},
+  {
+    get(_target, property) {
+      return (...args) => [property, ...args]
+    },
+  },
+)

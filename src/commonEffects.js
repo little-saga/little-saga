@@ -1,28 +1,16 @@
-import { def, TASK_CANCEL } from '..'
-import { is, noop } from '../utils'
-
-function setIn(object, keyPath, value) {
-  const size = keyPath.length
-  for (let i = 0; i < size - 1; i++) {
-    object = object[keyPath[i]] || {}
-  }
-  object[keyPath[size - 1]] = value
-}
+import { def, TASK_CANCEL } from './index'
+import { is, noop, actionCreators } from './utils'
 
 export function delay([_, timeout, returnVal], ctx, cb) {
   const handle = setTimeout(() => cb(returnVal), timeout)
   cb.cancel = () => clearTimeout(handle)
 }
 
-export function list(effect, ctx, cb) {
-  const result = {}
-  for (const typeName of ctx.translator.supportedTypes) {
-    setIn(result, typeName.split('.'), (...args) => [typeName, ...args])
-  }
-  cb(result)
+export function list(_effect, _ctx, cb) {
+  cb(actionCreators)
 }
 
-export function all([_, effects], ctx, cb, digestEffect) {
+export function all([_, effects], ctx, cb, { digestEffect }) {
   const keys = Object.keys(effects)
 
   if (!keys.length) {
@@ -70,7 +58,7 @@ export function all([_, effects], ctx, cb, digestEffect) {
   keys.forEach(key => digestEffect(effects[key], childCbs[key]))
 }
 
-export function race([_, effects], ctx, cb, digestEffect) {
+export function race([_, effects], ctx, cb, { digestEffect }) {
   let completed = false
   const keys = Object.keys(effects)
   const childCbs = {}
@@ -120,8 +108,11 @@ export function getContext(effect, ctx, cb) {
   cb(ctx)
 }
 
-export const commonEffects = { delay, list, all, race, getContext, setContext }
-
-export default function enhance(ctx) {
-  return def(ctx, commonEffects)
+export default function commonEffects(ctx) {
+  def(ctx, 'delay', delay)
+  def(ctx, 'list', list)
+  def(ctx, 'all', all)
+  def(ctx, 'race', race)
+  def(ctx, 'getContext', getContext)
+  def(ctx, 'setContext', setContext)
 }

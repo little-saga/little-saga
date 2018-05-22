@@ -69,9 +69,8 @@ export function put([effectType, channel, action], ctx, cb) {
   })
 }
 
-export const channelEffects = { take, put }
-
 export default function(ctx) {
   ctx.channel = multicastChannel()
-  return def(ctx, channelEffects)
+  def(ctx, 'take', take)
+  def(ctx, 'put', put)
 }

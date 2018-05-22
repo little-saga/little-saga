@@ -1,9 +1,7 @@
-const { env } = require('../lib')
-const { channel, END } = require('../lib/channelEffects/channel')
-const commonEffects = require('../lib/commonEffects').default
-const channelEffects = require('../lib/channelEffects').default
-
-jest.setTimeout(1000)
+import { env } from '../src'
+import commonEffects from '../src/commonEffects'
+import channelEffects from '../src/channelEffects'
+import { channel, END } from '../src/channelEffects/channel'
 
 test('channel: watcher + max workers', done => {
   const actual = []
@@ -38,8 +36,7 @@ test('channel: watcher + max workers', done => {
 
   task
     .toPromise()
-    .then(value => {
-      console.log('task-promise-value:', value)
+    .then(() => {
       expect(actual).toEqual([
         [1, 1],
         [2, 2],

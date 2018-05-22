@@ -1,6 +1,6 @@
-const mitt = require('mitt')
-const { channel, END, eventChannel } = require('../lib/channelEffects/channel')
-const buffers = require('../lib/channelEffects/buffers')
+import mitt from 'mitt'
+import { channel, END, eventChannel } from '../src/channelEffects/channel'
+import * as buffers from '../src/channelEffects/buffers'
 
 const eq = x => y => x === y
 const assert = {}

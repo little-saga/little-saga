@@ -56,6 +56,13 @@ function forkQueue(mainTask, cb) {
 }
 
 export default function proc(iterator, parentContext, cont) {
+  iterator._deferredEnd = null
+  iterator._isRunning = true
+  iterator._isCancelled = false
+  iterator._isAborted = false
+  iterator._result = undefined
+  iterator._error = undefined
+
   const ctx = Object.create(parentContext)
   const task = newTask(iterator, cont)
   const mainTask = {
@@ -65,12 +72,6 @@ export default function proc(iterator, parentContext, cont) {
     // cont: **will be set when passed to forkQueue**
   }
   const taskQueue = forkQueue(mainTask, end)
-
-  iterator._isRunning = true
-  iterator._isCancelled = false
-  iterator._isAborted = false
-  iterator._result = undefined
-  iterator._error = undefined
 
   cont.cancel = cancel
   next()
@@ -172,7 +173,7 @@ export default function proc(iterator, parentContext, cont) {
         error.effect = effect
         currCb(error, true)
       } else {
-        effectRunner(effect, ctx, currCb, digestEffect)
+        effectRunner(effect, ctx, currCb, { digestEffect })
       }
     }
   }
@@ -209,7 +210,6 @@ export default function proc(iterator, parentContext, cont) {
   }
 
   function newTask(iterator, cont) {
-    iterator._deferredEnd = null
     return {
       [TASK]: true,
       toPromise() {
@@ -258,7 +258,7 @@ export default function proc(iterator, parentContext, cont) {
     const iterator = createTaskIterator(fn, args)
     try {
       suspend()
-      const task = proc(iterator, ctx, cb)
+      const task = proc(iterator, ctx, noop)
       if (iterator._isRunning) {
         taskQueue.addTask(task)
         cb(task)
@@ -296,8 +296,8 @@ export default function proc(iterator, parentContext, cont) {
     cb()
   }
 
-  function runDefEffect([_, nameOrDefObject, handler], ctx, cb) {
-    def(ctx, nameOrDefObject, handler)
+  function runDefEffect([_, name, handler], ctx, cb) {
+    def(ctx, name, handler)
     cb()
   }
   // endregion

@@ -1,10 +1,11 @@
-import { is, createTaskIterator } from '../utils'
+import { createTaskIterator } from '../utils'
 import def from './def'
 import proc from './proc'
 
-const stdTranslator = {
-  supportedTypes: ['promise', 'iterator', 'fork', 'join', 'cancel', 'def'],
-  getRunner() {},
+const emptyTranslator = {
+  getRunner() {
+    return null
+  },
 }
 
 function fallbackCont(result, isErr) {
@@ -16,15 +17,15 @@ function fallbackCont(result, isErr) {
 }
 
 export default function env(cont = fallbackCont) {
-  let ctx = { translator: stdTranslator }
+  const ctx = { translator: emptyTranslator }
 
   return {
-    use(arg1, arg2) {
-      if (is.func(arg1)) {
-        ctx = arg1(ctx) || ctx
-      } else {
-        def(ctx, arg1, arg2)
-      }
+    use(enhancer) {
+      enhancer(ctx)
+      return this
+    },
+    def(type, handler) {
+      def(ctx, type, handler)
       return this
     },
     run(fn, ...args) {

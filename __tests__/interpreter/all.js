@@ -1,11 +1,10 @@
-const { env } = require('../../lib')
-const { deferred } = require('../../lib/utils')
-const commonEffects = require('../../lib/commonEffects').default
-const channelEffects = require('../../lib/channelEffects').default
-const { END } = require('../../lib/channelEffects/channel')
+import { env, deferred } from '../../src'
+import commonEffects from '../../src/commonEffects'
+import channelEffects from '../../src/channelEffects'
+import { END } from '../../src/channelEffects/channel'
 
 const run = fn =>
-  env()
+  env((result, isErr) => isErr && console.error(result))
     .use(commonEffects)
     .use(channelEffects)
     .run(fn)
