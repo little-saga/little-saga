@@ -104,8 +104,24 @@ export function setContext([effectType, partialContext], ctx, cb) {
   cb()
 }
 
-export function getContext(effect, ctx, cb) {
-  cb(ctx)
+export function getContext([effectType, prop], ctx, cb) {
+  cb(ctx[prop])
+}
+
+export function cps([effectType, fn, ...args], ctx, cb) {
+  // CPS (ie node style functions) can define their own cancellation logic
+  // by setting cancel field on the cb
+
+  // catch synchronous failures; see redux-saga #152
+  try {
+    const cpsCb = (err, res) => (err == null ? cb(res) : cb(err, true))
+    fn(...args.concat(cpsCb))
+    if (cpsCb.cancel) {
+      cb.cancel = () => cpsCb.cancel()
+    }
+  } catch (error) {
+    cb(error, true)
+  }
 }
 
 export default function commonEffects(ctx) {
@@ -115,4 +131,5 @@ export default function commonEffects(ctx) {
   def(ctx, 'race', race)
   def(ctx, 'getContext', getContext)
   def(ctx, 'setContext', setContext)
+  def(ctx, 'cps', cps)
 }

@@ -1,10 +1,10 @@
-import { env, deferred } from '../../src'
+import { env, deferred, noop } from '../../src'
 import commonEffects from '../../src/commonEffects'
 import channelEffects from '../../src/channelEffects'
 import { END } from '../../src/channelEffects/channel'
 
 const run = fn =>
-  env((result, isErr) => isErr && console.error(result))
+  env(noop)
     .use(commonEffects)
     .use(channelEffects)
     .run(fn)

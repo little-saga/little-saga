@@ -1,10 +1,9 @@
-import { env, is } from '../../src'
+import { env, is, noop } from '../../src'
 import commonEffects from '../../src/commonEffects'
 import channelEffects from '../../src/channelEffects'
 
 const run = fn =>
-  // env((result, isErr) => isErr && console.error(result))
-  env(() => null)
+  env(noop)
     .use(commonEffects)
     .use(channelEffects)
     .def('echo', ([effect, arg], ctx, cb) => cb(arg))

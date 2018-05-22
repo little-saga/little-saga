@@ -157,7 +157,7 @@ export default function proc(iterator, parentContext, cont) {
     if (effectType === 'promise') {
       resolvePromise(effect, ctx, currCb)
     } else if (effectType === 'iterator') {
-      resolveIterator(iterator, ctx, currCb)
+      resolveIterator(effect, ctx, currCb)
     } else if (effectType === 'fork') {
       runForkEffect(effect, ctx, currCb)
     } else if (effectType === 'join') {

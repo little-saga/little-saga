@@ -1,4 +1,4 @@
-import { env } from '../src'
+import { env, noop } from '../src'
 import commonEffects from '../src/commonEffects'
 import channelEffects from '../src/channelEffects'
 import { channel, END } from '../src/channelEffects/channel'
@@ -6,7 +6,7 @@ import { channel, END } from '../src/channelEffects/channel'
 test('channel: watcher + max workers', done => {
   const actual = []
   const chan = channel()
-  const task = env()
+  const task = env(noop)
     .use(commonEffects)
     .use(channelEffects)
     .run(function* saga() {
