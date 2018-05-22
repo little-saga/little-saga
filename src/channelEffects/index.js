@@ -1,6 +1,6 @@
 import { TASK_CANCEL, asap, def } from '..'
 import { is, kTrue } from '../utils'
-import { multicastChannel, END } from './channel'
+import { channel, multicastChannel, END } from './channel'
 
 function makeMatcher(pattern) {
   if (pattern === '*' || pattern === undefined) {
@@ -69,8 +69,29 @@ export function put([effectType, channel, action], ctx, cb) {
   })
 }
 
+export function flush([effectType, channel], ctx, cb) {
+  channel.flush(cb)
+}
+
+export function actionChannel([effectType, pattern, buffer], ctx, cb) {
+  const chan = channel(buffer)
+  const match = makeMatcher(pattern)
+
+  const taker = action => {
+    if (action !== END) {
+      ctx.channel.take(taker, match)
+    }
+    chan.put(action)
+  }
+
+  ctx.channel.take(taker, match)
+  cb(chan)
+}
+
 export default function(ctx) {
   ctx.channel = multicastChannel()
   def(ctx, 'take', take)
   def(ctx, 'put', put)
+  def(ctx, 'actionChannel', actionChannel)
+  def(ctx, 'flush', flush)
 }

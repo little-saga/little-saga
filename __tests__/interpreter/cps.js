@@ -1,11 +1,11 @@
-import { actionCreators, env } from '../../src'
+import { actionCreators, env, noop } from '../../src'
 import commonEffects from '../../src/commonEffects'
 import channelEffects from '../../src/channelEffects'
 
 test('saga cps call handling', () => {
   let actual = []
 
-  const task = env()
+  const task = env(noop)
     .use(commonEffects)
     .use(ctx => {
       ctx.a = 1
@@ -58,7 +58,7 @@ test('saga synchronous cps failures handling', () => {
     }
   }
 
-  const task = env()
+  const task = env(noop)
     .use(commonEffects)
     .use(channelEffects)
     .use(ctx => {
@@ -86,7 +86,7 @@ test('saga cps cancellation handling', () => {
     }
   }
 
-  const task = env()
+  const task = env(noop)
     .use(commonEffects)
     .run(function* genFn() {
       const task = yield io.fork(function*() {
