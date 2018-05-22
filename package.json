@@ -6,7 +6,8 @@
   "scripts": {
     "start": "babel --watch src -d lib",
     "build": "babel src -d lib",
-    "test": "jest --coverage"
+    "test":
+      "jest --coverage && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js"
   },
   "author": {
     "name": "Shi Feichao",
@@ -14,13 +15,7 @@
     "url": "http://shinima.pw"
   },
   "main": "lib/index.js",
-  "files": [
-    "lib",
-    ".editorconfig",
-    ".gitignore",
-    "package.json",
-    "readme.md"
-  ],
+  "files": ["lib", ".editorconfig", ".gitignore", "package.json", "readme.md"],
   "prettier": {
     "printWidth": 100,
     "semi": false,
@@ -35,11 +30,7 @@
   },
   "jest": {
     "testRegex": "(/__tests__/.*|\\.(test|spec))\\.jsx?$",
-    "moduleFileExtensions": [
-      "js",
-      "json",
-      "jsx"
-    ]
+    "moduleFileExtensions": ["js", "json", "jsx"]
   },
   "devDependencies": {
     "@babel/cli": "^7.0.0-beta.47",
@@ -48,6 +39,7 @@
     "@babel/plugin-transform-modules-commonjs": "^7.0.0-beta.47",
     "babel-core": "7.0.0-bridge.0",
     "babel-jest": "^22.4.4",
+    "coveralls": "^3.0.1",
     "jest": "^22.4.4",
     "mitt": "^1.1.3",
     "prettier": "1"
