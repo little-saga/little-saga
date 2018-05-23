@@ -1,5 +1,5 @@
 import { def, TASK_CANCEL } from './index'
-import { is, noop, delay } from './utils'
+import { delay, is, noop, resolveContextAndFn } from './utils'
 
 export function all([_, effects], ctx, cb, { digestEffect }) {
   const keys = Object.keys(effects)
@@ -112,20 +112,6 @@ export function cps([effectType, fn, ...args], ctx, cb) {
     }
   } catch (error) {
     cb(error, true)
-  }
-}
-
-function resolveContextAndFn(arg) {
-  if (is.func(arg)) {
-    return { context: null, fn: arg }
-  } else {
-    // [ context, method--or--method-name ]
-    const context = arg[0]
-    if (is.func(arg[1])) {
-      return { context, fn: arg[1] }
-    } else {
-      return { context, fn: context[arg[1]] }
-    }
   }
 }
 

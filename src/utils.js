@@ -53,10 +53,39 @@ export function remove(array, item) {
   }
 }
 
-export function createTaskIterator(fn, args) {
+function iteratorAlwaysThrow(error) {
+  return {
+    next() {
+      throw error
+    },
+    throw(e) {
+      throw e
+    },
+    return() {
+      throw error
+    },
+  }
+}
+
+function iteratorAlwaysDone(value) {
+  return {
+    next() {
+      return { done: true, value }
+    },
+    throw(e) {
+      throw e
+    },
+    return(v) {
+      return { done: true, value: v }
+    },
+  }
+}
+
+export function createTaskIterator(fnObj, args) {
   let result, error
   try {
-    result = fn(...args)
+    const { context, fn } = resolveContextAndFn(fnObj)
+    result = fn.apply(context, args)
   } catch (err) {
     error = err
   }
@@ -65,9 +94,9 @@ export function createTaskIterator(fn, args) {
     return result
   }
   if (error) {
-    throw error
+    return iteratorAlwaysThrow(error)
   } else {
-    throw new Error('Cannot create task iterator')
+    return iteratorAlwaysDone(result)
   }
 }
 
@@ -79,3 +108,17 @@ export const io = new Proxy(
     },
   },
 )
+
+export function resolveContextAndFn(arg) {
+  if (is.func(arg)) {
+    return { context: null, fn: arg }
+  } else {
+    // [ context, method--or--method-name ]
+    const context = arg[0]
+    if (is.func(arg[1])) {
+      return { context, fn: arg[1] }
+    } else {
+      return { context, fn: context[arg[1]] }
+    }
+  }
+}

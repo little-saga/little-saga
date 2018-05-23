@@ -1,4 +1,4 @@
-import { createTaskIterator, deferred, is, noop, remove } from '../utils'
+import { createTaskIterator, deferred, is, noop, remove, resolveContextAndFn } from '../utils'
 import { CANCEL, def, flush, suspend, TASK, TASK_CANCEL } from '..'
 
 function forkQueue(mainTask, cb) {
@@ -166,10 +166,14 @@ export default function proc(iterator, parentContext, cont) {
       resolveIterator(effect, ctx, currCb)
     } else if (effectType === 'fork') {
       runForkEffect(effect, ctx, currCb)
+    } else if (effectType === 'spawn') {
+      runSpawnEffect(effect, ctx, currCb)
     } else if (effectType === 'join') {
       runJoinEffect(effect, ctx, currCb)
     } else if (effectType === 'cancel') {
       runCancelEffect(effect, ctx, currCb)
+    } else if (effectType === 'cancelled') {
+      runCancelledEffect(effect, ctx, currCb)
     } else if (effectType === 'def') {
       runDefEffect(effect, ctx, currCb)
     } else {
@@ -278,16 +282,31 @@ export default function proc(iterator, parentContext, cont) {
     }
   }
 
-  function runJoinEffect([effectType, otherTask], ctx, cb) {
-    if (otherTask.isRunning()) {
-      const joiner = { task, cb }
-      cb.cancel = () => remove(otherTask.joiners, joiner)
-      otherTask.joiners.push(joiner)
+  function runSpawnEffect([effectType, fn, ...args], ctx, cb) {
+    const iterator = createTaskIterator(fn, args)
+    try {
+      suspend()
+      cb(proc(iterator, ctx, noop))
+    } finally {
+      flush()
+    }
+  }
+
+  function runJoinEffect([effectType, ...otherTasks], ctx, cb) {
+    if (otherTasks.length > 1) {
+      digestEffect(['all', otherTasks.map(t => ['join', t])], cb)
     } else {
-      if (otherTask.isAborted()) {
-        cb(otherTask.error(), true)
+      const t = otherTasks[0]
+      if (t.isRunning()) {
+        const joiner = { task, cb }
+        cb.cancel = () => remove(t.joiners, joiner)
+        t.joiners.push(joiner)
       } else {
-        cb(otherTask.result())
+        if (t.isAborted()) {
+          cb(t.error(), true)
+        } else {
+          cb(t.result())
+        }
       }
     }
   }
@@ -300,6 +319,10 @@ export default function proc(iterator, parentContext, cont) {
       taskToCancel.cancel()
     }
     cb()
+  }
+
+  function runCancelledEffect(effect, ctx, cb) {
+    cb(Boolean(mainTask.isCancelled))
   }
 
   function runDefEffect([_, name, handler], ctx, cb) {
