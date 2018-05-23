@@ -1,4 +1,4 @@
-import { env, noop } from '../src'
+import { env, noop, io } from '../src'
 import commonEffects from '../src/commonEffects'
 import channelEffects from '../src/channelEffects'
 import { channel, END } from '../src/channelEffects/channel'
@@ -10,7 +10,7 @@ test('channel: watcher + max workers', done => {
     .use(commonEffects)
     .use(channelEffects)
     .run(function* saga() {
-      const { fork, put } = yield 'list'
+      const { fork, put } = io
       for (let i = 0; i < 3; i++) {
         yield fork(worker, i + 1, chan)
       }

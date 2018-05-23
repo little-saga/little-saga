@@ -40,10 +40,6 @@ export function remove(array, item) {
 }
 
 export function createTaskIterator(fn, args) {
-  if (is.iterator(fn)) {
-    return fn
-  }
-
   let result, error
   try {
     result = fn(...args)
@@ -61,7 +57,7 @@ export function createTaskIterator(fn, args) {
   }
 }
 
-export const actionCreators = new Proxy(
+export const io = new Proxy(
   {},
   {
     get(_target, property) {

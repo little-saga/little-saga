@@ -1,4 +1,4 @@
-import { env, is, noop } from '../../src'
+import { env, io, is, noop } from '../../src'
 import commonEffects from '../../src/commonEffects'
 import channelEffects from '../../src/channelEffects'
 
@@ -13,7 +13,7 @@ test('saga iteration', async done => {
   let actual = []
 
   const task = run(function*() {
-    const { echo } = yield 'list'
+    const { echo } = io
     actual.push(yield echo(1))
     actual.push(yield echo(2))
     return 3
@@ -68,7 +68,7 @@ test('saga yielded falsy values', async () => {
   let actual = []
 
   await run(function*() {
-    const { echo } = yield 'list'
+    const { echo } = io
     actual.push(yield echo(false))
     actual.push(yield echo(undefined))
     actual.push(yield echo(null))

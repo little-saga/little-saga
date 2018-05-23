@@ -1,4 +1,4 @@
-import { env, noop } from '../../src'
+import { env, io, noop } from '../../src'
 import commonEffects from '../../src/commonEffects'
 
 test('saga must handle context in dynamic scoping manner', () => {
@@ -9,7 +9,7 @@ test('saga must handle context in dynamic scoping manner', () => {
       ctx.a = 1
     })
     .run(function* genFn() {
-      const { fork, getContext, setContext } = yield 'list'
+      const { fork, getContext, setContext } = io
       actual.push(yield getContext('a'))
       yield setContext({ b: 2 })
       yield fork(function*() {

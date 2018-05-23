@@ -1,19 +1,15 @@
 import { def, TASK_CANCEL } from './index'
-import { is, noop, actionCreators } from './utils'
+import { is, noop } from './utils'
 
 export function delay([_, timeout, returnVal], ctx, cb) {
   const handle = setTimeout(() => cb(returnVal), timeout)
   cb.cancel = () => clearTimeout(handle)
 }
 
-export function list(_effect, _ctx, cb) {
-  cb(actionCreators)
-}
-
 export function all([_, effects], ctx, cb, { digestEffect }) {
   const keys = Object.keys(effects)
 
-  if (!keys.length) {
+  if (keys.length === 0) {
     cb(is.array(effects) ? [] : {})
     return
   }
@@ -124,9 +120,45 @@ export function cps([effectType, fn, ...args], ctx, cb) {
   }
 }
 
+function resolveContextAndFn(arg) {
+  if (is.func(arg)) {
+    return { context: null, fn: arg }
+  } else {
+    // [ context, method--or--method-name ]
+    const context = arg[0]
+    if (is.func(arg[1])) {
+      return { context, fn: arg[1] }
+    } else {
+      return { context, fn: context[arg[1]] }
+    }
+  }
+}
+
+export function call([effectType, fnObj, ...args], ctx, cb, { digestEffect }) {
+  let result
+  try {
+    const { context, fn } = resolveContextAndFn(fnObj)
+    result = fn.apply(context, args)
+  } catch (e) {
+    cb(e, true)
+    return
+  }
+  if (is.promise(result) || is.iterator(result)) {
+    digestEffect(result, cb)
+  } else {
+    cb(result)
+  }
+}
+
+export function apply([effectType, context, fn, ...args], ctx, cb, internals) {
+  call(['call', [context, fn], ...args], ctx, cb, internals)
+}
+
 export default function commonEffects(ctx) {
   def(ctx, 'delay', delay)
-  def(ctx, 'list', list)
+
+  def(ctx, 'call', call)
+  def(ctx, 'apply', apply)
   def(ctx, 'all', all)
   def(ctx, 'race', race)
   def(ctx, 'getContext', getContext)

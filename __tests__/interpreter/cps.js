@@ -1,4 +1,4 @@
-import { actionCreators, env, noop } from '../../src'
+import { io, env, noop } from '../../src'
 import commonEffects from '../../src/commonEffects'
 import channelEffects from '../../src/channelEffects'
 
@@ -11,7 +11,7 @@ test('saga cps call handling', () => {
       ctx.a = 1
     })
     .run(function* genFn() {
-      const { cps } = yield 'list'
+      const { cps } = io
       try {
         yield cps(cb => {
           actual.push('call 1')
@@ -32,7 +32,6 @@ test('saga cps call handling', () => {
 })
 
 test('saga synchronous cps failures handling', () => {
-  const io = actionCreators
   let actual = []
 
   function* genFnChild() {
@@ -78,7 +77,6 @@ test('saga synchronous cps failures handling', () => {
 })
 
 test('saga cps cancellation handling', () => {
-  const io = actionCreators
   let cancelled = false
   const cpsFn = cb => {
     cb.cancel = () => {

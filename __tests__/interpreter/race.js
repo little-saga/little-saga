@@ -1,9 +1,7 @@
-import { actionCreators, deferred, env, noop } from '../../src'
+import { io, deferred, env, noop } from '../../src'
 import commonEffects from '../../src/commonEffects'
 import channelEffects from '../../src/channelEffects'
 import { END } from '../../src/channelEffects/channel'
-
-const io = actionCreators
 
 test('saga race between effects handling', () => {
   let actual = []
