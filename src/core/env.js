@@ -10,7 +10,7 @@ const emptyTranslator = {
 
 function fallbackCont(result, isErr) {
   if (isErr) {
-    console.error('fallbackCont error:', result)
+    throw result
   } else {
     console.log('fallbackCont result:', result)
   }

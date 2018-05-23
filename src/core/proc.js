@@ -101,6 +101,9 @@ export default function proc(iterator, parentContext, cont) {
         mainTask.cont(result.value)
       }
     } catch (error) {
+      if (!mainTask.isRunning) {
+        throw error
+      }
       if (mainTask.isCancelled) {
         console.error(error)
       }
@@ -135,10 +138,11 @@ export default function proc(iterator, parentContext, cont) {
       currCb.cancel = noop
     }
 
-    runEffect(normalizeEffect(rawEffect), currCb)
+    const normalized = normalizeEffect(rawEffect, currCb)
+    runEffect(normalized, currCb)
   }
 
-  function normalizeEffect(effect) {
+  function normalizeEffect(effect, currCb) {
     if (is.string(effect)) {
       return [effect]
     } else if (is.promise(effect)) {
@@ -148,7 +152,9 @@ export default function proc(iterator, parentContext, cont) {
     } else if (is.array(effect)) {
       return effect
     } else {
-      throw new Error('Unable to normalize effect')
+      const error = new Error('Unable to normalize effect')
+      error.effect = effect
+      currCb(error, true)
     }
   }
 
