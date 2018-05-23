@@ -1,10 +1,5 @@
 import { def, TASK_CANCEL } from './index'
-import { is, noop } from './utils'
-
-export function delay([_, timeout, returnVal], ctx, cb) {
-  const handle = setTimeout(() => cb(returnVal), timeout)
-  cb.cancel = () => clearTimeout(handle)
-}
+import { is, noop, delay } from './utils'
 
 export function all([_, effects], ctx, cb, { digestEffect }) {
   const keys = Object.keys(effects)
@@ -154,9 +149,12 @@ export function apply([effectType, context, fn, ...args], ctx, cb, internals) {
   call(['call', [context, fn], ...args], ctx, cb, internals)
 }
 
-export default function commonEffects(ctx) {
-  def(ctx, 'delay', delay)
+function delayEffectRunner([_, timeout, returnVal], ctx, cb, { digestEffect }) {
+  digestEffect(delay(timeout, returnVal), cb)
+}
 
+export default function commonEffects(ctx) {
+  def(ctx, 'delay', delayEffectRunner)
   def(ctx, 'call', call)
   def(ctx, 'apply', apply)
   def(ctx, 'all', all)

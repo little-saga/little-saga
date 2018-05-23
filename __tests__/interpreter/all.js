@@ -1,7 +1,6 @@
-import { env, deferred, noop, io } from '../../src'
+import { env, deferred, noop, io, delay } from '../../src'
 import commonEffects from '../../src/commonEffects'
-import channelEffects from '../../src/channelEffects'
-import { END } from '../../src/channelEffects/channel'
+import channelEffects, { END } from '../../src/channelEffects'
 
 const run = fn =>
   env(noop)
@@ -16,7 +15,7 @@ test('saga parallel effects handling', () => {
   const expected = [1, { type: 'action' }]
 
   return run(function* genFn() {
-    const { all, take, fork, put, delay } = io
+    const { all, take, fork, put } = io
     yield fork(logicAfterDelay0)
     actual = yield all([def.promise, /* TODO ??cps?? */ take('action')])
 
@@ -60,7 +59,7 @@ test('saga parallel effect: handling errors', () => {
     }
 
     function* logicAfterDelay0() {
-      yield ['delay', 0]
+      yield delay(0)
       def1.reject('error')
       def2.resolve(1)
     }
@@ -77,7 +76,7 @@ test('saga parallel effect: handling END', () => {
   const def = deferred()
 
   return run(function*() {
-    const { all, take, put, fork, delay } = io
+    const { all, take, put, fork } = io
     yield fork(logicAfterDelay0)
     try {
       actual = yield all([def.promise, take('action')])
@@ -110,7 +109,7 @@ test('saga parallel effect: named effects', () => {
       prom: def.promise,
     })
     function* logicAfterDelay0() {
-      yield ['delay', 0]
+      yield delay(0)
       def.resolve(1)
       yield put({ type: 'action' })
     }

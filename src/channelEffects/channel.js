@@ -4,6 +4,7 @@ import * as buffers from './buffers'
 export const END = Symbol('END')
 export const MATCH = Symbol('MATCH')
 export const MULTICAST = Symbol('MULTICAST')
+export const SAGA_ACTION = Symbol('SAGA_ACTION')
 
 export function channel(buffer = buffers.expanding()) {
   let closed = false

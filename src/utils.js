@@ -1,3 +1,5 @@
+import { CANCEL } from './core/symbols'
+
 export function deferred(props = {}) {
   const def = { ...props }
   def.promise = new Promise((resolve, reject) => {
@@ -5,6 +7,17 @@ export function deferred(props = {}) {
     def.reject = reject
   })
   return def
+}
+
+export function delay(ms, val = true) {
+  let timeoutId
+  const promise = new Promise(resolve => {
+    timeoutId = setTimeout(() => resolve(val), ms)
+  })
+
+  promise[CANCEL] = () => clearTimeout(timeoutId)
+
+  return promise
 }
 
 export const noop = () => {}
@@ -25,6 +38,7 @@ export const is = {
   func: f => typeof f === 'function',
   number: n => typeof n === 'number',
   string: s => typeof s === 'string',
+  symbol: s => typeof s === 'symbol',
   array: Array.isArray,
   object: obj => obj && !is.array(obj) && typeof obj === 'object',
   promise: p => p && is.func(p.then),
