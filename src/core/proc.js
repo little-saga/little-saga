@@ -296,29 +296,38 @@ export default function proc(iterator, parentContext, cont) {
     if (otherTasks.length > 1) {
       digestEffect(['all', otherTasks.map(t => ['join', t])], cb)
     } else {
-      const t = otherTasks[0]
-      if (t.isRunning()) {
+      const singleTask = otherTasks[0]
+      if (singleTask.isRunning()) {
         const joiner = { task, cb }
-        cb.cancel = () => remove(t.joiners, joiner)
-        t.joiners.push(joiner)
+        cb.cancel = () => remove(singleTask.joiners, joiner)
+        singleTask.joiners.push(joiner)
       } else {
-        if (t.isAborted()) {
-          cb(t.error(), true)
+        if (singleTask.isAborted()) {
+          cb(singleTask.error(), true)
         } else {
-          cb(t.result())
+          cb(singleTask.result())
         }
       }
     }
   }
 
-  function runCancelEffect([effectType, taskToCancel], ctx, cb) {
-    if (taskToCancel == null) {
-      taskToCancel = task
+  function runCancelEffect([effectType, ...cancelling], ctx, cb) {
+    if (cancelling.length === 0) {
+      // self-cancellation
+      task.cancel()
+      cb()
+      return
     }
-    if (taskToCancel.isRunning()) {
-      taskToCancel.cancel()
+
+    if (cancelling.length > 1) {
+      digestEffect(['all', cancelling.map(t => ['cancel', t])], cb)
+    } else {
+      const singleTask = cancelling[0]
+      if (singleTask.isRunning()) {
+        singleTask.cancel()
+      }
+      cb()
     }
-    cb()
   }
 
   function runCancelledEffect(effect, ctx, cb) {

@@ -123,22 +123,7 @@ test('saga nested puts handling', () => {
     })
 })
 
-// TODO 与 redux-saga 的测试差别较大
-test('puts does not trigger stack overflow', () => {
-  function* root() {
-    yield io.put({ type: 'put a lot of actions' })
-    yield io.delay(0)
-    for (let i = 0; i < 32768; i++) {
-      yield io.put({ type: 'test' })
-    }
-  }
-
-  return env(noop)
-    .use(commonEffects)
-    .use(channelEffects)
-    .run(root)
-    .toPromise()
-})
+// TODO test('puts does not trigger stack overflow')
 
 // TODO 与 redux-saga 的测试差别较大
 test('puts emitted directly after creating a task (caused by another put) should not be missed by that task', () => {

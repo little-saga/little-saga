@@ -67,7 +67,7 @@ function iteratorAlwaysThrow(error) {
   }
 }
 
-function iteratorAlwaysDone(value) {
+function iteratorAlwaysReturn(value) {
   return {
     next() {
       return { done: true, value }
@@ -96,7 +96,7 @@ export function createTaskIterator(fnObj, args) {
   if (error) {
     return iteratorAlwaysThrow(error)
   } else {
-    return iteratorAlwaysDone(result)
+    return iteratorAlwaysReturn(result)
   }
 }
 
