@@ -2,7 +2,7 @@
   "name": "little-saga",
   "license": "MIT",
   "description": "Just a little-saga.",
-  "version": "0.1.0-SNAPSHOT",
+  "version": "0.1.0",
   "scripts": {
     "start": "babel --watch src -d lib",
     "build": "babel src -d lib",
@@ -15,7 +15,16 @@
     "url": "http://shinima.pw"
   },
   "main": "lib/index.js",
-  "files": ["lib", ".editorconfig", ".gitignore", "package.json", "readme.md"],
+  "files": [
+    "channelEffects/",
+    "commonEffects/",
+    "compat/",
+    "lib/",
+    ".editorconfig",
+    ".gitignore",
+    "package.json",
+    "readme.md"
+  ],
   "prettier": {
     "printWidth": 100,
     "semi": false,
