@@ -1,9 +1,9 @@
-import { env, io, noop } from '../../src'
+import { Env, io, noop } from '../../src'
 import commonEffects from '../../src/commonEffects'
 
 test('saga must handle context in dynamic scoping manner', () => {
   let actual = []
-  const task = env(noop)
+  const task = new Env(noop)
     .use(commonEffects)
     .use(ctx => {
       ctx.a = 1

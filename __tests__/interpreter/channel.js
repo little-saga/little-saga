@@ -1,4 +1,4 @@
-import { env, noop, io } from '../../src'
+import { Env, noop, io } from '../../src'
 import commonEffects from '../../src/commonEffects'
 import channelEffects, { buffers } from '../../src/channelEffects'
 
@@ -6,7 +6,7 @@ test('saga create channel for store actions', () => {
   let actual = []
   let dispatch
 
-  const task = env(noop)
+  const task = new Env(noop)
     .use(commonEffects)
     .use(channelEffects)
     .use(ctx => (dispatch = ctx.channel.put))
@@ -34,7 +34,7 @@ test('saga create channel for store actions (with buffer)', () => {
   const buffer = buffers.expanding()
   let dispatch
 
-  const task = env(noop)
+  const task = new Env(noop)
     .use(commonEffects)
     .use(channelEffects)
     .use(ctx => (dispatch = ctx.channel.put))

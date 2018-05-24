@@ -1,5 +1,5 @@
 import EventEmitter from 'events'
-import { env, io, noop } from '../../src'
+import { Env, io, noop } from '../../src'
 import commonEffects from '../../src/commonEffects'
 import channelEffects, { buffers, channel, connectToEmitter } from '../../src/channelEffects'
 
@@ -18,7 +18,7 @@ test('synchronous sequential takes', () => {
     actual.push(yield take('a2'))
   }
 
-  env(noop)
+  new Env(noop)
     .use(commonEffects)
     .use(channelEffects)
     .use(ctx => (dispatch = ctx.channel.put))
@@ -39,7 +39,7 @@ test('synchronous concurrent takes', () => {
   const actual = []
   let dispatch
 
-  env(noop)
+  new Env(noop)
     .use(commonEffects)
     .use(channelEffects)
     .use(ctx => (dispatch = ctx.channel.put))
@@ -70,7 +70,7 @@ test('synchronous parallel takes', () => {
   const actual = []
   let dispatch
 
-  env(noop)
+  new Env(noop)
     .use(commonEffects)
     .use(channelEffects)
     .use(ctx => (dispatch = ctx.channel.put))
@@ -90,7 +90,7 @@ test('synchronous parallel + concurrent takes', () => {
   const actual = []
   let dispatch
 
-  env(noop)
+  new Env(noop)
     .use(commonEffects)
     .use(channelEffects)
     .use(ctx => (dispatch = ctx.channel.put))
@@ -118,7 +118,7 @@ test('synchronous takes + puts', () => {
   const actual = []
   let dispatch
 
-  env(noop)
+  new Env(noop)
     .use(commonEffects)
     .use(channelEffects)
     .use(ctx => (dispatch = ctx.channel.put))
@@ -149,7 +149,7 @@ test('synchronous takes (from a channel) + puts (to the store)', () => {
   const chan = channel()
   let dispatch
 
-  env(noop)
+  new Env(noop)
     .use(commonEffects)
     .use(channelEffects)
     .use(ctx => (dispatch = ctx.channel.put))
@@ -197,7 +197,7 @@ test('inter-saga put/take handling', () => {
   function* someAction(payload) {
     actual.push(payload)
   }
-  env(noop)
+  new Env(noop)
     .use(commonEffects)
     .use(channelEffects)
     .run(function* root() {
@@ -235,7 +235,7 @@ test('inter-saga put/take handling (via buffered channel)', () => {
     yield all([fork(fnA), fork(fnB)])
   }
 
-  return env(noop)
+  return new Env(noop)
     .use(commonEffects)
     .use(channelEffects)
     .run(root)
@@ -268,7 +268,7 @@ test('inter-saga send/aknowledge handling', () => {
     yield all([fork(fnA), fork(fnB)])
   }
 
-  env(noop)
+  new Env(noop)
     .use(commonEffects)
     .use(channelEffects)
     .run(root)
@@ -301,7 +301,7 @@ test('inter-saga send/acknowledge handling (via unbuffered channel)', () => {
     yield fork(fnB)
   }
 
-  env(noop)
+  new Env(noop)
     .use(commonEffects)
     .use(channelEffects)
     .run(root)
@@ -341,7 +341,7 @@ test('inter-saga send/acknowledge handling (via buffered channel)', () => {
     yield fork(fnA)
   }
 
-  return env(noop)
+  return new Env(noop)
     .use(commonEffects)
     .use(channelEffects)
     .run(root)
@@ -373,7 +373,7 @@ test('deeply nested forks/puts', () => {
     yield put({ type: 'a3' })
   }
 
-  env(noop)
+  new Env(noop)
     .use(commonEffects)
     .use(channelEffects)
     .run(s1)
@@ -387,7 +387,7 @@ test('put causing sync dispatch response in store subscriber', () => {
   const actual = []
   const emitter = new EventEmitter()
 
-  env(noop)
+  new Env(noop)
     .use(commonEffects)
     .use(channelEffects)
     .use(connectToEmitter(emitter))

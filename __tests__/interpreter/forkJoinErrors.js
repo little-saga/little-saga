@@ -1,11 +1,9 @@
-import { env, io, noop } from '../../src'
+import { Env, io, noop } from '../../src'
 import commonEffects from '../../src/commonEffects'
 import channelEffects from '../../src/channelEffects'
 
 function goodEnv() {
-  return env(noop)
-    .use(commonEffects)
-    .use(channelEffects)
+  return new Env(noop).use(commonEffects).use(channelEffects)
 }
 
 test('saga sync fork failures: functions', async () => {

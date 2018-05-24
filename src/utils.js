@@ -1,7 +1,7 @@
 import { CANCEL } from './core/symbols'
 
 export function deferred(props = {}) {
-  const def = { ...props }
+  const def = Object.assign({}, props)
   def.promise = new Promise((resolve, reject) => {
     def.resolve = resolve
     def.reject = reject
@@ -61,8 +61,8 @@ function iteratorAlwaysThrow(error) {
     throw(e) {
       throw e
     },
-    return() {
-      throw error
+    return(v) {
+      return { done: true, value: v }
     },
   }
 }
@@ -103,8 +103,8 @@ export function createTaskIterator(fnObj, args) {
 export const io = new Proxy(
   {},
   {
-    get(_target, property) {
-      return (...args) => [property, ...args]
+    get(_target, typeName) {
+      return (...args) => [typeName, ...args]
     },
   },
 )
@@ -120,5 +120,14 @@ export function resolveContextAndFn(arg) {
     } else {
       return { context, fn: context[arg[1]] }
     }
+  }
+}
+
+export function def(ctx, type, handler) {
+  const old = ctx.translator
+  ctx.translator = {
+    getRunner(effect) {
+      return effect[0] === type ? handler : old.getRunner(effect)
+    },
   }
 }

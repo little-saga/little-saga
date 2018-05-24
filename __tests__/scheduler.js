@@ -14,7 +14,6 @@ test('scheduler executes all recursively triggered tasks in order', () => {
   expect(actual).toEqual(['1', '2', '3'])
 })
 
-
 test('scheduler when suspended queues up and executes all tasks on flush', () => {
   const actual = []
   suspend()

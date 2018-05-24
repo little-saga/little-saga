@@ -1,4 +1,4 @@
-import { asap, def, TASK_CANCEL } from '..'
+import { asap, TASK_CANCEL } from '..'
 import { is, kTrue } from '../utils'
 import { channel, END, multicastChannel } from './channel'
 import * as buffers from './buffers'
@@ -104,11 +104,26 @@ function actionChannel([effectType, pattern, buffer], ctx, cb) {
   cb(chan)
 }
 
+const map = new Map([
+  ['take', take],
+  ['takeMaybe', takeMaybe],
+  ['put', put],
+  ['actionChannel', actionChannel],
+  ['flush', flush],
+])
+
 export default function(ctx) {
   ctx.channel = multicastChannel()
-  def(ctx, 'take', take)
-  def(ctx, 'takeMaybe', takeMaybe)
-  def(ctx, 'put', put)
-  def(ctx, 'actionChannel', actionChannel)
-  def(ctx, 'flush', flush)
+
+  const last = ctx.translator
+  ctx.translator = {
+    getRunner(effect) {
+      const effectType = effect[0]
+      if (map.has(effectType)) {
+        return map.get(effectType)
+      } else {
+        return last.getRunner(effect)
+      }
+    },
+  }
 }

@@ -1,4 +1,4 @@
-import { env, noop, io } from '../../src'
+import { Env, noop, io } from '../../src'
 import commonEffects from '../../src/commonEffects'
 
 test('saga onError is optional', () => {
@@ -12,9 +12,7 @@ test('saga onError is optional', () => {
     yield io.call(child)
   }
 
-  const task = env(noop)
-    .use(commonEffects)
-    .run(main)
+  const task = new Env(noop).use(commonEffects).run(main)
 
   return task.toPromise().catch(err => {
     expect(err).toBe(expectedError)
@@ -35,7 +33,7 @@ test('saga onError is called for uncaught error', () => {
     yield io.call(child)
   }
 
-  const task = env((result, isErr) => {
+  const task = new Env((result, isErr) => {
     actualIsErr = isErr
     actualResult = result
   })
@@ -67,7 +65,7 @@ test('saga onError is not called for caught errors', () => {
     }
   }
 
-  const task = env((result, isErr) => {
+  const task = new Env((result, isErr) => {
     actualIsErr = isErr
     actualResult = result
   })

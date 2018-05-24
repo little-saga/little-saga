@@ -1,4 +1,4 @@
-import { deferred, io, env, noop } from '../../src'
+import { deferred, io, Env, noop } from '../../src'
 import commonEffects from '../../src/commonEffects'
 import channelEffects from '../../src/channelEffects'
 
@@ -6,7 +6,7 @@ const { join, delay, fork, cancel, spawn, take, put } = io
 
 test('object effect cannot be normalized', () => {
   expect(() =>
-    env().run(function*() {
+    new Env().run(function*() {
       yield { foo: 'bar' }
     }),
   ).toThrow('Unable to normalize effect')
@@ -14,7 +14,7 @@ test('object effect cannot be normalized', () => {
 
 test('use def effect to define customized effect-types', async () => {
   const actual = []
-  const task = env(noop).run(function*() {
+  const task = new Env(noop).run(function*() {
     const { def, fork } = io
     yield def('Parent', (_, ctx, cb) => cb('response-Parent'))
 
@@ -51,7 +51,7 @@ test('use def effect to define customized effect-types', async () => {
 
 test('use def effect to define customized effect-types', async () => {
   const def = deferred()
-  const task = env(noop).run(function*() {
+  const task = new Env(noop).run(function*() {
     yield def.promise
   })
 
@@ -65,19 +65,17 @@ test('use def effect to define customized effect-types', async () => {
 test('cancel delay', async () => {
   let actual1
   let actual2
-  const rootTask = env(noop)
-    .use(commonEffects)
-    .run(function*() {
-      const task1 = yield fork(function*() {
-        actual1 = yield delay(0, 'non-cancel-value')
-      })
-      yield cancel(task1)
-
-      const task2 = yield fork(function*() {
-        actual2 = yield delay(0, 'non-cancel-value')
-      })
-      // we do not cancel task2
+  const rootTask = new Env(noop).use(commonEffects).run(function*() {
+    const task1 = yield fork(function*() {
+      actual1 = yield delay(0, 'non-cancel-value')
     })
+    yield cancel(task1)
+
+    const task2 = yield fork(function*() {
+      actual2 = yield delay(0, 'non-cancel-value')
+    })
+    // we do not cancel task2
+  })
 
   await rootTask.toPromise()
   expect(actual1).toBeUndefined()
@@ -88,7 +86,7 @@ test('join an aborted task', async () => {
   const error = new Error('manual-abort')
   let actual = []
 
-  const task = env(noop)
+  const task = new Env(noop)
     .use(commonEffects)
     .use(channelEffects)
     .run(function*() {

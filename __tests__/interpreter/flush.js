@@ -1,11 +1,11 @@
-import { env, io, noop } from '../../src'
+import { Env, io, noop } from '../../src'
 import commonEffects from '../../src/commonEffects'
 import channelEffects, { channel, END } from '../../src/channelEffects'
 
 test('saga flush handling', () => {
   let actual = []
 
-  const task = env(noop)
+  const task = new Env(noop)
     .use(commonEffects)
     .use(channelEffects)
     .run(function* genFn() {

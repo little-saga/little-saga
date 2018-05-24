@@ -23,10 +23,7 @@
     "trailingComma": "all"
   },
   "babel": {
-    "plugins": [
-      "@babel/plugin-proposal-object-rest-spread",
-      "@babel/plugin-transform-modules-commonjs"
-    ]
+    "plugins": ["@babel/plugin-transform-modules-commonjs"]
   },
   "jest": {
     "testRegex": "(/__tests__/.*|\\.(test|spec))\\.jsx?$",
@@ -35,7 +32,6 @@
   "devDependencies": {
     "@babel/cli": "^7.0.0-beta.47",
     "@babel/core": "^7.0.0-beta.47",
-    "@babel/plugin-proposal-object-rest-spread": "^7.0.0-beta.47",
     "@babel/plugin-transform-modules-commonjs": "^7.0.0-beta.47",
     "babel-core": "7.0.0-bridge.0",
     "babel-jest": "^22.4.4",

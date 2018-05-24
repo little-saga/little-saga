@@ -1,4 +1,4 @@
-import { deferred, env, io, noop } from '../../src'
+import { deferred, Env, io, noop } from '../../src'
 import commonEffects from '../../src/commonEffects'
 import channelEffects, { END, channel } from '../../src/channelEffects'
 
@@ -19,7 +19,7 @@ test('saga put handling', () => {
     yield io.put({ type: 2 })
   }
 
-  const task = env(noop)
+  const task = new Env(noop)
     .use(commonEffects)
     .use(channelEffects)
     .use(collect(actual))
@@ -46,7 +46,7 @@ test('saga put in a channel', () => {
     yield io.put(chan, 2)
   }
 
-  const task = env(noop)
+  const task = new Env(noop)
     .use(commonEffects)
     .use(channelEffects)
     .run(genFn, 'arg')
@@ -70,7 +70,7 @@ test("saga error put's response handling", () => {
     }
   }
 
-  const task = env(noop)
+  const task = new Env(noop)
     .use(commonEffects)
     .use(channelEffects)
     .use(ctx => {
@@ -112,7 +112,7 @@ test('saga nested puts handling', () => {
 
   const expected = ['put a', 'put b']
 
-  return env(noop)
+  return new Env(noop)
     .use(commonEffects)
     .use(channelEffects)
     .run(root)
@@ -131,7 +131,7 @@ test('puts emitted directly after creating a task (caused by another put) should
   let callSubscriber = false
   let dispatch = false
 
-  const saga = env(noop)
+  const saga = new Env(noop)
     .use(commonEffects)
     .use(channelEffects)
     .use(ctx => {
@@ -182,7 +182,7 @@ test('END should reach tasks created after it gets dispatched', () => {
 
   const def = deferred()
 
-  const task = env(noop)
+  const task = new Env(noop)
     .use(commonEffects)
     .use(channelEffects)
     .use(ctx => (dispatch = ctx.channel.put))

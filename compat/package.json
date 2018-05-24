@@ -1,0 +1,5 @@
+{
+  "name": "little-saga/compat",
+  "private": true,
+  "main": "../lib/compat.js"
+}

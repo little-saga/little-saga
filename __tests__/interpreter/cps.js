@@ -1,11 +1,11 @@
-import { io, env, noop } from '../../src'
+import { io, Env, noop } from '../../src'
 import commonEffects from '../../src/commonEffects'
 import channelEffects from '../../src/channelEffects'
 
 test('saga cps call handling', () => {
   let actual = []
 
-  const task = env(noop)
+  const task = new Env(noop)
     .use(commonEffects)
     .use(ctx => {
       ctx.a = 1
@@ -57,7 +57,7 @@ test('saga synchronous cps failures handling', () => {
     }
   }
 
-  const task = env(noop)
+  const task = new Env(noop)
     .use(commonEffects)
     .use(channelEffects)
     .use(ctx => {
@@ -84,14 +84,12 @@ test('saga cps cancellation handling', () => {
     }
   }
 
-  const task = env(noop)
-    .use(commonEffects)
-    .run(function* genFn() {
-      const task = yield io.fork(function*() {
-        yield io.cps(cpsFn)
-      })
-      yield io.cancel(task)
+  const task = new Env(noop).use(commonEffects).run(function* genFn() {
+    const task = yield io.fork(function*() {
+      yield io.cps(cpsFn)
     })
+    yield io.cancel(task)
+  })
 
   return task.toPromise().then(() => {
     // saga should call cancellation function on callback

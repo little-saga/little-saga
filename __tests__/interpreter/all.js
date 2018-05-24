@@ -1,9 +1,9 @@
-import { env, deferred, noop, io, delay } from '../../src'
+import { Env, deferred, noop, io, delay } from '../../src'
 import commonEffects from '../../src/commonEffects'
 import channelEffects, { END } from '../../src/channelEffects'
 
 const run = fn =>
-  env(noop)
+  new Env(noop)
     .use(commonEffects)
     .use(channelEffects)
     .run(fn)

@@ -133,19 +133,6 @@
     esutils "^2.0.2"
     js-tokens "^3.0.0"
 
-"@babel/plugin-proposal-object-rest-spread@^7.0.0-beta.47":
-  version "7.0.0-beta.47"
-  resolved "http://registry.npm.taobao.org/@babel/plugin-proposal-object-rest-spread/download/@babel/plugin-proposal-object-rest-spread-7.0.0-beta.47.tgz#e1529fddc88e948868ee1d0edaa27ebd9502322d"
-  dependencies:
-    "@babel/helper-plugin-utils" "7.0.0-beta.47"
-    "@babel/plugin-syntax-object-rest-spread" "7.0.0-beta.47"
-
-"@babel/plugin-syntax-object-rest-spread@7.0.0-beta.47":
-  version "7.0.0-beta.47"
-  resolved "http://registry.npm.taobao.org/@babel/plugin-syntax-object-rest-spread/download/@babel/plugin-syntax-object-rest-spread-7.0.0-beta.47.tgz#21da514d94c138b2261ca09f0dec9abadce16185"
-  dependencies:
-    "@babel/helper-plugin-utils" "7.0.0-beta.47"
-
 "@babel/plugin-transform-modules-commonjs@^7.0.0-beta.47":
   version "7.0.0-beta.47"
   resolved "http://registry.npm.taobao.org/@babel/plugin-transform-modules-commonjs/download/@babel/plugin-transform-modules-commonjs-7.0.0-beta.47.tgz#dfe5c6d867aa9614e55f7616736073edb3aab887"

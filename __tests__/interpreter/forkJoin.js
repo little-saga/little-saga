@@ -1,12 +1,10 @@
 import EventEmitter from 'events'
-import { deferred, env, io, is, noop } from '../../src'
-import commonEffects from '../../src/commonEffects'
-import channelEffects, { connectToEmitter } from '../../src/channelEffects'
+import { deferred, Env, io, is, noop } from '../../src'
+import { connectToEmitter } from '../../src/channelEffects'
+import compat, { join } from '../../src/compat'
 
 function goodEnv() {
-  return env(noop)
-    .use(commonEffects)
-    .use(channelEffects)
+  return new Env(noop).use(compat)
 }
 
 test('saga fork handling: generators', async () => {
@@ -62,7 +60,7 @@ test('saga join handling : generators', () => {
     const task = yield io.fork(subGen, 1)
     actual.push(yield defs[0].promise)
     actual.push(yield io.take('action-1'))
-    actual.push(yield io.join(task))
+    actual.push(yield join(task))
   }
 
   const emitter = new EventEmitter()
@@ -107,9 +105,9 @@ test('saga fork/join handling : functions', () => {
 
     actual.push(yield defs[0].promise)
     // TODO 这里和 redux-saga 行为不一致
-    const promise = yield io.join(task)
+    const promise = yield join(task)
     actual.push(yield promise)
-    actual.push(yield io.join(syncTask))
+    actual.push(yield join(syncTask))
   }
 
   const task = goodEnv().run(genFn)
@@ -524,7 +522,7 @@ test('joining multiple tasks', async () => {
     const task2 = yield io.fork(worker, 1)
     const task3 = yield io.fork(worker, 2)
 
-    actual = yield io.join(task1, task2, task3)
+    actual = yield join(task1, task2, task3)
   }
 
   const mainTask = goodEnv().run(genFn)

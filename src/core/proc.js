@@ -1,5 +1,6 @@
-import { createTaskIterator, deferred, is, noop, remove, resolveContextAndFn } from '../utils'
-import { CANCEL, def, flush, suspend, TASK, TASK_CANCEL } from '..'
+import { CANCEL, TASK, TASK_CANCEL } from './symbols'
+import { flush, suspend } from './scheduler'
+import { createTaskIterator, def, deferred, is, noop, remove } from '../utils'
 
 function forkQueue(mainTask, cb) {
   let tasks = []
@@ -292,42 +293,25 @@ export default function proc(iterator, parentContext, cont) {
     }
   }
 
-  function runJoinEffect([effectType, ...otherTasks], ctx, cb) {
-    if (otherTasks.length > 1) {
-      digestEffect(['all', otherTasks.map(t => ['join', t])], cb)
+  function runJoinEffect([effectType, otherTask], ctx, cb) {
+    if (otherTask.isRunning()) {
+      const joiner = { task, cb }
+      cb.cancel = () => remove(otherTask.joiners, joiner)
+      otherTask.joiners.push(joiner)
     } else {
-      const singleTask = otherTasks[0]
-      if (singleTask.isRunning()) {
-        const joiner = { task, cb }
-        cb.cancel = () => remove(singleTask.joiners, joiner)
-        singleTask.joiners.push(joiner)
+      if (otherTask.isAborted()) {
+        cb(otherTask.error(), true)
       } else {
-        if (singleTask.isAborted()) {
-          cb(singleTask.error(), true)
-        } else {
-          cb(singleTask.result())
-        }
+        cb(otherTask.result())
       }
     }
   }
 
-  function runCancelEffect([effectType, ...cancelling], ctx, cb) {
-    if (cancelling.length === 0) {
-      // self-cancellation
-      task.cancel()
-      cb()
-      return
+  function runCancelEffect([effectType, cancelling = task], ctx, cb) {
+    if (cancelling.isRunning()) {
+      cancelling.cancel()
     }
-
-    if (cancelling.length > 1) {
-      digestEffect(['all', cancelling.map(t => ['cancel', t])], cb)
-    } else {
-      const singleTask = cancelling[0]
-      if (singleTask.isRunning()) {
-        singleTask.cancel()
-      }
-      cb()
-    }
+    cb()
   }
 
   function runCancelledEffect(effect, ctx, cb) {

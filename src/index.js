@@ -2,8 +2,7 @@ export * from './core/symbols'
 export * from './core/scheduler'
 export * from './utils'
 
-import env from './core/env'
+import Env from './core/Env'
 import proc from './core/proc'
-import def from './core/def'
 
-export { env, proc, def }
+export { Env, proc }

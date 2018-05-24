@@ -1,9 +1,9 @@
-import { env, noop, io } from '../../src'
+import { Env, noop, io } from '../../src'
 import commonEffects from '../../src/commonEffects'
 import channelEffects from '../../src/channelEffects'
 
 const simpleRun = fn =>
-  env(noop)
+  new Env(noop)
     .use(commonEffects)
     .use(channelEffects)
     .run(fn)
@@ -70,7 +70,7 @@ test('saga handles call effects and throw the rejected values inside the generat
 
   const expected = ['start', 'failure']
 
-  return env(noop)
+  return new Env(noop)
     .use(commonEffects)
     .use(channelEffects)
     .use(ctx => {
@@ -110,7 +110,7 @@ test("saga handles call's synchronous failures and throws in the calling generat
     }
   }
 
-  const task = env(noop)
+  const task = new Env(noop)
     .use(commonEffects)
     .use(channelEffects)
     .use(ctx => {
@@ -147,7 +147,7 @@ test("saga handles call's synchronous failures and throws in the calling generat
     }
   }
 
-  const task = env(noop)
+  const task = new Env(noop)
     .use(commonEffects)
     .use(channelEffects)
     .use(ctx => {

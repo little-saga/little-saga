@@ -1,7 +1,8 @@
-import { env, noop } from '../../src'
+import { Env, noop } from '../../src'
+import commonEffects from '../../src/commonEffects'
 
 test('fallbackCont can get result when rootSaga completes', () => {
-  return env()
+  return new Env()
     .run(function* rootSaga() {
       return 100
       /* the fallbackCont should print 100 in console */
@@ -15,7 +16,7 @@ test('fallbackCont can get result when rootSaga completes', () => {
 test('fallbackCont can get error and then throw the error (1)', () => {
   const error = new Error('some-error-message')
   expect(() => {
-    env().run(function*() {
+    new Env().run(function*() {
       throw error
     })
   }).toThrow(error.message)
@@ -23,7 +24,7 @@ test('fallbackCont can get error and then throw the error (1)', () => {
 
 test('fallbackCont can get error and then throw the error (2)', () => {
   expect(() => {
-    env().run(function*() {
+    new Env().run(function*() {
       yield 'unknown-effect-type'
     })
   }).toThrow('Cannot resolve effect-runner')
@@ -31,7 +32,7 @@ test('fallbackCont can get error and then throw the error (2)', () => {
 
 test('fallbackCont dont get error when the error is catched', () => {
   expect(() => {
-    env().run(function*() {
+    new Env().run(function*() {
       try {
         yield 'unknown-effect-type'
       } catch (e) {
@@ -43,7 +44,8 @@ test('fallbackCont dont get error when the error is catched', () => {
 
 test('emptyTranslator cannot handle unknown effect types', () => {
   return expect(
-    env(noop)
+    new Env(noop)
+      .use(commonEffects)
       .run(function*() {
         yield 'unknown-effect-type'
       })

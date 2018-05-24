@@ -1,4 +1,4 @@
-import { io, deferred, env, noop } from '../../src'
+import { io, deferred, Env, noop } from '../../src'
 import commonEffects from '../../src/commonEffects'
 import channelEffects from '../../src/channelEffects'
 import { END } from '../../src/channelEffects/channel'
@@ -9,7 +9,7 @@ test('saga race between effects handling', () => {
 
   let dispatch
 
-  const task = env(noop)
+  const task = new Env(noop)
     .use(commonEffects)
     .use(channelEffects)
     .use(ctx => {
@@ -42,7 +42,7 @@ test('saga race between array of effects handling', () => {
 
   const timeout = deferred()
 
-  const task = env(noop)
+  const task = new Env(noop)
     .use(commonEffects)
     .use(channelEffects)
     .use(ctx => {
@@ -69,7 +69,7 @@ test('saga race between effects: handle END', () => {
   let dispatch
   const timeout = deferred()
 
-  const task = env(noop)
+  const task = new Env(noop)
     .use(commonEffects)
     .use(channelEffects)
     .use(ctx => {
@@ -100,7 +100,7 @@ test('saga race between sync effects', () => {
   let actual = []
   let dispatch
 
-  const task = env(noop)
+  const task = new Env(noop)
     .use(commonEffects)
     .use(channelEffects)
     .use(ctx => {

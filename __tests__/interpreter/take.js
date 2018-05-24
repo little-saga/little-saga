@@ -1,4 +1,4 @@
-import { env, io, noop } from '../../src'
+import { Env, io, noop } from '../../src'
 import commonEffects from '../../src/commonEffects'
 import channelEffects, { END, channel } from '../../src/channelEffects'
 
@@ -23,7 +23,7 @@ test('saga take from default channel', () => {
     }
   }
 
-  const task = env(noop)
+  const task = new Env(noop)
     .use(commonEffects)
     .use(channelEffects)
     .use(ctx => (dispatch = ctx.channel.put))
@@ -69,7 +69,7 @@ test('saga take from provided channel', () => {
     actual.push(yield io.takeMaybe(chan))
   }
 
-  const task = env(noop)
+  const task = new Env(noop)
     .use(commonEffects)
     .use(channelEffects)
     .run(genFn)
