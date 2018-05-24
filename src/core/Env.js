@@ -1,5 +1,6 @@
-import { createTaskIterator, def } from '../utils'
+import { def } from '../utils'
 import proc from './proc'
+import { createTaskIterator } from './internal-utils'
 
 const emptyTranslator = {
   getRunner() {

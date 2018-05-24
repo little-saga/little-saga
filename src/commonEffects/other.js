@@ -1,4 +1,5 @@
-import { is, resolveContextAndFn } from '..'
+import { is } from '../utils'
+import { resolveContextAndFn } from '../core/internal-utils'
 
 export function cps([effectType, fn, ...args], ctx, cb) {
   // CPS (ie node style functions) can define their own cancellation logic

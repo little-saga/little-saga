@@ -1,73 +1,16 @@
 import { CANCEL, TASK_CANCEL } from './symbols'
 import { flush, suspend } from './scheduler'
-import { createTaskIterator, def, deferred, is, noop, remove } from '../utils'
-
-function forkQueue(mainTask, cb) {
-  let tasks = []
-  let result
-  let completed = false
-
-  addTask(mainTask)
-
-  function abort(err) {
-    cancelAll()
-    cb(err, true)
-  }
-
-  function addTask(task) {
-    tasks.push(task)
-    task.cont = (res, isErr) => {
-      if (completed) {
-        return
-      }
-
-      remove(tasks, task)
-      task.cont = noop
-      if (isErr) {
-        abort(res)
-      } else {
-        if (task === mainTask) {
-          result = res
-        }
-        if (tasks.length === 0) {
-          completed = true
-          cb(result)
-        }
-      }
-    }
-  }
-
-  function cancelAll() {
-    if (completed) {
-      return
-    }
-    completed = true
-    tasks.forEach(t => {
-      t.cont = noop
-      t.cancel()
-    })
-    tasks = []
-  }
-
-  return {
-    addTask,
-    cancelAll,
-    abort,
-  }
-}
+import { def, is, noop, remove } from '../utils'
+import { createTaskIterator, normalizeEffect } from './internal-utils'
+import MainTask from './MainTask'
+import Task from './Task'
 
 export default function proc(iterator, parentContext, cont) {
   const ctx = Object.create(parentContext)
-  const task = newTask(iterator, cont)
-  const mainTask = {
-    cancel: cancelMain,
-    isRunning: true,
-    isCancelled: false,
-    // cont: **will be set when passed to forkQueue**
-  }
-  const taskQueue = forkQueue(mainTask, end)
+  const mainTask = new MainTask(next)
+  const task = new Task(cont, mainTask)
 
-  cont.cancel = cancel
+  cont.cancel = task.cancel
   next()
 
   return task
@@ -136,22 +79,6 @@ export default function proc(iterator, parentContext, cont) {
     runEffect(normalized, currCb)
   }
 
-  function normalizeEffect(effect, currCb) {
-    if (is.string(effect)) {
-      return [effect]
-    } else if (is.promise(effect)) {
-      return ['promise', effect]
-    } else if (is.iterator(effect)) {
-      return ['iterator', effect]
-    } else if (is.array(effect)) {
-      return effect
-    } else {
-      const error = new Error('Unable to normalize effect')
-      error.effect = effect
-      currCb(error, true)
-    }
-  }
-
   function runEffect(effect, currCb) {
     const effectType = effect[0]
     if (effectType === 'promise') {
@@ -181,67 +108,6 @@ export default function proc(iterator, parentContext, cont) {
       }
     }
   }
-
-  function cancel() {
-    if (task.isRunning && !task.isCancelled) {
-      task.isCancelled = true
-      taskQueue.cancelAll()
-      end(TASK_CANCEL)
-    }
-  }
-
-  function end(result, isErr) {
-    task.isRunning = false
-    if (!isErr) {
-      task.result = result
-      task._deferredEnd && task._deferredEnd.resolve(result)
-    } else {
-      task.error = result
-      task.isAborted = true
-      task._deferredEnd && task._deferredEnd.reject(result)
-    }
-
-    task.cont(result, isErr)
-    task.joiners.forEach(j => j.cb(result, isErr))
-    task.joiners = null
-  }
-
-  function cancelMain() {
-    if (mainTask.isRunning && !mainTask.isCancelled) {
-      mainTask.isCancelled = true
-      next(TASK_CANCEL)
-    }
-  }
-
-  function newTask(iterator, cont) {
-    return {
-      toPromise() {
-        if (this._deferredEnd) {
-          return this._deferredEnd.promise
-        }
-
-        const def = deferred()
-        this._deferredEnd = def
-
-        if (!this.isRunning) {
-          if (this.isAborted) {
-            def.reject(this.error)
-          } else {
-            def.resolve(this.result)
-          }
-        }
-        return def.promise
-      },
-      cont,
-      joiners: [],
-      cancel,
-      isRunning: true,
-      isCancelled: false,
-      isAborted: false,
-      result: undefined,
-      error: undefined,
-    }
-  }
   // endregion
 
   // region core-effects-runner
@@ -266,10 +132,10 @@ export default function proc(iterator, parentContext, cont) {
       suspend()
       const subTask = proc(iterator, ctx, noop)
       if (subTask.isRunning) {
-        taskQueue.addTask(subTask)
+        task.taskQueue.addTask(subTask)
         cb(subTask)
       } else if (subTask.error) {
-        taskQueue.abort(subTask.error)
+        task.taskQueue.abort(subTask.error)
       } else {
         cb(subTask)
       }

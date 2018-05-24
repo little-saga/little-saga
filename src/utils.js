@@ -57,45 +57,6 @@ export function remove(array, item) {
   }
 }
 
-const dumbIterators = {
-  *throw(error) {
-    throw error
-  },
-  // https://github.com/mishoo/UglifyJS2/issues/3092
-  return(value) {
-    return {
-      next() {
-        return { done: true, value }
-      },
-      throw(e) {
-        throw e
-      },
-      return(v) {
-        return v
-      },
-    }
-  },
-}
-
-export function createTaskIterator(fnObj, args) {
-  let result, error
-  try {
-    const { context, fn } = resolveContextAndFn(fnObj)
-    result = fn.apply(context, args)
-  } catch (err) {
-    error = err
-  }
-
-  if (is.iterator(result)) {
-    return result
-  }
-  if (error) {
-    return dumbIterators.throw(error)
-  } else {
-    return dumbIterators.return(result)
-  }
-}
-
 export const io = new Proxy(
   {},
   {
@@ -104,20 +65,6 @@ export const io = new Proxy(
     },
   },
 )
-
-export function resolveContextAndFn(arg) {
-  if (is.func(arg)) {
-    return { context: null, fn: arg }
-  } else {
-    // [ context, method--or--method-name ]
-    const context = arg[0]
-    if (is.func(arg[1])) {
-      return { context, fn: arg[1] }
-    } else {
-      return { context, fn: context[arg[1]] }
-    }
-  }
-}
 
 export function def(ctx, type, handler) {
   const old = ctx.translator
