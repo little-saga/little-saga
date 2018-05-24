@@ -1,6 +1,6 @@
 import all from './all'
 import race from './race'
-import { apply, call, cps, delayEffectRunner, getContext, setContext } from './other'
+import { apply, call, cps, getContext, setContext } from './other'
 
 const map = new Map([
   ['all', all],
@@ -8,7 +8,6 @@ const map = new Map([
   ['apply', apply],
   ['call', call],
   ['cps', cps],
-  ['delay', delayEffectRunner],
   ['getContext', getContext],
   ['setContext', setContext],
 ])

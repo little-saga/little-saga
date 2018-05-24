@@ -1,8 +1,8 @@
-import { deferred, io, Env, noop } from '../../src'
+import { deferred, delay, Env, io, noop } from '../../src'
 import commonEffects from '../../src/commonEffects'
 import channelEffects from '../../src/channelEffects'
 
-const { join, delay, fork, cancel, spawn, take, put } = io
+const { join, fork, cancel, spawn, take, put } = io
 
 test('object effect cannot be normalized', () => {
   expect(() =>

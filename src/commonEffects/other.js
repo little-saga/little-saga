@@ -1,4 +1,4 @@
-import { delay, is, resolveContextAndFn } from '..'
+import { is, resolveContextAndFn } from '..'
 
 export function cps([effectType, fn, ...args], ctx, cb) {
   // CPS (ie node style functions) can define their own cancellation logic
@@ -32,10 +32,6 @@ export function call([effectType, fnObj, ...args], ctx, cb, { digestEffect }) {
 
 export function apply([effectType, context, fn, ...args], ctx, cb, internals) {
   call(['call', [context, fn], ...args], ctx, cb, internals)
-}
-
-export function delayEffectRunner([_, timeout, returnVal], ctx, cb, { digestEffect }) {
-  digestEffect(delay(timeout, returnVal), cb)
 }
 
 export function setContext([effectType, partialContext], ctx, cb) {

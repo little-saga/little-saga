@@ -1,5 +1,9 @@
 import { CANCEL } from './core/symbols'
 
+export function identity(arg) {
+  return arg
+}
+
 export function deferred(props = {}) {
   const def = Object.assign({}, props)
   def.promise = new Promise((resolve, reject) => {
@@ -53,32 +57,24 @@ export function remove(array, item) {
   }
 }
 
-function iteratorAlwaysThrow(error) {
-  return {
-    next() {
-      throw error
-    },
-    throw(e) {
-      throw e
-    },
-    return(v) {
-      return { done: true, value: v }
-    },
-  }
-}
-
-function iteratorAlwaysReturn(value) {
-  return {
-    next() {
-      return { done: true, value }
-    },
-    throw(e) {
-      throw e
-    },
-    return(v) {
-      return { done: true, value: v }
-    },
-  }
+const dumbIterators = {
+  *throw(error) {
+    throw error
+  },
+  // https://github.com/mishoo/UglifyJS2/issues/3092
+  return(value) {
+    return {
+      next() {
+        return { done: true, value }
+      },
+      throw(e) {
+        throw e
+      },
+      return(v) {
+        return v
+      },
+    }
+  },
 }
 
 export function createTaskIterator(fnObj, args) {
@@ -94,9 +90,9 @@ export function createTaskIterator(fnObj, args) {
     return result
   }
   if (error) {
-    return iteratorAlwaysThrow(error)
+    return dumbIterators.throw(error)
   } else {
-    return iteratorAlwaysReturn(result)
+    return dumbIterators.return(result)
   }
 }
 

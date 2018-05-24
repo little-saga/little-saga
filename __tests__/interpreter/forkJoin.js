@@ -1,10 +1,10 @@
 import EventEmitter from 'events'
 import { deferred, Env, io, is, noop } from '../../src'
 import { connectToEmitter } from '../../src/channelEffects'
-import compat, { join } from '../../src/compat'
+import { compatEnhancer, join } from '../../src/compat'
 
 function goodEnv() {
-  return new Env(noop).use(compat)
+  return new Env(noop).use(compatEnhancer)
 }
 
 test('saga fork handling: generators', async () => {

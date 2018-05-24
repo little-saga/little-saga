@@ -1,13 +1,7 @@
-import { io } from './utils'
-import commonEffects from './commonEffects'
-import channelEffects from './channelEffects'
+import commonEffects from '../commonEffects'
+import channelEffects from '../channelEffects'
 
-export const cancel = io['enhanced-cancel']
-export const join = io['enhanced-join']
-
-// TODO fn connectToStore: connect a multicast channel to store
-
-export default function compat(ctx) {
+export default function compatEnhancer(ctx) {
   commonEffects(ctx)
   channelEffects(ctx)
 

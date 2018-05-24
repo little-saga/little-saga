@@ -2,7 +2,7 @@ import EventEmitter from 'events'
 import { deferred, Env, io, noop } from '../../src'
 import commonEffects from '../../src/commonEffects'
 import channelEffects, { connectToEmitter } from '../../src/channelEffects'
-import compat, { cancel } from '../../src/compat'
+import { cancel, compatEnhancer } from '../../src/compat'
 
 const assert = {
   deepEqual(a, b) {
@@ -12,7 +12,7 @@ const assert = {
 
 function run(...args) {
   return new Env(noop)
-    .use(compat)
+    .use(compatEnhancer)
     .def('echo', ([_, value], ctx, cb) => cb(value))
     .run(...args)
 }
