@@ -1,4 +1,7 @@
-import { actionChannel, call, cancel, delay, fork, take } from './index'
+import { io, delay } from '..'
+import { buffers } from '../channelEffects'
+
+const { fork, take, call, actionChannel, cancel } = io
 
 export function takeEvery(patternOrChannel, worker, ...args) {
   return fork(function*() {
@@ -33,7 +36,7 @@ export function takeLatest(patternOrChannel, worker, ...args) {
 
 export function throttle(ms, pattern, worker, ...args) {
   return fork(function*() {
-    const throttleChannel = yield actionChannel(pattern)
+    const throttleChannel = yield actionChannel(pattern, buffers.sliding(1))
     while (true) {
       const action = yield take(throttleChannel)
       yield fork(worker, ...args, action)

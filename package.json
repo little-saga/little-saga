@@ -6,8 +6,7 @@
   "scripts": {
     "start": "babel --watch src -d lib",
     "build": "babel src -d lib",
-    "test":
-      "jest --coverage && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js"
+    "test": "jest --coverage && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js"
   },
   "author": {
     "name": "Shi Feichao",
@@ -32,11 +31,17 @@
     "trailingComma": "all"
   },
   "babel": {
-    "plugins": ["@babel/plugin-transform-modules-commonjs"]
+    "plugins": [
+      "@babel/plugin-transform-modules-commonjs"
+    ]
   },
   "jest": {
     "testRegex": "(/__tests__/.*|\\.(test|spec))\\.jsx?$",
-    "moduleFileExtensions": ["js", "json", "jsx"]
+    "moduleFileExtensions": [
+      "js",
+      "json",
+      "jsx"
+    ]
   },
   "devDependencies": {
     "@babel/cli": "^7.0.0-beta.47",
@@ -46,7 +51,6 @@
     "babel-jest": "^22.4.4",
     "coveralls": "^3.0.1",
     "jest": "^22.4.4",
-    "mitt": "^1.1.3",
     "prettier": "1"
   }
 }

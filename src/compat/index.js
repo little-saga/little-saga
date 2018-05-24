@@ -2,7 +2,7 @@ import { delay, io } from '..'
 import compatEnhancer from './compatEnhancer'
 import createSagaMiddleware from './middleware'
 import { buffers, channel, eventChannel } from '../channelEffects'
-import { takeEvery, takeLatest, takeLeading, throttle } from './helpers'
+import { takeEvery, takeLatest, takeLeading, throttle } from '../sagaHelpers'
 
 // little-saga specific APIs
 export { compatEnhancer }

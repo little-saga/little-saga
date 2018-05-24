@@ -1,4 +1,4 @@
-import mitt from 'mitt'
+import EventEmitter from 'events'
 import { channel, END, eventChannel } from '../src/channelEffects/channel'
 import * as buffers from '../src/channelEffects/buffers'
 
@@ -155,18 +155,18 @@ test('event channel', done => {
     'eventChannel should throw if subscriber does not return a function to unsubscribe',
   )
 
-  const em = mitt()
+  const em = new EventEmitter()
   let chan = eventChannel(emit => {
-    em.on('*', emit)
-    return () => em.off('*', emit)
+    em.addListener('action', emit)
+    return () => em.removeListener('action', emit)
   })
   let actual = []
 
   chan.take(ac => actual.push(ac))
-  em.emit('action-1')
+  em.emit('action', 'action-1')
   assert.deepEqual(actual, ['action-1'], 'eventChannel must notify takers on a new action')
 
-  em.emit('action-1')
+  em.emit('action', 'action-1')
   assert.deepEqual(actual, ['action-1'], 'eventChannel must notify takers only once')
 
   actual = []

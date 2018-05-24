@@ -1,0 +1,5 @@
+{
+  "name": "little-saga/sagaHelpers",
+  "private": true,
+  "main": "../lib/sagaHelpers/index.js"
+}
