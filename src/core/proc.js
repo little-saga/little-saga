@@ -1,4 +1,4 @@
-import { CANCEL, TASK, TASK_CANCEL } from './symbols'
+import { CANCEL, TASK_CANCEL } from './symbols'
 import { flush, suspend } from './scheduler'
 import { createTaskIterator, def, deferred, is, noop, remove } from '../utils'
 
@@ -57,13 +57,6 @@ function forkQueue(mainTask, cb) {
 }
 
 export default function proc(iterator, parentContext, cont) {
-  iterator._deferredEnd = null
-  iterator._isRunning = true
-  iterator._isCancelled = false
-  iterator._isAborted = false
-  iterator._result = undefined
-  iterator._error = undefined
-
   const ctx = Object.create(parentContext)
   const task = newTask(iterator, cont)
   const mainTask = {
@@ -190,22 +183,22 @@ export default function proc(iterator, parentContext, cont) {
   }
 
   function cancel() {
-    if (iterator._isRunning && !iterator._isCancelled) {
-      iterator._isCancelled = true
+    if (task.isRunning && !task.isCancelled) {
+      task.isCancelled = true
       taskQueue.cancelAll()
       end(TASK_CANCEL)
     }
   }
 
   function end(result, isErr) {
-    iterator._isRunning = false
+    task.isRunning = false
     if (!isErr) {
-      iterator._result = result
-      iterator._deferredEnd && iterator._deferredEnd.resolve(result)
+      task.result = result
+      task._deferredEnd && task._deferredEnd.resolve(result)
     } else {
-      iterator._error = result
-      iterator._isAborted = true
-      iterator._deferredEnd && iterator._deferredEnd.reject(result)
+      task.error = result
+      task.isAborted = true
+      task._deferredEnd && task._deferredEnd.reject(result)
     }
 
     task.cont(result, isErr)
@@ -222,20 +215,19 @@ export default function proc(iterator, parentContext, cont) {
 
   function newTask(iterator, cont) {
     return {
-      [TASK]: true,
       toPromise() {
-        if (iterator._deferredEnd) {
-          return iterator._deferredEnd.promise
+        if (this._deferredEnd) {
+          return this._deferredEnd.promise
         }
 
         const def = deferred()
-        iterator._deferredEnd = def
+        this._deferredEnd = def
 
-        if (!iterator._isRunning) {
-          if (iterator._isAborted) {
-            def.reject(iterator._error)
+        if (!this.isRunning) {
+          if (this.isAborted) {
+            def.reject(this.error)
           } else {
-            def.resolve(iterator._result)
+            def.resolve(this.result)
           }
         }
         return def.promise
@@ -243,11 +235,11 @@ export default function proc(iterator, parentContext, cont) {
       cont,
       joiners: [],
       cancel,
-      isRunning: () => iterator._isRunning,
-      isCancelled: () => iterator._isCancelled,
-      isAborted: () => iterator._isAborted,
-      result: () => iterator._result,
-      error: () => iterator._error,
+      isRunning: true,
+      isCancelled: false,
+      isAborted: false,
+      result: undefined,
+      error: undefined,
     }
   }
   // endregion
@@ -272,14 +264,14 @@ export default function proc(iterator, parentContext, cont) {
     const iterator = createTaskIterator(fn, args)
     try {
       suspend()
-      const task = proc(iterator, ctx, noop)
-      if (iterator._isRunning) {
-        taskQueue.addTask(task)
-        cb(task)
-      } else if (iterator._error) {
-        taskQueue.abort(iterator._error)
+      const subTask = proc(iterator, ctx, noop)
+      if (subTask.isRunning) {
+        taskQueue.addTask(subTask)
+        cb(subTask)
+      } else if (subTask.error) {
+        taskQueue.abort(subTask.error)
       } else {
-        cb(task)
+        cb(subTask)
       }
     } finally {
       flush()
@@ -297,21 +289,21 @@ export default function proc(iterator, parentContext, cont) {
   }
 
   function runJoinEffect([effectType, otherTask], ctx, cb) {
-    if (otherTask.isRunning()) {
+    if (otherTask.isRunning) {
       const joiner = { task, cb }
       cb.cancel = () => remove(otherTask.joiners, joiner)
       otherTask.joiners.push(joiner)
     } else {
-      if (otherTask.isAborted()) {
-        cb(otherTask.error(), true)
+      if (otherTask.isAborted) {
+        cb(otherTask.error, true)
       } else {
-        cb(otherTask.result())
+        cb(otherTask.result)
       }
     }
   }
 
   function runCancelEffect([effectType, cancelling = task], ctx, cb) {
-    if (cancelling.isRunning()) {
+    if (cancelling.isRunning) {
       cancelling.cancel()
     }
     cb()

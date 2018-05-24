@@ -95,13 +95,13 @@ test('join an aborted task', async () => {
         throw error
       })
 
-      actual.push('before-isRunning:' + task.isRunning())
-      actual.push('before-error:', task.error())
+      actual.push('before-isRunning:' + task.isRunning)
+      actual.push('before-error:', task.error)
 
       yield put({ type: 'START' })
 
-      actual.push('after-isRunning:' + task.isRunning())
-      actual.push('after-error:', task.error())
+      actual.push('after-isRunning:' + task.isRunning)
+      actual.push('after-error:', task.error)
 
       try {
         yield join(task)

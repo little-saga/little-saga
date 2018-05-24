@@ -22,7 +22,7 @@ test('saga iteration', async done => {
   expect(is.promise(task.toPromise())).toBe(true)
   expect(actual).toEqual([1, 2])
   expect(await task.toPromise()).toBe(3)
-  expect(task.isRunning()).toBe(false)
+  expect(task.isRunning).toBe(false)
 
   done()
 })
