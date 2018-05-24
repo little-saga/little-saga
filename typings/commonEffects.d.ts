@@ -1,0 +1,2 @@
+declare const commonEffectsContextEnhancer: any
+export default commonEffectsContextEnhancer

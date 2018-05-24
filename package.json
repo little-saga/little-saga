@@ -2,7 +2,7 @@
   "name": "little-saga",
   "license": "MIT",
   "description": "Just a little-saga.",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "scripts": {
     "start": "babel --watch src -d lib",
     "build": "babel src -d lib",
@@ -14,11 +14,14 @@
     "url": "http://shinima.pw"
   },
   "main": "lib/index.js",
+  "typings": "./typings/index.d.ts",
   "files": [
     "channelEffects/",
     "commonEffects/",
     "compat/",
     "lib/",
+    "sagaHelpers/",
+    "typings/",
     ".editorconfig",
     ".gitignore",
     "package.json",

@@ -1,5 +1,6 @@
 {
   "name": "little-saga/compat",
   "private": true,
-  "main": "../lib/compat/index.js"
+  "main": "../lib/compat/index.js",
+  "typings": "../typings/compat.d.ts"
 }
