@@ -1,7 +1,6 @@
 import { delay, io } from '..'
 import compatEnhancer from './compatEnhancer'
 import createSagaMiddleware from './middleware'
-import { buffers, channel, eventChannel } from '../channelEffects'
 import { takeEvery, takeLatest, takeLeading, throttle } from '../sagaHelpers'
 
 // little-saga specific APIs
@@ -43,12 +42,9 @@ export const race = io.race
 // Interfaces & External API are NOT supported in little-saga
 
 // Utils
-export {
-  channel,
-  eventChannel,
-  buffers,
-  delay,
-  // The following utils are NOT supported in little-saga
-  // cloneableGenerator(generatorFunc)
-  // createMockTask()
-}
+export { delay }
+export * from '../channelEffects'
+
+// The following utils are NOT supported in little-saga
+// cloneableGenerator(generatorFunc)
+// createMockTask()

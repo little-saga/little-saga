@@ -1,4 +1,4 @@
-export const takeEvery: any
-export const takeLeading: any
-export const takeLatest: any
-export const throttle: any
+export function takeEvery(patternOrChannel: any, worker: any, ...args: any[]): any[]
+export function takeLeading(patternOrChannel: any, worker: any, ...args: any[]): any[]
+export function takeLatest(patternOrChannel: any, worker: any, ...args: any[]): any[]
+export function throttle(ms: number, pattern: any, worker: any, ...args: any[]): any[]

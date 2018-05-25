@@ -1,32 +1,38 @@
-export const compatEnhancer: any
+import { Callback, Effect, Task, TaskContext, delay } from './index'
 
-declare const createSagaMiddleware: any
-export default createSagaMiddleware
+export * from './sagaHelpers'
 
-export const takeEvery: any
-export const takeLeading: any
-export const takeLatest: any
-export const throttle: any
+export function compatEnhancer(ctx: TaskContext): void
 
-export const take: any
-export const put: any
-export const call: any
-export const apply: any
-export const cps: any
-export const fork: any
-export const spawn: any
-export const join: any
-export const cancel: any
-export const select: any
-export const actionChannel: any
-export const flush: any
-export const cancelled: any
-export const setContext: any
-export const getContext: any
-export const all: any
-export const race: any
+export default function createSagaMiddleware(
+  cont?: Callback,
+): {
+  (middlewareAPI: any): (next: any) => (action: any) => any
+  run?(fn: Function, ...args: any[]): Task
+}
 
-export const channel: any
-export const eventChannel: any
-export const buffers: any
-export const delay: any
+type EffectCreator = {
+  (...args: any[]): Effect
+  [key: string]: any
+}
+
+export const take: EffectCreator
+export const put: EffectCreator
+export const call: EffectCreator
+export const apply: EffectCreator
+export const cps: EffectCreator
+export const fork: EffectCreator
+export const spawn: EffectCreator
+export const join: EffectCreator
+export const cancel: EffectCreator
+export const select: EffectCreator
+export const actionChannel: EffectCreator
+export const flush: EffectCreator
+export const cancelled: EffectCreator
+export const setContext: EffectCreator
+export const getContext: EffectCreator
+export const all: EffectCreator
+export const race: EffectCreator
+
+export * from './channelEffects'
+export { delay }
