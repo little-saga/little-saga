@@ -1,4 +1,4 @@
-import { delay, io } from '..'
+import { io } from '../utils'
 import compatEnhancer from './compatEnhancer'
 import createSagaMiddleware from './middleware'
 import { takeEvery, takeLatest, takeLeading, throttle } from '../sagaHelpers'
@@ -42,7 +42,7 @@ export const race = io.race
 // Interfaces & External API are NOT supported in little-saga
 
 // Utils
-export { delay }
+export * from '../index'
 export * from '../channelEffects'
 
 // The following utils are NOT supported in little-saga

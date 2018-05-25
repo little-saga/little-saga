@@ -1,6 +1,8 @@
-import { Callback, Effect, Task, TaskContext, delay } from './index'
+import { Callback, Effect, Task, TaskContext } from './index'
 
 export * from './sagaHelpers'
+export * from './channelEffects'
+export * from './index'
 
 export function compatEnhancer(ctx: TaskContext): void
 
@@ -11,8 +13,8 @@ export default function createSagaMiddleware(
   run?(fn: Function, ...args: any[]): Task
 }
 
-type EffectCreator = {
-  (...args: any[]): Effect
+interface EffectCreator {
+  <A = any, B = any, C = any, D = any, E = any>(...args: any[]): Effect
   [key: string]: any
 }
 
@@ -33,6 +35,3 @@ export const setContext: EffectCreator
 export const getContext: EffectCreator
 export const all: EffectCreator
 export const race: EffectCreator
-
-export * from './channelEffects'
-export { delay }

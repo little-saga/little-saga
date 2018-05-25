@@ -84,7 +84,7 @@ declare global {
   }
 }
 
-export class Task {
+export interface Task {
   cont: Callback
   isRunning: boolean
   isCancelled: boolean

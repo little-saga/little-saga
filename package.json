@@ -2,7 +2,7 @@
   "name": "little-saga",
   "license": "MIT",
   "description": "Just a little-saga.",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "scripts": {
     "start": "babel --watch src -d lib",
     "build": "babel src -d lib",
@@ -11,8 +11,7 @@
   },
   "author": {
     "name": "Shi Feichao",
-    "email": "842351815@qq.com",
-    "url": "http://shinima.pw"
+    "email": "842351815@qq.com"
   },
   "main": "lib/index.js",
   "typings": "./typings/index.d.ts",
