@@ -1,4 +1,4 @@
-import { deferred, delay, Env, io, noop } from '../../src'
+import { deferred, remove, is, delay, Env, io, noop, identity, once } from '../../src'
 import commonEffects from '../../src/commonEffects'
 import channelEffects from '../../src/channelEffects'
 
@@ -127,4 +127,31 @@ test('join an aborted task', async () => {
         error,
       ])
     })
+})
+
+test('util functions', () => {
+  expect(identity(1234)).toBe(1234)
+  expect(identity('str')).toBe('str')
+  expect(identity({})).not.toBe({})
+
+  let actual = []
+  const fn = once(() => {
+    actual.push('once')
+  })
+
+  fn()
+  fn()
+  fn()
+  expect(actual).toEqual(['once'])
+
+  expect(is.number(1234)).toBe(true)
+  expect(is.number('1234')).toBe(false)
+
+  const array1 = [0, 1, 2, 3, 4]
+  remove(array1, 2)
+  expect(array1).toEqual([0, 1, 3, 4])
+
+  const array2 = [0, 1, 2, 3, 4]
+  remove(array2, 'not-exist')
+  expect(array2).toEqual([0, 1, 2, 3, 4])
 })

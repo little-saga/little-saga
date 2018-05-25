@@ -124,9 +124,6 @@ export default function proc(iterator, parentContext, cont) {
   }
 
   function runForkEffect([effectType, fn, ...args], ctx, cb) {
-    if (fn.test) {
-      debugger
-    }
     const iterator = createTaskIterator(fn, args)
     try {
       suspend()
