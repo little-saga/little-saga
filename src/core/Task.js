@@ -1,5 +1,4 @@
 import { TASK_CANCEL } from './symbols'
-import ForkQueue from './ForkQueue'
 import { deferred } from '../utils'
 
 export default class Task {
@@ -12,9 +11,11 @@ export default class Task {
 
   _deferredEnd = null
 
-  constructor(cont, mainTask) {
-    this.cont = cont
-    this.taskQueue = new ForkQueue(mainTask, this.end)
+  // cont will be set after calling constructor()
+  cont = undefined
+
+  constructor(taskQueue) {
+    this.taskQueue = taskQueue
   }
 
   cancel = () => {

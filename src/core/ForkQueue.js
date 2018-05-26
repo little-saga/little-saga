@@ -5,9 +5,11 @@ export default class ForkQueue {
   result = undefined
   completed = false
 
-  constructor(mainTask, cont) {
+  // cont will be set after calling constructor()
+  cont = undefined
+
+  constructor(mainTask) {
     this.mainTask = mainTask
-    this.cont = cont
     this.addTask(this.mainTask)
   }
 

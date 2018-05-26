@@ -2,13 +2,27 @@ import { CANCEL, TASK_CANCEL } from './symbols'
 import { flush, suspend } from './scheduler'
 import { def, is, noop, remove } from '../utils'
 import { createTaskIterator, normalizeEffect } from './internal-utils'
-import MainTask from './MainTask'
 import Task from './Task'
+import ForkQueue from './ForkQueue'
 
 export default function proc(iterator, parentContext, cont) {
   const ctx = Object.create(parentContext)
-  const mainTask = new MainTask(next)
-  const task = new Task(cont, mainTask)
+
+  const mainTask = {
+    // cont: **will be set when passed to ForkQueue**
+    isRunning: true,
+    isCancelled: false,
+    cancel() {
+      if (mainTask.isRunning && !mainTask.isCancelled) {
+        mainTask.isCancelled = true
+        next(TASK_CANCEL)
+      }
+    },
+  }
+  const taskQueue = new ForkQueue(mainTask)
+  const task = new Task(taskQueue)
+  taskQueue.cont = task.end
+  task.cont = cont
 
   cont.cancel = task.cancel
   next()
