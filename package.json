@@ -2,7 +2,7 @@
   "name": "little-saga",
   "license": "MIT",
   "description": "Just a little-saga.",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "scripts": {
     "start": "babel --watch src -d lib",
     "build": "babel src -d lib",
