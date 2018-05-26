@@ -1,6 +1,7 @@
 import { Env, io, is, noop } from '../../src'
+import EventEmitter from 'events'
 import commonEffects from '../../src/commonEffects'
-import channelEffects from '../../src/channelEffects'
+import channelEffects, { connectToEmitter } from '../../src/channelEffects'
 
 const run = fn =>
   new Env(noop)
@@ -62,7 +63,24 @@ test('saga error handling', done => {
     })
 })
 
-// TODO test('saga output handling', () => {})
+test('saga output handling', async () => {
+  let actual = []
+  const emitter = new EventEmitter()
+  const env = new Env(noop)
+    .use(commonEffects)
+    .use(channelEffects)
+    .use(connectToEmitter(emitter))
+  emitter.addListener('action', action => actual.push(action.type))
+
+  function* genFn(arg) {
+    yield io.put({ type: arg })
+    yield io.put({ type: 2 })
+  }
+
+  await env.run(genFn, 'arg').toPromise()
+  const expected = ['arg', 2]
+  expect(actual).toEqual(expected)
+})
 
 test('saga yielded falsy values', async () => {
   let actual = []

@@ -11,17 +11,20 @@ const run = fn =>
 test('saga parallel effects handling', () => {
   let actual
   const def = deferred()
+  let cpsCb = {}
+  const cps = (val, cb) => (cpsCb = { val, cb })
 
-  const expected = [1, { type: 'action' }]
+  const expected = [1, 2, { type: 'action' }]
 
   return run(function* genFn() {
     const { all, take, fork, put } = io
     yield fork(logicAfterDelay0)
-    actual = yield all([def.promise, /* TODO ??cps?? */ take('action')])
+    actual = yield all([def.promise, io.cps(cps, 2), take('action')])
 
     function* logicAfterDelay0() {
       yield delay(0)
       def.resolve(1)
+      cpsCb.cb(null, cpsCb.val)
       yield put({ type: 'action' })
     }
   })

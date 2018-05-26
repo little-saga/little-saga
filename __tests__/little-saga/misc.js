@@ -155,3 +155,21 @@ test('util functions', () => {
   remove(array2, 'not-exist')
   expect(array2).toEqual([0, 1, 2, 3, 4])
 })
+
+test('get full context', async () => {
+  function justThrow(result, isErr) {
+    if (isErr) {
+      throw result
+    }
+  }
+
+  new Env(justThrow).use(commonEffects).run(function*() {
+    expect(yield 'getContext').toEqual({ translator: undefined })
+
+    channelEffects(yield 'getContext')
+    const keys = Object.keys(yield 'getContext')
+    expect(keys.length).toBe(2)
+    expect(keys).toContain('translator')
+    expect(keys).toContain('channel')
+  })
+})

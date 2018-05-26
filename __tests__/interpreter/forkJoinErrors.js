@@ -128,7 +128,7 @@ test('saga sync fork failures: spawns (detached forks)', async () => {
     try {
       actual.push('start main')
       const task = yield io.spawn(genChild)
-      // TODO little-saga 中没有实现 task.meta.name
+      // little-saga 中没有实现 task.meta.name
       actual.push('spawn ' + /* task.meta.name */ 'genChild')
       actual.push('success parent')
     } catch (e) {

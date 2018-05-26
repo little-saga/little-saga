@@ -41,5 +41,9 @@ export function setContext([effectType, partialContext], ctx, cb) {
 }
 
 export function getContext([effectType, prop], ctx, cb) {
-  cb(ctx[prop])
+  if (prop == null) {
+    cb(ctx)
+  } else {
+    cb(ctx[prop])
+  }
 }

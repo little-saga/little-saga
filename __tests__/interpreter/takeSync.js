@@ -1,7 +1,8 @@
 import EventEmitter from 'events'
 import { Env, io, noop } from '../../src'
 import commonEffects from '../../src/commonEffects'
-import channelEffects, { buffers, channel, connectToEmitter } from '../../src/channelEffects'
+import channelEffects, { buffers, channel, connectToEmitter, END } from '../../src/channelEffects'
+import { takeEvery } from '../../src/sagaHelpers'
 
 const { call, take, fork, all, put, race } = io
 
@@ -352,8 +353,52 @@ test('inter-saga send/acknowledge handling (via buffered channel)', () => {
     })
 })
 
-// TODO test('inter-saga fork/take back from forked child 1')
-// TODO test('inter-saga fork/take back from forked child 2')
+test('inter-saga fork/take back from forked child 1', async () => {
+  const actual = []
+  let testCounter = 0
+
+  function* root() {
+    yield all([takeEvery('TEST', takeTest1), takeEvery('TEST2', takeTest2)])
+  }
+
+  function* takeTest1(action) {
+    if (testCounter === 0) {
+      actual.push(1)
+      testCounter++
+
+      yield put({ type: 'TEST2' })
+    } else {
+      actual.push(++testCounter)
+    }
+  }
+
+  function* takeTest2(action) {
+    yield all([fork(forkedPut1), fork(forkedPut2)])
+  }
+
+  function* forkedPut1() {
+    yield put({ type: 'TEST' })
+  }
+
+  function* forkedPut2() {
+    yield put({ type: 'TEST' })
+  }
+
+  const emitter = new EventEmitter()
+  const task = new Env(noop)
+    .use(commonEffects)
+    .use(channelEffects)
+    .use(connectToEmitter(emitter))
+    .run(root)
+
+  emitter.emit('action', { type: 'TEST' })
+  emitter.emit('action', END)
+
+  await task.toPromise()
+
+  // Sagas must take actions from each forked childs doing Sync puts
+  expect(actual).toEqual([1, 2, 3])
+})
 
 test('deeply nested forks/puts', () => {
   const actual = []
@@ -381,7 +426,40 @@ test('deeply nested forks/puts', () => {
   expect(actual).toEqual([{ type: 'a3' }, { type: 'a2' }])
 })
 
-// TODO test('inter-saga fork/take back from forked child 3')
+test('inter-saga fork/take back from forked child 3', async () => {
+  const actual = []
+
+  let first = true
+
+  function* root() {
+    yield takeEvery('PING', ackWorker)
+  }
+
+  function* ackWorker(action) {
+    if (first) {
+      first = false
+      yield put({ type: 'PING', val: action.val + 1 })
+      yield take(`ACK-${action.val + 1}`)
+    }
+    yield put({ type: `ACK-${action.val}` })
+    actual.push(1)
+  }
+
+  const emitter = new EventEmitter()
+  const task = new Env(noop)
+    .use(commonEffects)
+    .use(channelEffects)
+    .use(connectToEmitter(emitter))
+    .run(root)
+
+  emitter.emit('action', { type: 'PING', val: 0 })
+  emitter.emit('action', END)
+
+  await task.toPromise()
+
+  // Sagas must take actions from each forked childs doing Sync puts
+  expect(actual).toEqual([1, 1])
+})
 
 test('put causing sync dispatch response in store subscriber', () => {
   const actual = []

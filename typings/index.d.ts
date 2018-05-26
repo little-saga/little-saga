@@ -85,13 +85,11 @@ declare global {
 }
 
 export interface Task {
-  cont: Callback
   isRunning: boolean
   isCancelled: boolean
   isAborted: boolean
   result: any
   error: any
   cancel: () => void
-  end: Callback
   toPromise(): Promise<any>
 }
