@@ -2,7 +2,9 @@
 
 # 构建你自己的 redux-saga
 
-知乎上已经有不少介绍 redux-saga 的好文章了，例如 [redux-saga 实践总结](https://zhuanlan.zhihu.com/p/23012870)、[浅析 redux-saga 实现原理](https://zhuanlan.zhihu.com/p/30098155)、[Redux-Saga 漫谈](https://zhuanlan.zhihu.com/p/35437092)。本文将介绍 redux-saga 的实现原理，并一步步地用代码构建 little-saga —— 一个 redux-saga 的简单版本。希望本文可以让你了解 redux-saga 背后的运行原理。
+知乎上已经有不少介绍 redux-saga 的好文章了，例如 [redux-saga 实践总结](https://zhuanlan.zhihu.com/p/23012870)、[浅析 redux-saga 实现原理](https://zhuanlan.zhihu.com/p/30098155)、[Redux-Saga 漫谈](https://zhuanlan.zhihu.com/p/35437092)。本文将介绍 redux-saga 的实现原理，并一步步地用代码构建 little-saga —— 一个 redux-saga 的简单版本。希望通过本文，更多人可以了解到 redux-saga 背后的运行原理。
+
+本文是对 redux-saga 的原理解析，将不再介绍 redux-saga 的相关概念。所以在阅读文章之前，请确保对 redux-saga 有一定的了解。
 
 ## 本文目录
 
@@ -764,6 +766,8 @@ function runForkEffect([effectType, fn, ...args], ctx, cb) {
 
 ### 2.6.4 类 `Task`
 
+类 `Task` 是 *2.1 Task* 的具体实现。
+
 ```javascript
 // /src/core/Task.js
 class Task {
@@ -858,34 +862,7 @@ function* Parent() {
 
 ## 2.8 类 `Env`
 
-类 `Env` 的作用是在运行 rootSaga 之前，对 root Task 的运行环境进行配置。
-
-```javascript
-// /src/core/Env.js
-class Env {
-  // fallbackCont 的行为是：在完成时打印结果，在出错时抛出异常
-  constructor(cont = fallbackCont) {
-    this.cont = cont
-    // emptyTranslator 永远返回 null，表示默认情况下 effect 拓展类型为空
-    this.ctx = { translator: emptyTranslator }
-  }
-
-  use(enhancer) {
-    enhancer(this.ctx)
-    return this
-  }
-
-  def(type, handler) {
-    def(this.ctx, type, handler)
-    return this
-  }
-
-  run(fn, ...args) {
-    const iterator = createTaskIterator(fn, args)
-    return proc(iterator, this.ctx, this.cont)
-  }
-}
-```
+类 `Env` 的作用是在运行 rootSaga 之前，对 root Task 的运行环境进行配置。Env 采用了链式调用风格的 API，方便将多个配置串联起来。
 
 我们可以利用 Env 来预先添加一些常见的 effect 类型，例如 all/race/take/put 等，这样后续所有的 saga 函数都可以直接使用这些 effect 类型。例如下面的代码在运行 rootSaga 之前定义了 delay 和 echo 两种 effect。
 
@@ -901,6 +878,10 @@ function* rootSaga() {
 }
 ```
 
+## 2.9 第二部分小节
+
+至此，little-saga 的核心部分实现完毕。核心部分实现了 fork model，实现了 fork/join/cancel/promise/iterator 等内置类型的 effect-runner，并预留了拓展接口。第三部分中，我们将使用该拓展接口来实现 redux-saga 中剩下的那些 effect 类型（all/race/put/take 等）。
+
 ## 3.1 commonEffects 拓展
 
 all-effect 的行为与 Promise#all 非常类似：all-effect 在构造时接受一些 effects 作为 sub-effects，当所有 sub-effects 完成时，all-effect 才算完成；当其中之一 sub-effect 抛出错误时，all-effect 会立即抛出错误。
@@ -908,55 +889,31 @@ all-effect 的行为与 Promise#all 非常类似：all-effect 在构造时接受
 有了 def effect，拓展 effect 就简单多了。redux-saga 中 [runAllEffect](https://github.com/redux-saga/redux-saga/blob/v1.0.0-beta.1/packages/core/src/internal/proc.js#L616) 用于运行 all 类型的 effect，我们拷贝该代码，并简单修改，使其符合 effectRunner 接口，即可在 little-saga 中实现 all effect。little-sage 中实现 all effect 的代码如下：
 
 ```javascript
+// 这里该函数是一个简化版，省略了 all-effect 被取消的处理代码
+// 这里假设 effects 是一个对象，实际版本中还需要考虑 effects为数组的情况
 function all([_, effects], ctx, cb, { digestEffect }) {
   const keys = Object.keys(effects)
 
-  if (keys.length === 0) {
-    cb(is.array(effects) ? [] : {})
-    return
-  }
-
-  // 变量 completedCount 用来记录 sub-effect 完成的数量
   let completedCount = 0
-  let completed = false
   const results = {}
   const childCbs = {}
 
-  function checkEffectEnd() {
-    // 如果所有的 sub-effects 都完成了，则调用 cb 来完成整个 all-effect
-    if (completedCount === keys.length) {
-      completed = true
-      cb(is.array(effects) ? Array.from({ ...results, length: keys.length }) : results)
-    }
-  }
-
   keys.forEach(key => {
     const chCbAtKey = (res, isErr) => {
-      if (completed) {
-        return
-      }
       if (isErr || res === TASK_CANCEL) {
         // 其中一个 sub-effect 发生错误时，立刻调用 cb 来结束 all-effect
         cb.cancel()
         cb(res, isErr)
       } else {
         results[key] = res
-        // 一个 sub-effect 完成时，将完成数量加一
         completedCount++
-        // 并检查是否完成了所有 sub-effects
-        checkEffectEnd()
+        if (completedCount === keys.length) {
+          cb(results)
+        }
       }
     }
-    chCbAtKey.cancel = noop
     childCbs[key] = chCbAtKey
   })
-
-  cb.cancel = () => {
-    if (!completed) {
-      completed = true
-      keys.forEach(key => childCbs[key].cancel())
-    }
-  }
 
   keys.forEach(key => digestEffect(effects[key], childCbs[key]))
 }
@@ -1089,4 +1046,4 @@ Task 的「取消」和「完成」是互斥的。Task 被取消时代码会直�
 
 ## 3.6 总结
 
-fork model 是一个非常优秀的异步逻辑处理模型，在阅读 redux-saga 源码和测试，进而实现 little-saga 的过程中，我也学到了非常多新知识。如果大家有什么疑问的话，欢迎一起探讨。欢迎转载本文，转载请注明来源。
+fork model 是一个非常优秀的异步逻辑处理模型，在阅读 redux-saga 源码和测试，进而实现 little-saga 的过程中，我也学到了非常多新知识。如果大家有什么问题或建议的话，欢迎一起探讨。
