@@ -455,7 +455,7 @@ async 函数被调用后，内部逻辑也许非常复杂，最后返回一个 P
 
 redux-saga 提供了 fork effect 来进行非阻塞调用，`yield fork(...)` 会返回一个 Task 对象，用于表示在后台执行的 saga 实例。在更普遍的情况下，一个 saga 实例在运行的时候会多次 yield fork effect，那么一个 parent-saga 实例就会有多个 child-saga。rootSaga 通过 `sagaMiddleware.run()` 开始运行，在 rootSaga 运行过程中，会 fork 得到若干个 child-saga，每一个 child-saga 又会 fork 得到若干个 grandchild-saga，如果我们将所有的 parent-child 关系绘制出来的话，我们可以得到类似于下图这样的一棵 saga 树。
 
-![saga-tree-of-running-battle-city](saga-tree-of-running-battle-city.jpg)
+![saga-tree-of-running-battle-city](docs/saga-tree-of-running-battle-city.jpg)
 
 redux-saga 的文档也对 fork model [进行了详细的说明](https://redux-saga.js.org/docs/advanced/ForkModel.html)，下面我做一点简单的翻译：
 
@@ -643,7 +643,7 @@ function* Parent() {
 
 在 _1.7 cancellation_ 中我们知道 cancellation 的顺序和 cont 恰好是相反的，在具体代码实现时，我们不仅需要构建下图中的 cont 关系，还需要构建反向的 cancellation 关系。
 
-![cont-graph](cont-graph.jpg)
+![cont-graph](docs/cont-graph.jpg)
 
 本小节中的代码比较复杂，如果觉得理解起来比较困难的话，可以和 _2.7 Task 状态变化举例_ 对照着看。
 
