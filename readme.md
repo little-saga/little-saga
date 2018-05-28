@@ -1,6 +1,12 @@
 [![Build Status](https://img.shields.io/travis/shinima/little-saga/master.svg?style=flat-square)](https://travis-ci.org/shinima/little-saga) [![Coverage Status](https://img.shields.io/coveralls/shinima/little-saga/master.svg?style=flat-square)](https://coveralls.io/github/shinima/little-saga?branch=master) [![NPM Package](https://img.shields.io/npm/v/little-saga.svg?style=flat-square)](https://www.npmjs.org/package/little-saga)
 
-# 构建你自己的 redux-saga
+# little-saga
+
+Just a little saga.
+
+[API 文档](docs/api.md)
+
+## 构建你自己的 redux-saga
 
 知乎上已经有不少介绍 redux-saga 的好文章了，例如 [redux-saga 实践总结](https://zhuanlan.zhihu.com/p/23012870)、[浅析 redux-saga 实现原理](https://zhuanlan.zhihu.com/p/30098155)、[Redux-Saga 漫谈](https://zhuanlan.zhihu.com/p/35437092)。本文将介绍 redux-saga 的实现原理，并一步步地用代码构建 little-saga —— 一个 redux-saga 的简单版本。希望通过本文，更多人可以了解到 redux-saga 背后的运行原理。
 
@@ -28,11 +34,13 @@
 * [2.6 little-saga 核心部分的完整实现](#26-little-saga-%E6%A0%B8%E5%BF%83%E9%83%A8%E5%88%86%E7%9A%84%E5%AE%8C%E6%95%B4%E5%AE%9E%E7%8E%B0)
 * [2.7 Task 状态变化举例](#27-task-%E7%8A%B6%E6%80%81%E5%8F%98%E5%8C%96%E4%B8%BE%E4%BE%8B)
 * [2.8 类 `Env`](#28-%E7%B1%BB-env)
+* [2.9 第二部分小节](#29-%E7%AC%AC%E4%BA%8C%E9%83%A8%E5%88%86%E5%B0%8F%E8%8A%82)
 * [3.1 commonEffects 拓展](#31-commoneffects-%E6%8B%93%E5%B1%95)
 * [3.2 channelEffects 拓展](#32-channeleffects-%E6%8B%93%E5%B1%95)
 * [3.3 compat 拓展](#33-compat-%E6%8B%93%E5%B1%95)
 * [3.4 scheduler](#34-scheduler)
 * [3.5 其他细节问题](#35-%E5%85%B6%E4%BB%96%E7%BB%86%E8%8A%82%E9%97%AE%E9%A2%98)
+* [3.6 总结](#36-%E6%80%BB%E7%BB%93)
 
 ## 0.1 文章结构
 
@@ -208,7 +216,7 @@ next()
 // getting: 5
 // Uncaught Error: 5 is bad input
 
-// 输出 getting: x 之后，输出会暂停一段时候
+// 输出 getting: x 之后，输出会暂停一段时间
 ```
 
 ## 1.5 effect 的类型与含义
@@ -294,7 +302,7 @@ effect 状态分为运行中、已完成（正常结束或是抛出错误结束�
 
 promise 一旦 resolve/reject 之后，就不能再改变状态了。effect 也是类似，一旦完成或是被取消，就不能再改变状态，「完成时的回调函数」和「被取消时的回调函数」合起来只能最多被调用一次。也就是说，effect 的「完成」和「被取消」是互斥的。
 
-每一个 effect 在运行之前都会通过函数 `digestEffect` 的处理。该函用变量 `effectSettled` 记录了一个 effect 是否已经 settled，保证了上述互斥性。
+每一个 effect 在运行之前都会通过函数 `digestEffect` 的处理。该函数用变量 `effectSettled` 记录了一个 effect 是否已经 settled，保证了上述互斥性。
 
 `digestEffect` 也调用了 `normalizeEffect` 来规范化 effect，这样一来，对于 promise/iterator，我们可以在 effect-producer 直接 yield 这些对象，而不需要将它们包裹在数组中。
 
