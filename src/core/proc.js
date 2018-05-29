@@ -1,7 +1,7 @@
 import { CANCEL, TASK_CANCEL } from './symbols'
 import { flush, suspend } from './scheduler'
 import { def, is, noop, remove } from '../utils'
-import { createTaskIterator, normalizeEffect } from './internal-utils'
+import { createTaskIterator } from './internal-utils'
 import Task from './Task'
 import ForkQueue from './ForkQueue'
 
@@ -40,7 +40,9 @@ export default function proc(iterator, parentContext, cont) {
       } else if (arg === TASK_CANCEL) {
         mainTask.isCancelled = true
         next.cancel()
-        result = iterator.return(TASK_CANCEL)
+        result = is.func(iterator.return)
+          ? iterator.return(TASK_CANCEL)
+          : { done: true, value: TASK_CANCEL }
       } else {
         result = iterator.next(arg)
       }
@@ -64,6 +66,14 @@ export default function proc(iterator, parentContext, cont) {
   }
 
   function digestEffect(rawEffect, cb) {
+    const normalized = ctx.translator.normalize(rawEffect)
+    if (normalized == null) {
+      const error = new Error('Unable to normalize effect')
+      error.effect = rawEffect
+      cb(error, true)
+      return
+    }
+
     let effectSettled = false
 
     function currCb(res, isErr) {
@@ -89,7 +99,6 @@ export default function proc(iterator, parentContext, cont) {
       currCb.cancel = noop
     }
 
-    const normalized = normalizeEffect(rawEffect, currCb)
     runEffect(normalized, currCb)
   }
 

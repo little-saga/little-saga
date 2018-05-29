@@ -6,6 +6,8 @@ Just a little saga.
 
 [API 文档](docs/api.md)
 
+**注意下文内容已经和实际代码有一定的偏差，以实际代码为准。**
+
 ## 构建你自己的 redux-saga
 
 知乎上已经有不少介绍 redux-saga 的好文章了，例如 [redux-saga 实践总结](https://zhuanlan.zhihu.com/p/23012870)、[浅析 redux-saga 实现原理](https://zhuanlan.zhihu.com/p/30098155)、[Redux-Saga 漫谈](https://zhuanlan.zhihu.com/p/35437092)。本文将介绍 redux-saga 的实现原理，并一步步地用代码构建 little-saga —— 一个 redux-saga 的简单版本。希望通过本文，更多人可以了解到 redux-saga 背后的运行原理。
@@ -774,7 +776,7 @@ function runForkEffect([effectType, fn, ...args], ctx, cb) {
 
 ### 2.6.4 类 `Task`
 
-类 `Task` 是 *2.1 Task* 的具体实现。
+类 `Task` 是 _2.1 Task_ 的具体实现。
 
 ```javascript
 // /src/core/Task.js

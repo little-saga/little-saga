@@ -1,6 +1,6 @@
 import { is } from '../utils'
 
-export function normalizeEffect(effect, currCb) {
+export function normalizeEffect(effect) {
   if (is.string(effect)) {
     return [effect]
   } else if (is.promise(effect)) {
@@ -10,9 +10,7 @@ export function normalizeEffect(effect, currCb) {
   } else if (is.array(effect)) {
     return effect
   } else {
-    const error = new Error('Unable to normalize effect')
-    error.effect = effect
-    currCb(error, true)
+    return null
   }
 }
 
@@ -43,28 +41,16 @@ export function createTaskIterator(fnObj, args) {
     return result
   }
   if (error) {
-    return dumbIterators.throw(error)
+    return iteratorAlwaysThrow(error)
   } else {
-    return dumbIterators.return(result)
+    return iteratorAlwaysReturn(result)
   }
 }
 
-const dumbIterators = {
-  *throw(error) {
-    throw error
-  },
-  // https://github.com/mishoo/UglifyJS2/issues/3092
-  return(value) {
-    return {
-      next() {
-        return { done: true, value }
-      },
-      throw(e) {
-        throw e
-      },
-      return(v) {
-        return v
-      },
-    }
-  },
+function* iteratorAlwaysThrow(error) {
+  throw error
+}
+
+function* iteratorAlwaysReturn(result) {
+  return result
 }

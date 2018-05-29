@@ -117,6 +117,7 @@ export default function(ctx) {
 
   const last = ctx.translator
   ctx.translator = {
+    ...last,
     getRunner(effect) {
       const effectType = effect[0]
       if (map.has(effectType)) {

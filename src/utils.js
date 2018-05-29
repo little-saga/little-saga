@@ -69,6 +69,7 @@ export const io = new Proxy(
 export function def(ctx, type, handler) {
   const old = ctx.translator
   ctx.translator = {
+    ...old,
     getRunner(effect) {
       return effect[0] === type ? handler : old.getRunner(effect)
     },

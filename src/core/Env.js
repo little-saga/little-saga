@@ -1,11 +1,12 @@
 import { def } from '../utils'
 import proc from './proc'
-import { createTaskIterator } from './internal-utils'
+import { createTaskIterator, normalizeEffect } from './internal-utils'
 
 const emptyTranslator = {
   getRunner() {
     return null
   },
+  normalize: normalizeEffect,
 }
 
 function fallbackCont(result, isErr) {

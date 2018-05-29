@@ -15,6 +15,7 @@ const map = new Map([
 export default function commonEffects(ctx) {
   const last = ctx.translator
   ctx.translator = {
+    ...last,
     getRunner(effect) {
       const effectType = effect[0]
       if (map.has(effectType)) {

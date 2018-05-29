@@ -7,6 +7,7 @@ export default function compatEnhancer(ctx) {
 
   const last = ctx.translator
   ctx.translator = {
+    ...last,
     getRunner(effect) {
       const effectType = effect[0]
       if (effectType === 'enhanced-join') {
