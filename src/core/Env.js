@@ -1,12 +1,24 @@
-import { def } from '../utils'
+import { def, is } from '../utils'
 import proc from './proc'
-import { createTaskIterator, normalizeEffect } from './internal-utils'
+import { createTaskIterator } from './internal-utils'
 
-const emptyTranslator = {
+const defaultTranslator = {
   getRunner() {
     return null
   },
-  normalize: normalizeEffect,
+  normalize(effect) {
+    if (is.string(effect)) {
+      return [effect]
+    } else if (is.promise(effect)) {
+      return ['promise', effect]
+    } else if (is.iterator(effect)) {
+      return ['iterator', effect]
+    } else if (is.array(effect)) {
+      return effect
+    } else {
+      return null
+    }
+  },
 }
 
 function fallbackCont(result, isErr) {
@@ -20,7 +32,7 @@ function fallbackCont(result, isErr) {
 export default class Env {
   constructor(cont = fallbackCont) {
     this.cont = cont
-    this.ctx = { translator: emptyTranslator }
+    this.ctx = { translator: defaultTranslator }
   }
 
   use(enhancer) {

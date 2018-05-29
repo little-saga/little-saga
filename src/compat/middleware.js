@@ -1,23 +1,24 @@
-import { asap, def, Env, identity, is } from '..'
+import { asap, Env, identity, is } from '..'
 import compatEnhancer from './compatEnhancer'
 import { SAGA_ACTION } from '../channelEffects/index'
 
 export default function createSagaMiddleware(cont) {
   function middleware({ dispatch, getState }) {
     let channelPut
-    const env = new Env(cont).use(compatEnhancer).use(ctx => {
-      channelPut = ctx.channel.put
-      ctx.channel.put = action => {
-        if (is.object(action) || is.array(action)) {
-          action[SAGA_ACTION] = true
+    const env = new Env(cont)
+      .use(compatEnhancer)
+      .use(ctx => {
+        channelPut = ctx.channel.put
+        ctx.channel.put = action => {
+          if (is.object(action) || is.array(action)) {
+            action[SAGA_ACTION] = true
+          }
+          dispatch(action)
         }
-        dispatch(action)
-      }
-
-      def(ctx, 'select', ([_type, selector = identity, ...args], _ctx, cb) =>
+      })
+      .def('select', ([_type, selector = identity, ...args], _ctx, cb) =>
         cb(selector(getState(), ...args)),
       )
-    })
 
     middleware.run = (...args) => env.run(...args)
 

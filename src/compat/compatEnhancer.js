@@ -4,7 +4,10 @@ import channelEffects from '../channelEffects'
 export default function compatEnhancer(ctx) {
   commonEffects(ctx)
   channelEffects(ctx)
+  enhancedJoinCancelEffects(ctx)
+}
 
+function enhancedJoinCancelEffects(ctx) {
   const last = ctx.translator
   ctx.translator = {
     ...last,

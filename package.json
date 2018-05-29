@@ -2,7 +2,7 @@
   "name": "little-saga",
   "license": "MIT",
   "description": "Just a little-saga.",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "scripts": {
     "start": "babel --watch src -d lib",
     "build": "babel src -d lib",
@@ -12,6 +12,9 @@
   "author": {
     "name": "Shi Feichao",
     "email": "842351815@qq.com"
+  },
+  "engines": {
+    "node": ">=8.3"
   },
   "main": "lib/index.js",
   "typings": "./typings/index.d.ts",
@@ -37,7 +40,8 @@
   "babel": {
     "plugins": [
       "@babel/plugin-transform-modules-commonjs",
-      "@babel/plugin-proposal-class-properties"
+      "@babel/plugin-proposal-class-properties",
+      "@babel/plugin-syntax-object-rest-spread"
     ]
   },
   "jest": {
@@ -52,6 +56,7 @@
     "@babel/cli": "^7.0.0-beta.47",
     "@babel/core": "^7.0.0-beta.47",
     "@babel/plugin-proposal-class-properties": "^7.0.0-beta.47",
+    "@babel/plugin-syntax-object-rest-spread": "^7.0.0-beta.49",
     "@babel/plugin-transform-modules-commonjs": "^7.0.0-beta.47",
     "babel-core": "7.0.0-bridge.0",
     "babel-jest": "^22.4.4",
