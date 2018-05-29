@@ -23,11 +23,11 @@ export interface DeferredEnd<T> {
   reject?(error: any): void
   [key: string]: any
 }
-export function deferred(props?: {}): DeferredEnd<any>
+export function deferred(props?: any): DeferredEnd<any>
 export function delay(ms: number, val?: boolean): Promise<{}>
 export const noop: () => void
-export const kTrue: () => boolean
-export function once(fn: () => void): () => void
+export const always: <T>(v: T) => () => T
+export function once<F extends Function>(fn: F): F
 export const is: {
   func: (f: any) => f is Function
   number: (n: any) => n is number

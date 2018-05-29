@@ -1,4 +1,4 @@
-import { is, kTrue, once, remove } from '../utils'
+import { is, always, once, remove } from '../utils'
 import * as buffers from './buffers'
 
 export const END = Symbol('END')
@@ -165,7 +165,7 @@ export function multicastChannel() {
         }
       }
     },
-    take(cb, matcher = kTrue) {
+    take(cb, matcher = always(true)) {
       if (closed) {
         cb(END)
         return

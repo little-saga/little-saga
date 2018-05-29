@@ -1,5 +1,5 @@
 import { asap, TASK_CANCEL } from '..'
-import { is, kTrue } from '../utils'
+import { is, always } from '../utils'
 import { channel, END, multicastChannel } from './channel'
 import * as buffers from './buffers'
 
@@ -9,7 +9,7 @@ export { default as connectToEmitter } from './connectToEmitter'
 
 function makeMatcher(pattern) {
   if (pattern === '*' || pattern === undefined) {
-    return kTrue
+    return always(true)
   } else if (is.string(pattern) || is.symbol(pattern)) {
     return action => action && action.type === pattern
   } else if (is.array(pattern)) {

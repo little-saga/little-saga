@@ -25,7 +25,7 @@ export function delay(ms, val = true) {
 }
 
 export const noop = () => {}
-export const kTrue = () => true
+export const always = v => () => v
 
 export function once(fn) {
   let called = false
