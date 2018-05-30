@@ -8,11 +8,7 @@
 
 ## 使用 little-saga
 
-首先确定 redux-saga 是否可以满足你的需求。如果满足的话，那么就用 redux-saga。否则请继续往下看。
-
-阅读 little-saga 核心部分源码：[/src/core/](/src/core) 目录以及 [/src/utils.js](/src/utils.js)，代码总共大约 400 行。
-
-**TODO**
+little-saga 目前还处于早期阶段，不适合用于生产环境。
 
 ## FAQ
 
