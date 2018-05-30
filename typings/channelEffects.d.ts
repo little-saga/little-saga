@@ -1,5 +1,8 @@
 import { TaskContextEnhancer } from './index'
 
+declare const commonEffectsContextEnhancer: TaskContextEnhancer
+export default commonEffectsContextEnhancer
+
 export const END: unique symbol
 export const MATCH: unique symbol
 export const MULTICAST: unique symbol

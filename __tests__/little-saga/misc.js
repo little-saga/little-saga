@@ -5,11 +5,12 @@ import channelEffects from '../../src/channelEffects'
 const { join, fork, cancel, spawn, take, put } = io
 
 test('object effect cannot be normalized', () => {
-  expect(() =>
-    new Env().run(function*() {
-      yield { foo: 'bar' }
-    }),
-  ).toThrow('Unable to normalize effect')
+  let output
+  console.error = jest.fn(arg => (output = arg))
+  new Env().run(function*() {
+    yield { foo: 'bar' }
+  })
+  expect(output.message).toMatch('Unable to normalize effect')
 })
 
 test('use def effect to define customized effect-types', async () => {

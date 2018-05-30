@@ -54,9 +54,6 @@ export default function proc(iterator, parentContext, cont) {
         mainTask.cont(result.value)
       }
     } catch (error) {
-      if (!mainTask.isRunning) {
-        throw error
-      }
       if (mainTask.isCancelled) {
         console.error(error)
       }

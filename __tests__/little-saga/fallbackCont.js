@@ -15,19 +15,21 @@ test('fallbackCont can get result when rootSaga completes', () => {
 
 test('fallbackCont can get error and then throw the error (1)', () => {
   const error = new Error('some-error-message')
-  expect(() => {
-    new Env().run(function*() {
-      throw error
-    })
-  }).toThrow(error.message)
+  let output
+  console.error = jest.fn(arg => (output = arg))
+  new Env().run(function*() {
+    throw error
+  })
+  expect(output.message).toMatch(error.message)
 })
 
 test('fallbackCont can get error and then throw the error (2)', () => {
-  expect(() => {
-    new Env().run(function*() {
-      yield 'unknown-effect-type'
-    })
-  }).toThrow('Cannot resolve effect-runner')
+  let output
+  console.error = jest.fn(arg => (output = arg))
+  new Env().run(function*() {
+    yield 'unknown-effect-type'
+  })
+  expect(output.message).toMatch('Cannot resolve effect-runner')
 })
 
 test('fallbackCont dont get error when the error is catched', () => {

@@ -23,9 +23,9 @@ const defaultTranslator = {
 
 function fallbackCont(result, isErr) {
   if (isErr) {
-    throw result
+    console.error(result)
   } else {
-    console.log('fallbackCont result:', result)
+    console.log(result)
   }
 }
 
