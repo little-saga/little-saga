@@ -1,9 +1,9 @@
-import { is, always, once, remove } from '../utils'
+import { always, is, once, remove } from '../utils'
 import * as buffers from './buffers'
+import { asap } from '../core/scheduler'
 
 export const END = Symbol('END')
 export const MATCH = Symbol('MATCH')
-export const MULTICAST = Symbol('MULTICAST')
 export const SAGA_ACTION = Symbol('SAGA_ACTION')
 
 export function channel(buffer = buffers.expanding()) {
@@ -74,12 +74,12 @@ export function channel(buffer = buffers.expanding()) {
     }
   }
 
-  return {
+  return liftable({
     take,
     put,
     flush,
     close,
-  }
+  })
 }
 
 export function eventChannel(subscribe, buffer = buffers.none()) {
@@ -120,6 +120,38 @@ export function eventChannel(subscribe, buffer = buffers.none()) {
   }
 }
 
+function liftable(chan) {
+  chan.lift = fn => {
+    chan.put = fn(chan.put)
+    return chan
+  }
+
+  chan.clone = () => liftable({ ...chan })
+
+  chan.connect = dispatch =>
+    chan
+      .lift(scheduleSagaPut)
+      .clone()
+      .lift(() => wrapSagaDispatch(dispatch))
+
+  return chan
+}
+
+const scheduleSagaPut = put => action => {
+  if (action[SAGA_ACTION]) {
+    put(action)
+  } else {
+    asap(() => put(action))
+  }
+}
+
+const wrapSagaDispatch = put => action => {
+  if (is.object(action) || is.array(action)) {
+    action[SAGA_ACTION] = true
+  }
+  put(action)
+}
+
 export function multicastChannel() {
   let closed = false
   let currentTakers = []
@@ -144,41 +176,40 @@ export function multicastChannel() {
     nextTakers = []
   }
 
-  return {
-    [MULTICAST]: true,
-    put(input) {
-      if (closed) {
-        return
-      }
+  const put = input => {
+    if (closed) {
+      return
+    }
 
-      if (input === END) {
-        close()
-        return
-      }
+    if (input === END) {
+      close()
+      return
+    }
 
-      const takers = (currentTakers = nextTakers)
-      for (let i = 0; i < takers.length; i++) {
-        const taker = takers[i]
-        if (taker[MATCH](input)) {
-          taker.cancel()
-          taker(input)
-        }
+    const takers = (currentTakers = nextTakers)
+    for (let i = 0; i < takers.length; i++) {
+      const taker = takers[i]
+      if (taker[MATCH](input)) {
+        taker.cancel()
+        taker(input)
       }
-    },
-    take(cb, matcher = always(true)) {
-      if (closed) {
-        cb(END)
-        return
-      }
-      cb[MATCH] = matcher
-      ensureCanMutateNextTakers()
-      nextTakers.push(cb)
-
-      cb.cancel = once(() => {
-        ensureCanMutateNextTakers()
-        remove(nextTakers, cb)
-      })
-    },
-    close,
+    }
   }
+
+  const take = (cb, matcher = always(true)) => {
+    if (closed) {
+      cb(END)
+      return
+    }
+    cb[MATCH] = matcher
+    ensureCanMutateNextTakers()
+    nextTakers.push(cb)
+
+    cb.cancel = once(() => {
+      ensureCanMutateNextTakers()
+      remove(nextTakers, cb)
+    })
+  }
+
+  return liftable({ close, put, take })
 }
