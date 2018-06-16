@@ -1,6 +1,6 @@
 import EventEmitter from 'events'
-import { cancel, compatEnhancer, take, takeLatest } from '../../src/compat'
-import { deferred, Env, noop } from '../../src'
+import { cancel, PrimaryEnv, take, takeLatest } from '../../src/compat'
+import { deferred, noop } from '../../src'
 import { connectToEmitter } from '../../src/channelEffects'
 
 test('takeLatest', () => {
@@ -9,10 +9,7 @@ test('takeLatest', () => {
   const actual = []
   const emitter = new EventEmitter()
 
-  new Env(noop)
-    .use(compatEnhancer)
-    .use(connectToEmitter(emitter))
-    .run(root)
+  new PrimaryEnv(noop).use(connectToEmitter(emitter)).run(root)
 
   function* root() {
     const task = yield takeLatest('ACTION', worker, 'a1', 'a2')

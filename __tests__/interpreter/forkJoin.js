@@ -1,11 +1,6 @@
 import EventEmitter from 'events'
-import { deferred, Env, io, is, noop } from '../../src'
+import { deferred, io, is, noop, PrimaryEnv } from '../../src'
 import { connectToEmitter } from '../../src/channelEffects'
-import { compatEnhancer, join } from '../../src/compat'
-
-function goodEnv() {
-  return new Env(noop).use(compatEnhancer)
-}
 
 test('saga fork handling: generators', async () => {
   let task1
@@ -33,7 +28,7 @@ test('saga fork handling: generators', async () => {
     task2 = yield io.fork([inst, inst.gen])
   }
 
-  const mainTask = goodEnv().run(genFn)
+  const mainTask = new PrimaryEnv(noop).run(genFn)
 
   await mainTask.toPromise()
   // fork result must include the promise of the task result
@@ -60,13 +55,11 @@ test('saga join handling : generators', () => {
     const task = yield io.fork(subGen, 1)
     actual.push(yield defs[0].promise)
     actual.push(yield io.take('action-1'))
-    actual.push(yield join(task))
+    actual.push(yield io.join(task))
   }
 
   const emitter = new EventEmitter()
-  const task = goodEnv()
-    .use(connectToEmitter(emitter))
-    .run(genFn)
+  const task = new PrimaryEnv(noop).use(connectToEmitter(emitter)).run(genFn)
 
   Promise.resolve(1)
     .then(() => defs[0].resolve(true))
@@ -105,12 +98,12 @@ test('saga fork/join handling : functions', () => {
 
     actual.push(yield defs[0].promise)
     // TODO 这里和 redux-saga 行为不一致
-    const promise = yield join(task)
+    const promise = yield io.join(task)
     actual.push(yield promise)
-    actual.push(yield join(syncTask))
+    actual.push(yield io.join(syncTask))
   }
 
-  const task = goodEnv().run(genFn)
+  const task = new PrimaryEnv(noop).run(genFn)
 
   const expected = [true, 2, 'sync']
 
@@ -160,7 +153,7 @@ test('saga fork wait for attached children', async () => {
     actual.push(idx)
   }
 
-  const task = goodEnv().run(root)
+  const task = new PrimaryEnv(noop).run(root)
 
   await task.toPromise()
   // parent task must wait for all forked tasks before terminating
@@ -234,7 +227,7 @@ test('saga auto cancel forks on error', async () => {
     }
   }
 
-  const task = goodEnv().run(root)
+  const task = new PrimaryEnv(noop).run(root)
 
   const expected = [
     'childA resolved',
@@ -318,7 +311,7 @@ test('saga auto cancel forks on main cancelled', async () => {
     }
   }
 
-  const task = goodEnv().run(root)
+  const task = new PrimaryEnv(noop).run(root)
 
   const expected = [
     'childA resolved',
@@ -403,7 +396,7 @@ test('saga auto cancel forks if a child aborts', async () => {
     }
   }
 
-  const task = goodEnv().run(root)
+  const task = new PrimaryEnv(noop).run(root)
 
   const expected = [
     'childA resolved',
@@ -491,7 +484,7 @@ test('saga auto cancel parent + forks if a child aborts', async () => {
     }
   }
 
-  const task = goodEnv().run(root)
+  const task = new PrimaryEnv(noop).run(root)
 
   const expected = [
     'childA resolved',
@@ -522,10 +515,10 @@ test('joining multiple tasks', async () => {
     const task2 = yield io.fork(worker, 1)
     const task3 = yield io.fork(worker, 2)
 
-    actual = yield join(task1, task2, task3)
+    actual = yield io.all([task1, task2, task3].map(io.join))
   }
 
-  const mainTask = goodEnv().run(genFn)
+  const mainTask = new PrimaryEnv(noop).run(genFn)
 
   Promise.resolve()
     .then(() => defs[0].resolve(1))

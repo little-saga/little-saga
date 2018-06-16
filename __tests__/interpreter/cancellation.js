@@ -1,8 +1,6 @@
 import EventEmitter from 'events'
-import { deferred, Env, io, noop } from '../../src'
-import commonEffects from '../../src/commonEffects'
-import channelEffects, { connectToEmitter } from '../../src/channelEffects'
-import { cancel, compatEnhancer } from '../../src/compat'
+import { deferred, io, noop, PrimaryEnv } from '../../src'
+import { connectToEmitter } from '../../src/channelEffects'
 
 const assert = {
   deepEqual(a, b) {
@@ -11,10 +9,7 @@ const assert = {
 }
 
 function run(...args) {
-  return new Env(noop)
-    .use(compatEnhancer)
-    .def('echo', ([_, value], ctx, cb) => cb(value))
-    .run(...args)
+  return new PrimaryEnv(noop).def('echo', ([_, value], ctx, cb) => cb(value)).run(...args)
 }
 
 test('saga cancellation: call effect', async () => {
@@ -166,9 +161,7 @@ test('saga cancellation: take effect', async () => {
   }
 
   const emitter = new EventEmitter()
-  const task = new Env(noop)
-    .use(commonEffects)
-    .use(channelEffects)
+  const task = new PrimaryEnv(noop)
     .def('echo', ([_, value], ctx, cb) => cb(value))
     .use(connectToEmitter(emitter))
     .run(main)
@@ -208,7 +201,7 @@ test('saga cancellation: join effect (joining from a different task)', async () 
     yield io.fork(joiner2, task)
 
     actual.push(yield cancelDef.promise)
-    yield cancel(task)
+    yield io.cancel(task)
   }
 
   function* subroutine() {
@@ -596,7 +589,7 @@ test('saga cancellation:  manual task cancellation', async () => {
     actual.push(yield signIn.promise)
     const task = yield io.fork(subtask)
     actual.push(yield signOut.promise)
-    yield cancel(task)
+    yield io.cancel(task)
   }
 
   const task = run(genFn)
@@ -665,7 +658,7 @@ test('saga cancellation: nested task cancellation', async () => {
     actual.push(yield start.promise)
     const task = yield io.fork(subtask)
     actual.push(yield stop.promise)
-    yield cancel(task)
+    yield io.cancel(task)
   }
 
   const task = run(genFn)
@@ -730,7 +723,7 @@ test('saga cancellation: nested forked task cancellation', async () => {
     actual.push(yield start.promise)
     const task = yield io.fork(subtask)
     actual.push(yield stop.promise)
-    yield cancel(task)
+    yield io.cancel(task)
   }
 
   const task = run(genFn)
@@ -748,7 +741,7 @@ test('saga cancellation: nested forked task cancellation', async () => {
   assert.deepEqual(actual, expected, 'saga must cancel forked task and its forked nested subtask')
 })
 
-test('cancel should be able to cancel multiple tasks', async () => {
+test('cancel + all to cancel multiple tasks', async () => {
   const defs = [deferred(), deferred(), deferred()]
   let actual = []
 
@@ -766,7 +759,7 @@ test('cancel should be able to cancel multiple tasks', async () => {
     const t1 = yield io.fork(worker, 0)
     const t2 = yield io.fork(worker, 1)
     const t3 = yield io.fork(worker, 2)
-    yield cancel(t1, t2, t3)
+    yield io.all([t1, t2, t3].map(io.cancel))
   }
 
   const task = run(genFn)
@@ -783,7 +776,7 @@ test('cancel should support for self cancellation', async () => {
 
   function* worker() {
     try {
-      yield cancel()
+      yield io.cancel()
     } finally {
       if (yield io.cancelled()) {
         actual.push('self cancellation')

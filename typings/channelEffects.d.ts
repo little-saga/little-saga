@@ -5,7 +5,6 @@ export default commonEffectsContextEnhancer
 
 export const END: unique symbol
 export const MATCH: unique symbol
-export const MULTICAST: unique symbol
 export const SAGA_ACTION: unique symbol
 
 export const buffers: {
@@ -23,7 +22,7 @@ export interface Buffer<T> {
   flush(): T[]
 }
 
-export function connectToEmitter(emitter: NodeJS.EventEmitter): TaskContextEnhancer
+export function connectToEmitter(emitter: NodeJS.EventEmitter, key?: string): TaskContextEnhancer
 
 export interface Channel<T> {
   take(cb: (message: T | typeof END) => void): void
@@ -46,5 +45,8 @@ export interface MulticastChannel<T> {
   take(cb: (message: T | typeof END) => void, matcher?: Predicate<T>): void
   put(message: T | typeof END): void
   close(): void
+  lift(fn: (chan: MulticastChannel<T>) => MulticastChannel<T>): this
+  clone(): this
+  connect(dispatch: (action: T | typeof END) => void): this
 }
 export function multicastChannel<T>(): MulticastChannel<T>

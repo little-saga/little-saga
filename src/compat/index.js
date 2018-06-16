@@ -1,10 +1,6 @@
 import { io } from '../utils'
-import compatEnhancer from './compatEnhancer'
 import createSagaMiddleware from './middleware'
 import { takeEvery, takeLatest, takeLeading, throttle } from '../sagaHelpers'
-
-// little-saga specific APIs
-export { compatEnhancer }
 
 // ------ 以下为 redux-saga 的 API ------
 // API 可以参考官方文档  https://redux-saga.js.org/docs/api/
@@ -18,16 +14,16 @@ export { takeEvery, takeLeading, takeLatest, throttle }
 
 // Effect creators
 export const take = io.take
-take.maybe = io.takeMaybe
+export const takeMay = io.takeMaybe
 export const put = io.put
-// put.resolve is NOT supported in little-saga
+// putResolve is NOT supported in little-saga
 export const call = io.call
 export const apply = io.apply
 export const cps = io.cps
 export const fork = io.fork
 export const spawn = io.spawn
-export const join = io['enhanced-join']
-export const cancel = io['enhanced-cancel']
+export const join = io.join
+export const cancel = io.cancel
 export const select = io.select
 export const actionChannel = io.actionChannel
 export const flush = io.flush

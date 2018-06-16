@@ -1,10 +1,8 @@
-import { Callback, Effect, Task, TaskContext } from './index'
+import { Callback, Effect, Task } from './index'
 
 export * from './sagaHelpers'
 export * from './channelEffects'
 export * from './index'
-
-export function compatEnhancer(ctx: TaskContext): void
 
 export default function createSagaMiddleware(
   cont?: Callback,
@@ -19,6 +17,7 @@ interface EffectCreator {
 }
 
 export const take: EffectCreator
+export const takeMaybe: EffectCreator
 export const put: EffectCreator
 export const call: EffectCreator
 export const apply: EffectCreator

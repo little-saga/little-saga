@@ -1,18 +1,21 @@
-import { Env, identity } from '..'
-import compatEnhancer from './compatEnhancer'
+import { identity, PrimaryEnv } from '..'
 import { multicastChannel } from '../channelEffects/index'
+
+const connectChannelWithDispatch = dispatch => ctx => (ctx.channel = ctx.channel.connect(dispatch))
+
+function createSelectEffectRunner(getState) {
+  return function runSelectEffect([_type, selector = identity, ...args], _ctx, cb) {
+    return cb(selector(getState(), ...args))
+  }
+}
 
 export default function createSagaMiddleware(cont) {
   function middleware({ dispatch, getState }) {
     const channel = multicastChannel()
-    const env = new Env(cont)
-      .use(compatEnhancer)
-      .use(ctx => {
-        ctx.channel = channel.connect(dispatch)
-      })
-      .def('select', ([_type, selector = identity, ...args], _ctx, cb) =>
-        cb(selector(getState(), ...args)),
-      )
+
+    const env = new PrimaryEnv(cont)
+      .use(connectChannelWithDispatch(dispatch))
+      .def('select', createSelectEffectRunner(getState))
 
     middleware.run = (...args) => env.run(...args)
 

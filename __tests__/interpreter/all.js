@@ -1,12 +1,7 @@
-import { Env, deferred, noop, io, delay } from '../../src'
-import commonEffects from '../../src/commonEffects'
-import channelEffects, { END } from '../../src/channelEffects'
+import { deferred, delay, io, noop, PrimaryEnv } from '../../src'
+import { END } from '../../src/channelEffects'
 
-const run = fn =>
-  new Env(noop)
-    .use(commonEffects)
-    .use(channelEffects)
-    .run(fn)
+const run = fn => new PrimaryEnv(noop).run(fn)
 
 test('saga parallel effects handling', () => {
   let actual

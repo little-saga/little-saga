@@ -10,6 +10,8 @@ export class Env {
   run(fn: Function, ...args: any[]): Task
 }
 
+export class PrimaryEnv extends Env {}
+
 export function proc(iterator: Iterator<any>, parentContext: TaskContext, cont: Callback): Task
 
 export function asap(task: () => void): void

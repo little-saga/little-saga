@@ -1,6 +1,6 @@
 import EventEmitter from 'events'
-import { cancel, compatEnhancer, delay, take, throttle } from '../../src/compat'
-import { Env, noop } from '../../src'
+import { cancel, delay, PrimaryEnv, take, throttle } from '../../src/compat'
+import { noop } from '../../src'
 import { connectToEmitter } from '../../src/channelEffects'
 
 jest.useFakeTimers()
@@ -17,10 +17,7 @@ test('throttle', () => {
     ['a1', 'a2', 34],
   ]
 
-  new Env(noop)
-    .use(compatEnhancer)
-    .use(connectToEmitter(emitter))
-    .run(root)
+  new PrimaryEnv(noop).use(connectToEmitter(emitter)).run(root)
 
   function* root() {
     const task = yield throttle(100, 'ACTION', worker, 'a1', 'a2')

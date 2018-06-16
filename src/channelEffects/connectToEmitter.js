@@ -1,22 +1,7 @@
-import { asap, is } from '..'
-import { SAGA_ACTION } from './channel'
-
-export default function connectToEmitter(emitter) {
+export default function connectToEmitter(emitter, event = 'action') {
   return ctx => {
-    const channelPut = ctx.channel.put
-    ctx.channel.put = action => {
-      if (is.object(action) || is.array(action)) {
-        action[SAGA_ACTION] = true
-      }
-      emitter.emit('action', action)
-    }
-
-    emitter.on('action', action => {
-      if (action[SAGA_ACTION]) {
-        channelPut(action)
-      } else {
-        asap(() => channelPut(action))
-      }
-    })
+    const channel = ctx.channel
+    ctx.channel = channel.connect(action => emitter.emit(event, action))
+    emitter.on(event, action => channel.put(action))
   }
 }
