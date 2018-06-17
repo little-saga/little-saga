@@ -128,11 +128,12 @@ function liftable(chan) {
 
   chan.clone = () => liftable({ ...chan })
 
-  chan.connect = dispatch =>
+  chan.connect = fn =>
     chan
       .lift(scheduleSagaPut)
       .clone()
-      .lift(() => wrapSagaDispatch(dispatch))
+      .lift(() => fn)
+      .lift(wrapSagaDispatch)
 
   return chan
 }

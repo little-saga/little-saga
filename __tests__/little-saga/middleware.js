@@ -83,5 +83,8 @@ test('a simple counter example using redux', () => {
     actual.push(yield select()) // count: 2
   })
 
-  expect(actual).toEqual([{ count: 0 }, { count: 1 }, { count: 3 }, { count: 2 }])
+  store.dispatch({ type: 'dec' }) // 2 -> 1
+  actual.push(store.getState()) // count: 1
+
+  expect(actual).toEqual([{ count: 0 }, { count: 1 }, { count: 3 }, { count: 2 }, { count: 1 }])
 })

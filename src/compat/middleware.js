@@ -1,8 +1,6 @@
 import { identity, PrimaryEnv } from '..'
 import { multicastChannel } from '../channelEffects/index'
 
-const connectChannelWithDispatch = dispatch => ctx => (ctx.channel = ctx.channel.connect(dispatch))
-
 function createSelectEffectRunner(getState) {
   return function runSelectEffect([_type, selector = identity, ...args], _ctx, cb) {
     return cb(selector(getState(), ...args))
@@ -14,7 +12,7 @@ export default function createSagaMiddleware(cont) {
     const channel = multicastChannel()
 
     const env = new PrimaryEnv(cont)
-      .use(connectChannelWithDispatch(dispatch))
+      .use(ctx => (ctx.channel = channel.connect(dispatch)))
       .def('select', createSelectEffectRunner(getState))
 
     middleware.run = (...args) => env.run(...args)
