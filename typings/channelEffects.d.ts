@@ -45,8 +45,6 @@ export interface MulticastChannel<T> {
   take(cb: (message: T | typeof END) => void, matcher?: Predicate<T>): void
   put(message: T | typeof END): void
   close(): void
-  lift<PUT extends (action: T | typeof END) => void>(fn: (put: PUT) => PUT): this
-  clone(): this
   connect(dispatch: (action: T | typeof END) => void): this
 }
 export function multicastChannel<T>(): MulticastChannel<T>

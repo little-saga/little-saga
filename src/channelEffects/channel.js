@@ -121,19 +121,19 @@ export function eventChannel(subscribe, buffer = buffers.none()) {
 }
 
 function liftable(chan) {
-  chan.lift = fn => {
+  chan._lift = fn => {
     chan.put = fn(chan.put)
     return chan
   }
 
-  chan.clone = () => liftable({ ...chan })
+  chan._clone = () => liftable({ ...chan })
 
   chan.connect = fn =>
     chan
-      .lift(scheduleSagaPut)
-      .clone()
-      .lift(() => fn)
-      .lift(wrapSagaDispatch)
+      ._lift(scheduleSagaPut)
+      ._clone()
+      ._lift(() => fn)
+      ._lift(wrapSagaDispatch)
 
   return chan
 }

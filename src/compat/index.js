@@ -1,6 +1,6 @@
 import { io } from '../utils'
 import createSagaMiddleware from './middleware'
-import { takeEvery, takeLatest, takeLeading, throttle } from '../sagaHelpers'
+import { takeEvery, takeLatest, takeLeading, throttle, debounce } from '../sagaHelpers'
 
 // ------ 以下为 redux-saga 的 API ------
 // API 可以参考官方文档  https://redux-saga.js.org/docs/api/
@@ -10,7 +10,7 @@ import { takeEvery, takeLatest, takeLeading, throttle } from '../sagaHelpers'
 export default createSagaMiddleware
 
 // Saga Helpers
-export { takeEvery, takeLeading, takeLatest, throttle }
+export { takeEvery, takeLeading, takeLatest, throttle, debounce }
 
 // Effect creators
 export const take = io.take

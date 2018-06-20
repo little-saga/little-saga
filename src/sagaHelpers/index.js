@@ -1,7 +1,7 @@
 import { io, delay } from '..'
 import { buffers } from '../channelEffects'
 
-const { fork, take, call, actionChannel, cancel } = io
+const { fork, race, take, call, actionChannel, cancel } = io
 
 export function takeEvery(patternOrChannel, worker, ...args) {
   return fork(function*() {
@@ -41,6 +41,23 @@ export function throttle(ms, pattern, worker, ...args) {
       const action = yield take(throttleChannel)
       yield fork(worker, ...args, action)
       yield delay(ms)
+    }
+  })
+}
+
+export function debounce(ms, channelOrPattern, worker, ...args) {
+  return fork(function*() {
+    while (true) {
+      let action = yield take(channelOrPattern)
+      while (true) {
+        const [nextAction, timeout] = yield race([take(channelOrPattern), delay(ms)])
+        if (timeout) {
+          yield fork(worker, ...args, action)
+          break
+        } else {
+          action = nextAction
+        }
+      }
     }
   })
 }
