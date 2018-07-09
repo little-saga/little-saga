@@ -1,7 +1,7 @@
 import { CANCEL, TASK_CANCEL } from './symbols'
 import { flush, suspend } from './scheduler'
 import { def, is, noop, remove } from '../utils'
-import { createTaskIterator } from './internal-utils'
+import { createTaskIterator, reportErrorOnly } from './internal-utils'
 import Task from './Task'
 import ForkQueue from './ForkQueue'
 
@@ -165,7 +165,7 @@ export default function proc(iterator, parentContext, cont) {
     const iterator = createTaskIterator(fn, args)
     try {
       suspend()
-      cb(proc(iterator, ctx, noop))
+      cb(proc(iterator, ctx, reportErrorOnly))
     } finally {
       flush()
     }

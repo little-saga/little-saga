@@ -1,6 +1,6 @@
 import { def, is } from '../utils'
 import proc from './proc'
-import { createTaskIterator } from './internal-utils'
+import { createTaskIterator, reportErrorOnly } from './internal-utils'
 
 const defaultTranslator = {
   getRunner() {
@@ -21,16 +21,8 @@ const defaultTranslator = {
   },
 }
 
-function fallbackCont(result, isErr) {
-  if (isErr) {
-    console.error(result)
-  } else {
-    console.log(result)
-  }
-}
-
 export default class Env {
-  constructor(cont = fallbackCont) {
+  constructor(cont = reportErrorOnly) {
     this.cont = cont
     this.ctx = { translator: defaultTranslator }
   }

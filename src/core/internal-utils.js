@@ -39,3 +39,5 @@ function* iteratorAlwaysThrow(error) {
 function* iteratorAlwaysReturn(result) {
   return result
 }
+
+export const reportErrorOnly = (result, isErr) => isErr && console.error(result)
