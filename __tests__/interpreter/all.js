@@ -1,7 +1,4 @@
-import { deferred, delay, io, noop, PrimaryEnv } from '../../src'
-import { END } from '../../src/channel-utils'
-
-const run = fn => new PrimaryEnv(noop).run(fn)
+import { SAGA_ACTION, runSaga, deferred, delay, io, END } from '../../src'
 
 test('saga parallel effects handling', () => {
   let actual
@@ -9,9 +6,9 @@ test('saga parallel effects handling', () => {
   let cpsCb = {}
   const cps = (val, cb) => (cpsCb = { val, cb })
 
-  const expected = [1, 2, { type: 'action' }]
+  const expected = [1, 2, { [SAGA_ACTION]: true, type: 'action' }]
 
-  return run(function* genFn() {
+  return runSaga({}, function* genFn() {
     const { all, take, fork, put } = io
     yield fork(logicAfterDelay0)
     actual = yield all([def.promise, io.cps(cps, 2), take('action')])
@@ -33,8 +30,8 @@ test('saga parallel effects handling', () => {
 test('saga empty array', () => {
   let actual
 
-  return run(function*() {
-    actual = yield ['all', []]
+  return runSaga({}, function*() {
+    actual = yield io.all([])
   })
     .toPromise()
     .then(() => {
@@ -48,10 +45,10 @@ test('saga parallel effect: handling errors', () => {
   const def1 = deferred()
   const def2 = deferred()
 
-  return run(function*() {
-    yield ['fork', logicAfterDelay0]
+  return runSaga({}, function*() {
+    yield io.fork(logicAfterDelay0)
     try {
-      actual = yield ['all', [def1.promise, def2.promise]]
+      actual = yield io.all([def1.promise, def2.promise])
     } catch (err) {
       actual = [err]
     }
@@ -73,11 +70,10 @@ test('saga parallel effect: handling END', () => {
   let actual
   const def = deferred()
 
-  return run(function*() {
-    const { all, take, put, fork } = io
-    yield fork(logicAfterDelay0)
+  return runSaga({}, function*() {
+    yield io.fork(logicAfterDelay0)
     try {
-      actual = yield all([def.promise, take('action')])
+      actual = yield io.all([def.promise, io.take('action')])
     } finally {
       actual = 'end'
     }
@@ -85,7 +81,7 @@ test('saga parallel effect: handling END', () => {
     function* logicAfterDelay0() {
       yield delay(0)
       def.resolve(1)
-      yield put(END)
+      yield io.put(END)
     }
   })
     .toPromise()
@@ -99,21 +95,23 @@ test('saga parallel effect: named effects', () => {
   let actual
   const def = deferred()
 
-  return run(function*() {
-    const { all, take, put, fork } = io
-    yield fork(logicAfterDelay0)
-    actual = yield all({
-      ac: take('action'),
+  return runSaga({}, function*() {
+    yield io.fork(logicAfterDelay0)
+    actual = yield io.all({
+      ac: io.take('action'),
       prom: def.promise,
     })
     function* logicAfterDelay0() {
       yield delay(0)
       def.resolve(1)
-      yield put({ type: 'action' })
+      yield io.put({ type: 'action' })
     }
   })
     .toPromise()
     .then(() => {
-      expect(actual).toEqual({ ac: { type: 'action' }, prom: 1 })
+      expect(actual).toEqual({
+        ac: { [SAGA_ACTION]: true, type: 'action' },
+        prom: 1,
+      })
     })
 })

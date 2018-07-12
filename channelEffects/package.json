@@ -1,6 +1,0 @@
-{
-  "name": "little-saga/channelEffects",
-  "private": true,
-  "main": "../lib/channelEffects/index.js",
-  "typings": "../typings/channelEffects.d.ts"
-}

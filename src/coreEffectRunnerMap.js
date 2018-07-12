@@ -1,7 +1,7 @@
 import { is, noop, remove } from './utils'
 import { asap, flush, suspend } from './scheduler'
 import proc from './proc'
-import { channel, END } from './channel-utils'
+import { channel, END } from './channel-utils/channels'
 import { SELF_CANCELLATION, TASK_CANCEL } from './symbols'
 import {
   createAllStyleChildCallbacks,

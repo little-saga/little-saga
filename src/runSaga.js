@@ -1,6 +1,6 @@
 import proc from './proc'
 import { createTaskIterator, reportErrorOnly } from './internal-utils'
-import { stdChannel } from './channel-utils'
+import { stdChannel } from './channel-utils/channels'
 import coreEffectRunnerMap from './coreEffectRunnerMap'
 
 export default function runSaga(options, fn, ...args) {

@@ -1,6 +1,4 @@
 import { Env, noop, io } from '../src'
-import commonEffects from '../src/commonEffects'
-import channelEffects from '../src/channel-utils'
 import { channel } from '../src/channel-utils/channels'
 
 test('channel: watcher + max workers', async () => {

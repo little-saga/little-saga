@@ -74,12 +74,12 @@ export function channel(buffer = buffers.expanding()) {
     }
   }
 
-  return enhanceable({
+  return {
     take,
     put,
     flush,
     close,
-  })
+  }
 }
 
 export function eventChannel(subscribe, buffer = buffers.none()) {

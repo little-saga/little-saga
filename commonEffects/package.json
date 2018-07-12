@@ -1,6 +1,0 @@
-{
-  "name": "little-saga/commonEffects",
-  "private": true,
-  "main": "../lib/commonEffects/index.js",
-  "typings": "../typings/commonEffects.d.ts"
-}

@@ -1,4 +1,4 @@
-import { stdChannel } from '../channel-utils'
+import { stdChannel } from '../channel-utils/channels'
 import runSaga from '../runSaga'
 import { reportErrorOnly } from '../internal-utils'
 

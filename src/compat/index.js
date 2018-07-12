@@ -1,6 +1,5 @@
 import io from '../io'
 import createSagaMiddleware from './middleware'
-import { takeEvery, takeLatest, takeLeading, throttle, debounce } from '../sagaHelpers'
 
 // ------ 以下为 redux-saga 的 API ------
 // API 可以参考官方文档  https://redux-saga.js.org/docs/api/
@@ -10,7 +9,7 @@ import { takeEvery, takeLatest, takeLeading, throttle, debounce } from '../sagaH
 export default createSagaMiddleware
 
 // Saga Helpers
-export { takeEvery, takeLeading, takeLatest, throttle, debounce }
+export * from '../sagaHelpers'
 
 // Effect creators
 export const take = io.take
@@ -38,8 +37,7 @@ export const race = io.race
 // Interfaces & External API are NOT supported in little-saga
 
 // Utils
-export * from '../index'
-export * from '../channel-utils'
+export * from '../utils'
 
 // The following utils are NOT supported in little-saga
 // cloneableGenerator(generatorFunc)
