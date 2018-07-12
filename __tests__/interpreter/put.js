@@ -1,27 +1,19 @@
-import { deferred, Env, io, noop } from '../../src'
-
-function collect(actual) {
-  return ctx => {
-    ctx.channel.take(function taker(payload) {
-      actual.push(payload.type)
-      ctx.channel.take(taker)
-    })
-  }
-}
+import { channel, deferred, END, io, runSaga, stdChannel } from '../../src'
 
 test('saga put handling', () => {
   const actual = []
+
+  const channel = stdChannel().enhancePut(put => action => {
+    actual.push(action.type)
+    return put(action)
+  })
 
   function* genFn(arg) {
     yield io.put({ type: arg })
     yield io.put({ type: 2 })
   }
 
-  const task = new Env(noop)
-    .use(commonEffects)
-    .use(channelEffects)
-    .use(collect(actual))
-    .run(genFn, 'arg')
+  const task = runSaga({ channel }, genFn, 'arg')
 
   const expected = ['arg', 2]
 
@@ -44,10 +36,7 @@ test('saga put in a channel', () => {
     yield io.put(chan, 2)
   }
 
-  const task = new Env(noop)
-    .use(commonEffects)
-    .use(channelEffects)
-    .run(genFn, 'arg')
+  const task = runSaga({}, genFn, 'arg')
 
   const expected = ['arg', 2]
 
@@ -59,6 +48,12 @@ test('saga put in a channel', () => {
 test("saga error put's response handling", () => {
   let actual = []
   const error = new Error('error')
+  const channel = stdChannel().enhancePut(put => action => {
+    if (action.error) {
+      throw error
+    }
+    put(action)
+  })
 
   function* genFn(arg) {
     try {
@@ -68,18 +63,7 @@ test("saga error put's response handling", () => {
     }
   }
 
-  const task = new Env(noop)
-    .use(commonEffects)
-    .use(channelEffects)
-    .use(ctx => {
-      ctx.channel.take(function taker(action) {
-        if (action.error) {
-          throw error
-        }
-        ctx.channel.take(taker)
-      })
-    })
-    .run(genFn, 'arg')
+  const task = runSaga({ channel }, genFn, 'arg')
 
   const expected = [error]
 
@@ -110,10 +94,7 @@ test('saga nested puts handling', () => {
 
   const expected = ['put a', 'put b']
 
-  return new Env(noop)
-    .use(commonEffects)
-    .use(channelEffects)
-    .run(root)
+  return runSaga({}, root)
     .toPromise()
     .then(() => {
       // saga must order nested puts by executing them after the outer puts complete
@@ -129,25 +110,23 @@ test('puts emitted directly after creating a task (caused by another put) should
   let callSubscriber = false
   let dispatch = false
 
-  const saga = new Env(noop)
-    .use(commonEffects)
-    .use(channelEffects)
-    .use(ctx => {
-      dispatch = ctx.channel.put
-      ctx.channel.take(function taker(action) {
-        callSubscriber = action.callSubscriber
-        ctx.channel.take(taker)
-      })
+  const channel = stdChannel().enhancePut(put => {
+    dispatch = put
+    return action => {
+      callSubscriber = action.callSubscriber
+      return put(action)
+    }
+  })
+
+  const saga = runSaga({ channel }, function*() {
+    yield io.take('a')
+    yield io.put({ type: 'b', callSubscriber: true })
+    yield io.take('c')
+    yield io.fork(function*() {
+      yield io.take('do not miss')
+      actual.push("didn't get missed")
     })
-    .run(function*() {
-      yield io.take('a')
-      yield io.put({ type: 'b', callSubscriber: true })
-      yield io.take('c')
-      yield io.fork(function*() {
-        yield io.take('do not miss')
-        actual.push("didn't get missed")
-      })
-    })
+  })
 
   dispatch({ type: 'a' })
   if (callSubscriber) {
@@ -166,6 +145,8 @@ test('END should reach tasks created after it gets dispatched', () => {
   const actual = []
   let dispatch = false
 
+  const channel = stdChannel().enhancePut(put => (dispatch = put))
+
   function* subTask() {
     try {
       while (true) {
@@ -180,20 +161,16 @@ test('END should reach tasks created after it gets dispatched', () => {
 
   const def = deferred()
 
-  const task = new Env(noop)
-    .use(commonEffects)
-    .use(channelEffects)
-    .use(ctx => (dispatch = ctx.channel.put))
-    .run(function*() {
-      while (true) {
-        yield io.take('START')
-        actual.push('start taken')
-        yield def.promise
-        actual.push('non-take effect resolved')
-        yield io.fork(subTask)
-        actual.push('subTask forked')
-      }
-    })
+  const task = runSaga({ channel }, function*() {
+    while (true) {
+      yield io.take('START')
+      actual.push('start taken')
+      yield def.promise
+      actual.push('non-take effect resolved')
+      yield io.fork(subTask)
+      actual.push('subTask forked')
+    }
+  })
 
   dispatch({ type: 'START' })
   dispatch(END)

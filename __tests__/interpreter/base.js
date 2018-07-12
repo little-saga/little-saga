@@ -1,20 +1,14 @@
-import { io, is, noop } from '../../src'
 import EventEmitter from 'events'
+import { io, is, noop, runSaga, stdChannel } from '../../src'
 
-const run = fn =>
-  new Env(noop)
-    .use(commonEffects)
-    .use(channelEffects)
-    .def('echo', ([effect, arg], ctx, cb) => cb(arg))
-    .run(fn)
+const run = fn => runSaga({}, fn)
 
 test('saga iteration', async done => {
   let actual = []
 
   const task = run(function*() {
-    const { echo } = io
-    actual.push(yield echo(1))
-    actual.push(yield echo(2))
+    actual.push(yield 1)
+    actual.push(yield 2)
     return 3
   })
 
@@ -30,7 +24,7 @@ test('saga error handling', done => {
   function fnThrow() {
     throw new Error('error')
   }
-  const task1 = run(function*() {
+  const task1 = runSaga({ cont: noop }, function*() {
     fnThrow()
   })
 
@@ -64,18 +58,19 @@ test('saga error handling', done => {
 test('saga output handling', async () => {
   let actual = []
   const emitter = new EventEmitter()
-  const env = new Env(noop)
-    .use(commonEffects)
-    .use(channelEffects)
-    .use(connectToEmitter(emitter))
-  emitter.addListener('action', action => actual.push(action.type))
+  const channel = stdChannel().enhancePut(put => {
+    emitter.on('action', action => put(action))
+    return action => emitter.emit('action', action)
+  })
+
+  emitter.on('action', action => actual.push(action.type))
 
   function* genFn(arg) {
     yield io.put({ type: arg })
     yield io.put({ type: 2 })
   }
 
-  await env.run(genFn, 'arg').toPromise()
+  await runSaga({ channel }, genFn, 'arg').toPromise()
   const expected = ['arg', 2]
   expect(actual).toEqual(expected)
 })
@@ -84,13 +79,12 @@ test('saga yielded falsy values', async () => {
   let actual = []
 
   await run(function*() {
-    const { echo } = io
-    actual.push(yield echo(false))
-    actual.push(yield echo(undefined))
-    actual.push(yield echo(null))
-    actual.push(yield echo(''))
-    actual.push(yield echo(0))
-    actual.push(yield echo(NaN))
+    actual.push(yield false)
+    actual.push(yield undefined)
+    actual.push(yield null)
+    actual.push(yield '')
+    actual.push(yield 0)
+    actual.push(yield NaN)
   }).toPromise()
 
   const expected = [false, undefined, null, '', 0, NaN]
