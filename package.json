@@ -2,7 +2,7 @@
   "name": "little-saga",
   "license": "MIT",
   "description": "Just a little-saga.",
-  "version": "0.3.5",
+  "version": "0.4.0-SNAPSHOT",
   "scripts": {
     "start": "babel --watch src -d lib",
     "build": "babel src -d lib",
@@ -53,21 +53,21 @@
     ]
   },
   "devDependencies": {
-    "@babel/cli": "^7.0.0-beta.47",
-    "@babel/core": "^7.0.0-beta.47",
-    "@babel/plugin-proposal-class-properties": "^7.0.0-beta.47",
-    "@babel/plugin-syntax-object-rest-spread": "^7.0.0-beta.49",
-    "@babel/plugin-transform-modules-commonjs": "^7.0.0-beta.47",
+    "@babel/cli": "^7.0.0-beta.53",
+    "@babel/core": "^7.0.0-beta.53",
+    "@babel/plugin-proposal-class-properties": "^7.0.0-beta.53",
+    "@babel/plugin-syntax-object-rest-spread": "^7.0.0-beta.53",
+    "@babel/plugin-transform-modules-commonjs": "^7.0.0-beta.53",
     "babel-core": "7.0.0-bridge.0",
-    "babel-jest": "^22.4.4",
-    "coveralls": "^3.0.1",
+    "babel-jest": "^23.4.0",
+    "coveralls": "^3.0.2",
     "husky": "^1.0.0-rc.9",
-    "jest": "^22.4.4",
+    "jest": "^23.4.0",
     "lint-staged": "^7.2.0",
-    "prettier": "1"
+    "prettier": "1.13.7"
   },
   "dependencies": {
-    "@types/node": "^10.1.2"
+    "@types/node": "^10.5.2"
   },
   "lint-staged": {
     "*.js": [
