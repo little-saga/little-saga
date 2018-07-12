@@ -1,7 +1,4 @@
-import { io, deferred, Env, noop } from '../../src'
-import commonEffects from '../../src/commonEffects'
-import channelEffects from '../../src/channel-utils'
-import { END } from '../../src/channel-utils/channels'
+import { io, deferred, noop, END } from '../../src'
 
 test('saga race between effects handling', () => {
   let actual = []
@@ -10,8 +7,6 @@ test('saga race between effects handling', () => {
   let dispatch
 
   const task = new Env(noop)
-    .use(commonEffects)
-    .use(channelEffects)
     .use(ctx => {
       dispatch = ctx.channel.put
     })

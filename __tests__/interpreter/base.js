@@ -1,7 +1,5 @@
-import { Env, io, is, noop } from '../../src'
+import { io, is, noop } from '../../src'
 import EventEmitter from 'events'
-import commonEffects from '../../src/commonEffects'
-import channelEffects, { connectToEmitter } from '../../src/channel-utils'
 
 const run = fn =>
   new Env(noop)

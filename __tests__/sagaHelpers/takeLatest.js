@@ -1,7 +1,6 @@
 import EventEmitter from 'events'
 import { cancel, PrimaryEnv, take, takeLatest } from '../../src/compat'
 import { deferred, noop } from '../../src'
-import { connectToEmitter } from '../../src/channel-utils'
 
 test('takeLatest', () => {
   const defs = [deferred(), deferred(), deferred(), deferred()]

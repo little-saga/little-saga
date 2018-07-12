@@ -1,6 +1,4 @@
 import { Env, noop, io } from '../../src'
-import commonEffects from '../../src/commonEffects'
-import channelEffects from '../../src/channel-utils'
 
 const simpleRun = fn =>
   new Env(noop)

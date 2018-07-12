@@ -1,6 +1,4 @@
 import { Env, noop, io } from '../../src'
-import commonEffects from '../../src/commonEffects'
-import channelEffects, { buffers } from '../../src/channel-utils'
 
 test('saga create channel for store actions', () => {
   let actual = []

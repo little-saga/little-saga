@@ -1,24 +1,19 @@
-import { io, Env, noop } from '../../src'
+import { io, runSaga } from '../../src'
 
 test('saga cps call handling', () => {
   let actual = []
 
-  const task = new Env(noop)
-    .use(ctx => {
-      ctx.a = 1
-    })
-    .run(function* genFn() {
-      const { cps } = io
-      try {
-        yield cps(cb => {
-          actual.push('call 1')
-          cb('err')
-        })
-        actual.push('call 2')
-      } catch (err) {
-        actual.push('call ' + err)
-      }
-    })
+  const task = runSaga({}, function* genFn() {
+    try {
+      yield io.cps(cb => {
+        actual.push('call 1')
+        cb('err')
+      })
+      actual.push('call 2')
+    } catch (err) {
+      actual.push('call ' + err)
+    }
+  })
 
   const expected = ['call 1', 'call err']
 
@@ -45,6 +40,12 @@ test('saga synchronous cps failures handling', () => {
   }
 
   function* genFnParent() {
+    yield io.fork(function*() {
+      while (true) {
+        const action = yield io.take('*')
+        actual.push(action.type)
+      }
+    })
     try {
       yield io.put({ type: 'start parent' })
       yield genFnChild()
@@ -54,23 +55,11 @@ test('saga synchronous cps failures handling', () => {
     }
   }
 
-  const task = new Env(noop)
-    .use(commonEffects)
-    .use(channelEffects)
-    .use(ctx => {
-      ctx.channel.take(function taker(payload) {
-        actual.push(payload.type)
-        ctx.channel.take(taker)
-      })
-    })
-    .run(genFnParent)
+  runSaga({}, genFnParent)
 
   const expected = ['start parent', 'startChild', 'failure child', 'success parent']
 
-  return task.toPromise().then(() => {
-    // saga should inject call error into generator
-    expect(actual).toEqual(expected)
-  })
+  expect(actual).toEqual(expected)
 })
 
 test('saga cps cancellation handling', () => {
@@ -81,7 +70,7 @@ test('saga cps cancellation handling', () => {
     }
   }
 
-  const task = new Env(noop).use(commonEffects).run(function* genFn() {
+  const task = runSaga({}, function* genFn() {
     const task = yield io.fork(function*() {
       yield io.cps(cpsFn)
     })

@@ -1,5 +1,4 @@
 import createSagaMiddleware, { put, select } from '../../src/compat'
-import { noop } from '../../src/index'
 
 function applyMiddleware(...middlewares) {
   function compose(...funcs) {
@@ -42,7 +41,7 @@ function createStore(reducer, initialState) {
 }
 
 test('a simple counter example using redux', () => {
-  const sagaMiddleware = createSagaMiddleware(noop)
+  const sagaMiddleware = createSagaMiddleware()
   const enhancedCreateStore = applyMiddleware(sagaMiddleware)(createStore)
   function reducer(state = { count: 0 }, action) {
     if (action.type === 'inc') {

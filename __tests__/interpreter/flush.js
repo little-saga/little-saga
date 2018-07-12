@@ -1,6 +1,4 @@
 import { Env, io, noop } from '../../src'
-import commonEffects from '../../src/commonEffects'
-import channelEffects, { channel, END } from '../../src/channel-utils'
 
 test('saga flush handling', () => {
   let actual = []

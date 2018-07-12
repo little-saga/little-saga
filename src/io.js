@@ -1,5 +1,5 @@
 import { IO, SELF_CANCELLATION } from './symbols'
-import { is } from './utils'
+import { identity, is } from './utils'
 import { resolveContextAndFn } from './internal-utils'
 
 export function makeEffect(type, payload) {
@@ -50,7 +50,7 @@ const io = {
   apply: applyEffectCreator,
   setContext: partialContext => makeEffect('SET_CONTEXT', partialContext),
   getContext: prop => makeEffect('GET_CONTEXT', prop),
-  select: (selector, ...args) => makeEffect('SELECT', { selector, args }),
+  select: (selector = identity, ...args) => makeEffect('SELECT', { selector, args }),
   take: takeEffectCreatorFactory(false),
   takeMaybe: takeEffectCreatorFactory(true),
   put: putEffectCreatorFactory(false),

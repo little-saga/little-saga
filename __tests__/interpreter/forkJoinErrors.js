@@ -1,10 +1,4 @@
-import { Env, io, noop } from '../../src'
-import commonEffects from '../../src/commonEffects'
-import channelEffects from '../../src/channel-utils'
-
-function goodEnv() {
-  return new Env(noop).use(commonEffects).use(channelEffects)
-}
+import { runSaga, io, noop } from '../../src'
 
 test('saga sync fork failures: functions', async () => {
   let actual = []
@@ -36,9 +30,7 @@ test('saga sync fork failures: functions', async () => {
 
   const expected = ['start main', 'start parent', 'main caught immediatelyFailingFork']
 
-  await goodEnv()
-    .run(main)
-    .toPromise()
+  await runSaga({}, main).toPromise()
   expect(actual).toEqual(expected)
 })
 
@@ -70,7 +62,7 @@ test('saga sync fork failures: functions/error bubbling', async () => {
     }
   }
 
-  const task = goodEnv().run(main)
+  const task = runSaga({ cont: noop }, main)
 
   const expected = ['start main', 'start parent', 'uncaught immediatelyFailingFork']
 
@@ -108,7 +100,7 @@ test("saga fork's failures: generators", async () => {
     }
   }
 
-  const task = goodEnv().run(main)
+  const task = runSaga({}, main)
 
   const expected = ['start main', 'start parent', 'main caught gen error']
 
@@ -136,7 +128,7 @@ test('saga sync fork failures: spawns (detached forks)', async () => {
     }
   }
 
-  const task = goodEnv().run(main)
+  const task = runSaga({}, main)
 
   const expected = ['start main', 'spawn genChild', 'success parent']
 

@@ -7,7 +7,7 @@ export default function createSagaMiddleware({
   cont = reportErrorOnly,
   channel = stdChannel(),
   customEffectRunnerMap = {},
-}) {
+} = {}) {
   function middleware({ dispatch, getState }) {
     const options = {
       ctx,

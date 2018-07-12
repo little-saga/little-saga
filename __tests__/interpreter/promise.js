@@ -21,7 +21,7 @@ test('saga native promise handling', () => {
 test('saga native promise handling: undefined errors', () => {
   let actual = []
 
-  const task = runSaga(function* genFn() {
+  const task = runSaga({}, function* genFn() {
     try {
       actual.push(yield Promise.reject())
     } catch (e) {

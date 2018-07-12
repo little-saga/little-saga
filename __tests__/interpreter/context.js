@@ -1,5 +1,4 @@
 import { Env, io, noop } from '../../src'
-import commonEffects from '../../src/commonEffects'
 
 test('saga must handle context in dynamic scoping manner', () => {
   let actual = []

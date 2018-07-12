@@ -1,5 +1,4 @@
 import { Env, noop, io } from '../../src'
-import commonEffects from '../../src/commonEffects'
 
 test('saga onError is optional', () => {
   const expectedError = new Error('child error')

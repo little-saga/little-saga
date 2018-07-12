@@ -1,7 +1,6 @@
 import EventEmitter from 'events'
-import { cancel, PrimaryEnv, take, takeEvery } from '../../src/compat'
+import { cancel, take, takeEvery } from '../../src/compat'
 import { noop } from '../../src'
-import { connectToEmitter } from '../../src/channel-utils'
 
 test('takeEvery', async () => {
   const loop = 10

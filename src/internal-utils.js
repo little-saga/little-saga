@@ -24,7 +24,6 @@ export function resolveContextAndFn(fnobj) {
     const { context, fn } = fnobj
     return resolveMethod(context, fn)
   } else {
-    console.log(fnobj)
     throw new Error('Invalid arg passed to resolveContextAndFn')
   }
 }
