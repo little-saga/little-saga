@@ -1,6 +1,6 @@
 import { Env, io, noop } from '../../src'
 import commonEffects from '../../src/commonEffects'
-import channelEffects, { END, channel } from '../../src/channelEffects'
+import channelEffects, { END, channel } from '../../src/channel-utils'
 
 test('saga take from default channel', () => {
   const typeSymbol = Symbol('action-symbol')

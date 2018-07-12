@@ -1,9 +1,9 @@
-import { Env, noop } from '../../src'
+import { runSaga } from '../../src'
 
 test('saga native promise handling', () => {
   let actual = []
 
-  const task = new Env(noop).run(function* genFn() {
+  const task = runSaga({}, function* genFn() {
     try {
       actual.push(yield Promise.resolve(1))
       actual.push(yield Promise.reject('error'))
@@ -21,7 +21,7 @@ test('saga native promise handling', () => {
 test('saga native promise handling: undefined errors', () => {
   let actual = []
 
-  const task = new Env(noop).run(function* genFn() {
+  const task = runSaga(function* genFn() {
     try {
       actual.push(yield Promise.reject())
     } catch (e) {

@@ -1,5 +1,5 @@
 import { TASK_CANCEL } from './symbols'
-import { deferred } from '../utils'
+import { deferred } from './utils'
 
 export default class Task {
   isRunning = true
@@ -14,8 +14,9 @@ export default class Task {
   // cont will be set after calling constructor()
   cont = undefined
 
-  constructor(taskQueue) {
+  constructor(taskQueue, taskContext) {
     this.taskQueue = taskQueue
+    this.taskContext = taskContext
   }
 
   cancel = () => {

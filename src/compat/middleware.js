@@ -1,21 +1,23 @@
-import { identity, PrimaryEnv } from '..'
-import { multicastChannel } from '../channelEffects/index'
+import { stdChannel } from '../channel-utils'
+import runSaga from '../runSaga'
+import { reportErrorOnly } from '../internal-utils'
 
-function createSelectEffectRunner(getState) {
-  return function runSelectEffect([_type, selector = identity, ...args], _ctx, cb) {
-    return cb(selector(getState(), ...args))
-  }
-}
-
-export default function createSagaMiddleware(cont) {
+export default function createSagaMiddleware({
+  ctx = {},
+  cont = reportErrorOnly,
+  channel = stdChannel(),
+  customEffectRunnerMap = {},
+}) {
   function middleware({ dispatch, getState }) {
-    const channel = multicastChannel()
-
-    const env = new PrimaryEnv(cont)
-      .use(ctx => (ctx.channel = channel.connect(dispatch)))
-      .def('select', createSelectEffectRunner(getState))
-
-    middleware.run = (...args) => env.run(...args)
+    const options = {
+      ctx,
+      cont,
+      channel,
+      customEffectRunnerMap,
+      dispatch,
+      getState,
+    }
+    middleware.run = (...args) => runSaga(options, ...args)
 
     return next => action => {
       const result = next(action) // hit reducers
@@ -24,7 +26,7 @@ export default function createSagaMiddleware(cont) {
     }
   }
 
-  middleware.run = (...args) => {
+  middleware.run = () => {
     throw new Error(
       'Before running a Saga, you must mount the Saga middleware on the Store using applyMiddleware',
     )

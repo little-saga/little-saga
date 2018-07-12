@@ -1,6 +1,6 @@
 import { deferred, remove, is, delay, Env, io, noop, identity, once } from '../../src'
 import commonEffects from '../../src/commonEffects'
-import channelEffects from '../../src/channelEffects'
+import channelEffects from '../../src/channel-utils'
 
 const { join, fork, cancel, spawn, take, put } = io
 

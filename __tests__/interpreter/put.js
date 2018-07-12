@@ -1,6 +1,6 @@
 import { deferred, Env, io, noop } from '../../src'
 import commonEffects from '../../src/commonEffects'
-import channelEffects, { END, channel } from '../../src/channelEffects'
+import channelEffects, { END, channel } from '../../src/channel-utils'
 
 function collect(actual) {
   return ctx => {

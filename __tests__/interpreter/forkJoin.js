@@ -1,6 +1,7 @@
 import EventEmitter from 'events'
-import { deferred, io, is, noop, PrimaryEnv } from '../../src'
-import { connectToEmitter } from '../../src/channelEffects'
+import { deferred, io, is, noop } from '../../src'
+import { connectToEmitter } from '../../src/channel-utils'
+import runSaga from '../../src/runSaga'
 
 test('saga fork handling: generators', async () => {
   let task1
@@ -28,7 +29,7 @@ test('saga fork handling: generators', async () => {
     task2 = yield io.fork([inst, inst.gen])
   }
 
-  const mainTask = new PrimaryEnv(noop).run(genFn)
+  const mainTask = runSaga({}, genFn)
 
   await mainTask.toPromise()
   // fork result must include the promise of the task result
@@ -59,7 +60,7 @@ test('saga join handling : generators', () => {
   }
 
   const emitter = new EventEmitter()
-  const task = new PrimaryEnv(noop).use(connectToEmitter(emitter)).run(genFn)
+  const task = runSaga({ dispatch: action => emitter.emit('action', action) }, genFn)
 
   Promise.resolve(1)
     .then(() => defs[0].resolve(true))
@@ -103,7 +104,7 @@ test('saga fork/join handling : functions', () => {
     actual.push(yield io.join(syncTask))
   }
 
-  const task = new PrimaryEnv(noop).run(genFn)
+  const task = runSaga({}, genFn)
 
   const expected = [true, 2, 'sync']
 
@@ -153,7 +154,7 @@ test('saga fork wait for attached children', async () => {
     actual.push(idx)
   }
 
-  const task = new PrimaryEnv(noop).run(root)
+  const task = runSaga({}, root)
 
   await task.toPromise()
   // parent task must wait for all forked tasks before terminating
@@ -227,7 +228,7 @@ test('saga auto cancel forks on error', async () => {
     }
   }
 
-  const task = new PrimaryEnv(noop).run(root)
+  const task = runSaga({}, root)
 
   const expected = [
     'childA resolved',
@@ -311,7 +312,7 @@ test('saga auto cancel forks on main cancelled', async () => {
     }
   }
 
-  const task = new PrimaryEnv(noop).run(root)
+  const task = runSaga({}, root)
 
   const expected = [
     'childA resolved',
@@ -396,7 +397,7 @@ test('saga auto cancel forks if a child aborts', async () => {
     }
   }
 
-  const task = new PrimaryEnv(noop).run(root)
+  const task = runSaga({}, root)
 
   const expected = [
     'childA resolved',
@@ -484,7 +485,7 @@ test('saga auto cancel parent + forks if a child aborts', async () => {
     }
   }
 
-  const task = new PrimaryEnv(noop).run(root)
+  const task = runSaga({}, root)
 
   const expected = [
     'childA resolved',
@@ -518,7 +519,7 @@ test('joining multiple tasks', async () => {
     actual = yield io.all([task1, task2, task3].map(io.join))
   }
 
-  const mainTask = new PrimaryEnv(noop).run(genFn)
+  const mainTask = runSaga({}, genFn)
 
   Promise.resolve()
     .then(() => defs[0].resolve(1))

@@ -1,6 +1,6 @@
 import { always, is, once, remove } from '../utils'
 import * as buffers from './buffers'
-import { asap } from '../core/scheduler'
+import { asap } from '../scheduler'
 
 export const END = Symbol('END')
 export const MATCH = Symbol('MATCH')
@@ -74,7 +74,7 @@ export function channel(buffer = buffers.expanding()) {
     }
   }
 
-  return liftable({
+  return enhanceable({
     take,
     put,
     flush,
@@ -120,20 +120,15 @@ export function eventChannel(subscribe, buffer = buffers.none()) {
   }
 }
 
-function liftable(chan) {
-  chan._lift = fn => {
+function enhanceable(chan) {
+  chan.enhancePut = fn => {
     chan.put = fn(chan.put)
     return chan
   }
 
-  chan._clone = () => liftable({ ...chan })
+  chan._clone = () => enhanceable({ ...chan })
 
-  chan.connect = fn =>
-    chan
-      ._lift(scheduleSagaPut)
-      ._clone()
-      ._lift(() => fn)
-      ._lift(wrapSagaDispatch)
+  chan._connect = fn => chan._clone().enhancePut(() => wrapSagaDispatch(fn))
 
   return chan
 }
@@ -151,6 +146,10 @@ const wrapSagaDispatch = put => action => {
     action[SAGA_ACTION] = true
   }
   put(action)
+}
+
+export function stdChannel() {
+  return enhanceable(multicastChannel()).enhancePut(scheduleSagaPut)
 }
 
 export function multicastChannel() {
@@ -212,5 +211,5 @@ export function multicastChannel() {
     })
   }
 
-  return liftable({ close, put, take })
+  return { close, put, take }
 }

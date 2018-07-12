@@ -1,4 +1,4 @@
-import { noop, remove } from '../utils'
+import { noop, remove } from './utils'
 
 export default class ForkQueue {
   tasks = []

@@ -1,12 +1,9 @@
 import { io, Env, noop } from '../../src'
-import commonEffects from '../../src/commonEffects'
-import channelEffects from '../../src/channelEffects'
 
 test('saga cps call handling', () => {
   let actual = []
 
   const task = new Env(noop)
-    .use(commonEffects)
     .use(ctx => {
       ctx.a = 1
     })

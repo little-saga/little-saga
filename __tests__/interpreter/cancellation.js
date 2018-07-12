@@ -1,6 +1,5 @@
 import EventEmitter from 'events'
-import { deferred, io, noop, PrimaryEnv } from '../../src'
-import { connectToEmitter } from '../../src/channelEffects'
+import { deferred, io, runSaga } from '../../src'
 
 const assert = {
   deepEqual(a, b) {
@@ -9,7 +8,7 @@ const assert = {
 }
 
 function run(...args) {
-  return new PrimaryEnv(noop).def('echo', ([_, value], ctx, cb) => cb(value)).run(...args)
+  return runSaga({}, ...args)
 }
 
 test('saga cancellation: call effect', async () => {
@@ -34,12 +33,12 @@ test('saga cancellation: call effect', async () => {
   }
 
   function* subroutine() {
-    actual.push(yield io.echo('subroutine start'))
+    actual.push(yield 'subroutine start')
     try {
       actual.push(yield subroutineDef.promise)
     } finally {
       if (yield io.cancelled()) {
-        actual.push(yield io.echo('subroutine cancelled'))
+        actual.push(yield 'subroutine cancelled')
       }
     }
   }
@@ -155,16 +154,13 @@ test('saga cancellation: take effect', async () => {
       actual.push(yield io.take('action'))
     } finally {
       if (yield io.cancelled()) {
-        actual.push(yield io.echo('cancelled'))
+        actual.push(yield 'cancelled')
       }
     }
   }
 
   const emitter = new EventEmitter()
-  const task = new PrimaryEnv(noop)
-    .def('echo', ([_, value], ctx, cb) => cb(value))
-    .use(connectToEmitter(emitter))
-    .run(main)
+  const task = runSaga({}, main)
 
   cancelDef.promise.then(v => {
     actual.push(v)
@@ -184,7 +180,7 @@ test('saga cancellation: take effect', async () => {
 })
 
 test('saga cancellation: join effect (joining from a different task)', async () => {
-  const { echo } = io
+  const {} = io
   let actual = []
 
   let cancelDef = deferred()
@@ -210,7 +206,7 @@ test('saga cancellation: join effect (joining from a different task)', async () 
       actual.push(yield subroutineDef.promise)
     } finally {
       if (yield io.cancelled()) {
-        actual.push(yield echo('subroutine cancelled'))
+        actual.push(yield 'subroutine cancelled')
       }
     }
   }
@@ -220,7 +216,7 @@ test('saga cancellation: join effect (joining from a different task)', async () 
       actual.push(yield io.all([io.call(joiner1, task), new Promise(() => {})]))
     } finally {
       if (yield io.cancelled()) {
-        actual.push(yield echo('caller of joiner1 cancelled'))
+        actual.push(yield 'caller of joiner1 cancelled')
       }
     }
   }
@@ -231,7 +227,7 @@ test('saga cancellation: join effect (joining from a different task)', async () 
       actual.push(yield io.join(task))
     } finally {
       if (yield io.cancelled()) {
-        actual.push(yield echo('joiner1 cancelled'))
+        actual.push(yield 'joiner1 cancelled')
       }
     }
   }
@@ -242,7 +238,7 @@ test('saga cancellation: join effect (joining from a different task)', async () 
       actual.push(yield io.join(task))
     } finally {
       if (yield io.cancelled()) {
-        actual.push(yield echo('joiner2 cancelled'))
+        actual.push(yield 'joiner2 cancelled')
       }
     }
   }
@@ -286,16 +282,16 @@ test("saga cancellation: join effect (join from the same task's parent)", async 
     try {
       actual.push(yield io.join(task))
     } finally {
-      if (yield io.cancelled()) actual.push(yield io.echo('cancelled'))
+      if (yield io.cancelled()) actual.push(yield 'cancelled')
     }
   }
 
   function* subroutine() {
-    actual.push(yield io.echo('subroutine start'))
+    actual.push(yield 'subroutine start')
     try {
       actual.push(yield subroutineDef.promise)
     } finally {
-      if (yield io.cancelled()) actual.push(yield io.echo('subroutine cancelled'))
+      if (yield io.cancelled()) actual.push(yield 'subroutine cancelled')
     }
   }
 
@@ -331,25 +327,25 @@ test('saga cancellation: parallel effect', async () => {
     try {
       actual.push(yield io.all([io.call(subroutine1), io.call(subroutine2)]))
     } finally {
-      if (yield io.cancelled()) actual.push(yield io.echo('cancelled'))
+      if (yield io.cancelled()) actual.push(yield 'cancelled')
     }
   }
 
   function* subroutine1() {
-    actual.push(yield io.echo('subroutine 1 start'))
+    actual.push(yield 'subroutine 1 start')
     try {
       actual.push(yield subroutineDefs[0].promise)
     } finally {
-      if (yield io.cancelled()) actual.push(yield io.echo('subroutine 1 cancelled'))
+      if (yield io.cancelled()) actual.push(yield 'subroutine 1 cancelled')
     }
   }
 
   function* subroutine2() {
-    actual.push(yield io.echo('subroutine 2 start'))
+    actual.push(yield 'subroutine 2 start')
     try {
       actual.push(yield subroutineDefs[1].promise)
     } finally {
-      if (yield io.cancelled()) actual.push(yield io.echo('subroutine 2 cancelled'))
+      if (yield io.cancelled()) actual.push(yield 'subroutine 2 cancelled')
     }
   }
 
@@ -398,25 +394,25 @@ test('saga cancellation: race effect', async () => {
         }),
       )
     } finally {
-      if (yield io.cancelled()) actual.push(yield io.echo('cancelled'))
+      if (yield io.cancelled()) actual.push(yield 'cancelled')
     }
   }
 
   function* subroutine1() {
-    actual.push(yield io.echo('subroutine 1 start'))
+    actual.push(yield 'subroutine 1 start')
     try {
       actual.push(yield subroutineDefs[0].promise)
     } finally {
-      if (yield io.cancelled()) actual.push(yield io.echo('subroutine cancelled'))
+      if (yield io.cancelled()) actual.push(yield 'subroutine cancelled')
     }
   }
 
   function* subroutine2() {
-    actual.push(yield io.echo('subroutine 2 start'))
+    actual.push(yield 'subroutine 2 start')
     try {
       actual.push(yield subroutineDefs[1].promise)
     } finally {
-      if (yield io.cancelled()) actual.push(yield io.echo('subroutine cancelled'))
+      if (yield io.cancelled()) actual.push(yield 'subroutine cancelled')
     }
   }
 
@@ -464,7 +460,7 @@ test('saga cancellation: automatic parallel effect cancellation', async () => {
       actual.push(yield subtask2Defs[0].promise)
       actual.push(yield subtask2Defs[1].promise)
     } finally {
-      if (yield io.cancelled()) actual.push(yield io.echo('subtask 2 cancelled'))
+      if (yield io.cancelled()) actual.push(yield 'subtask 2 cancelled')
     }
   }
 
@@ -472,7 +468,7 @@ test('saga cancellation: automatic parallel effect cancellation', async () => {
     try {
       yield io.all([io.call(subtask1), io.call(subtask2)])
     } catch (e) {
-      actual.push(yield io.echo(`caught ${e}`))
+      actual.push(yield `caught ${e}`)
     }
   }
 
@@ -506,7 +502,7 @@ test('saga cancellation: automatic race competitor cancellation', async () => {
       actual.push(yield winnerSubtaskDefs[1].promise)
     } finally {
       if (yield io.cancelled()) {
-        actual.push(yield io.echo('winner subtask cancelled'))
+        actual.push(yield 'winner subtask cancelled')
       }
     }
   }
@@ -517,7 +513,7 @@ test('saga cancellation: automatic race competitor cancellation', async () => {
       actual.push(yield loserSubtaskDefs[1].promise)
     } finally {
       if (yield io.cancelled()) {
-        actual.push(yield io.echo('loser subtask cancelled'))
+        actual.push(yield 'loser subtask cancelled')
       }
     }
   }
@@ -528,7 +524,7 @@ test('saga cancellation: automatic race competitor cancellation', async () => {
       actual.push(yield parallelSubtaskDefs[1].promise)
     } finally {
       if (yield io.cancelled()) {
-        actual.push(yield io.echo('parallel subtask cancelled'))
+        actual.push(yield 'parallel subtask cancelled')
       }
     }
   }
@@ -580,7 +576,7 @@ test('saga cancellation:  manual task cancellation', async () => {
       }
     } finally {
       if (yield io.cancelled()) {
-        actual.push(yield io.echo('task cancelled'))
+        actual.push(yield 'task cancelled')
       }
     }
   }
@@ -626,7 +622,7 @@ test('saga cancellation: nested task cancellation', async () => {
       actual.push(yield nestedTask1Defs[1].promise)
     } finally {
       if (yield io.cancelled()) {
-        actual.push(yield io.echo('nested task 1 cancelled'))
+        actual.push(yield 'nested task 1 cancelled')
       }
     }
   }
@@ -637,7 +633,7 @@ test('saga cancellation: nested task cancellation', async () => {
       actual.push(yield nestedTask2Defs[1].promise)
     } finally {
       if (yield io.cancelled()) {
-        actual.push(yield io.echo('nested task 2 cancelled'))
+        actual.push(yield 'nested task 2 cancelled')
       }
     }
   }
@@ -649,7 +645,7 @@ test('saga cancellation: nested task cancellation', async () => {
       actual.push(yield subtaskDefs[1].promise)
     } finally {
       if (yield io.cancelled()) {
-        actual.push(yield io.echo('subtask cancelled'))
+        actual.push(yield 'subtask cancelled')
       }
     }
   }
@@ -702,7 +698,7 @@ test('saga cancellation: nested forked task cancellation', async () => {
       actual.push(yield nestedTaskDefs[1].promise)
     } finally {
       if (yield io.cancelled()) {
-        actual.push(yield io.echo('nested task cancelled'))
+        actual.push(yield 'nested task cancelled')
       }
     }
   }
@@ -714,7 +710,7 @@ test('saga cancellation: nested forked task cancellation', async () => {
       actual.push(yield subtaskDefs[1].promise)
     } finally {
       if (yield io.cancelled()) {
-        actual.push(yield io.echo('subtask cancelled'))
+        actual.push(yield 'subtask cancelled')
       }
     }
   }

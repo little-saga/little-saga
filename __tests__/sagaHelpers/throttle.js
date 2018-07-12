@@ -1,7 +1,7 @@
 import EventEmitter from 'events'
 import { cancel, delay, PrimaryEnv, take, throttle } from '../../src/compat'
 import { noop } from '../../src'
-import { connectToEmitter } from '../../src/channelEffects'
+import { connectToEmitter } from '../../src/channel-utils'
 
 jest.useFakeTimers()
 

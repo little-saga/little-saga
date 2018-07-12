@@ -1,9 +1,10 @@
-export * from './core/symbols'
-export * from './core/scheduler'
+export * from './symbols'
+export * from './scheduler'
 export * from './utils'
+export * from './sagaHelpers'
+export * from './channel-utils'
 
-import Env from './core/Env'
-import PrimaryEnv from './PrimaryEnv'
-import proc from './core/proc'
+import runSaga from './runSaga'
+import io, { makeEffect, detach } from './io'
 
-export { Env, proc, PrimaryEnv }
+export { runSaga, io, makeEffect, detach }

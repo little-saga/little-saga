@@ -1,7 +1,6 @@
 import EventEmitter from 'events'
-import { Env, io, noop } from '../../src'
-import commonEffects from '../../src/commonEffects'
-import channelEffects, { buffers, channel, connectToEmitter, END } from '../../src/channelEffects'
+import { io, noop } from '../../src'
+import { buffers, channel, END } from '../../src/channel-utils'
 import { takeEvery } from '../../src/sagaHelpers'
 
 const { call, take, fork, all, put, race } = io

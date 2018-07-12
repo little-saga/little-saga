@@ -1,6 +1,6 @@
 import EventEmitter from 'events'
-import { channel, END, eventChannel } from '../src/channelEffects/channel'
-import * as buffers from '../src/channelEffects/buffers'
+import { channel, END, eventChannel } from '../src/channel-utils/channels'
+import * as buffers from '../src/channel-utils/buffers'
 
 const eq = x => y => x === y
 const assert = {}

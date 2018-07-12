@@ -1,4 +1,4 @@
-import { CANCEL } from './core/symbols'
+import { CANCEL, IO } from './symbols'
 
 export function identity(arg) {
   return arg
@@ -48,30 +48,12 @@ export const is = {
   promise: p => p && is.func(p.then),
   iterator: it => it && is.func(it.next) && is.func(it.throw),
   channel: ch => ch && is.func(ch.take) && is.func(ch.close),
+  effect: eff => eff && eff[IO],
 }
 
 export function remove(array, item) {
   const index = array.indexOf(item)
   if (index !== -1) {
     array.splice(index, 1)
-  }
-}
-
-export const io = new Proxy(
-  {},
-  {
-    get(_target, typeName) {
-      return (...args) => [typeName, ...args]
-    },
-  },
-)
-
-export function def(ctx, type, handler) {
-  const old = ctx.translator
-  ctx.translator = {
-    ...old,
-    getRunner(effect) {
-      return effect[0] === type ? handler : old.getRunner(effect)
-    },
   }
 }

@@ -1,7 +1,7 @@
 import { io, deferred, Env, noop } from '../../src'
 import commonEffects from '../../src/commonEffects'
-import channelEffects from '../../src/channelEffects'
-import { END } from '../../src/channelEffects/channel'
+import channelEffects from '../../src/channel-utils'
+import { END } from '../../src/channel-utils/channels'
 
 test('saga race between effects handling', () => {
   let actual = []

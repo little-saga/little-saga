@@ -1,6 +1,6 @@
 import { Env, io, noop } from '../../src'
 import commonEffects from '../../src/commonEffects'
-import channelEffects from '../../src/channelEffects'
+import channelEffects from '../../src/channel-utils'
 
 function goodEnv() {
   return new Env(noop).use(commonEffects).use(channelEffects)

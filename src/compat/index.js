@@ -1,4 +1,4 @@
-import { io } from '../utils'
+import io from '../io'
 import createSagaMiddleware from './middleware'
 import { takeEvery, takeLatest, takeLeading, throttle, debounce } from '../sagaHelpers'
 
@@ -39,7 +39,7 @@ export const race = io.race
 
 // Utils
 export * from '../index'
-export * from '../channelEffects'
+export * from '../channel-utils'
 
 // The following utils are NOT supported in little-saga
 // cloneableGenerator(generatorFunc)

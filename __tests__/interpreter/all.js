@@ -1,5 +1,5 @@
 import { deferred, delay, io, noop, PrimaryEnv } from '../../src'
-import { END } from '../../src/channelEffects'
+import { END } from '../../src/channel-utils'
 
 const run = fn => new PrimaryEnv(noop).run(fn)
 
