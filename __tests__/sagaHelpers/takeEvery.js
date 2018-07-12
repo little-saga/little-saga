@@ -1,13 +1,18 @@
 import EventEmitter from 'events'
 import { cancel, take, takeEvery } from '../../src/compat'
-import { noop } from '../../src'
+import { noop, stdChannel } from '../../src'
+import runSaga from '../../src/runSaga'
 
 test('takeEvery', async () => {
   const loop = 10
 
   const actual = []
   const emitter = new EventEmitter()
-  const mainTask = new PrimaryEnv(noop).use(connectToEmitter(emitter)).run(root)
+  const channel = stdChannel().enhancePut(put => {
+    emitter.on('action', put)
+    return action => emitter.emit('action', action)
+  })
+  const mainTask = runSaga({ channel }, root)
 
   function* root() {
     const task = yield takeEvery('ACTION', worker, 'a1', 'a2')

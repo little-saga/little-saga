@@ -1,6 +1,7 @@
 import EventEmitter from 'events'
-import { cancel, delay, PrimaryEnv, take, throttle } from '../../src/compat'
-import { noop } from '../../src'
+import { cancel, delay, take, throttle } from '../../src/compat'
+import { noop, stdChannel } from '../../src'
+import runSaga from '../../src/runSaga'
 
 jest.useFakeTimers()
 
@@ -16,7 +17,15 @@ test('throttle', () => {
     ['a1', 'a2', 34],
   ]
 
-  new PrimaryEnv(noop).use(connectToEmitter(emitter)).run(root)
+  runSaga(
+    {
+      channel: stdChannel().enhancePut(put => {
+        emitter.on('action', put)
+        return action => emitter.emit('action', action)
+      }),
+    },
+    root,
+  )
 
   function* root() {
     const task = yield throttle(100, 'ACTION', worker, 'a1', 'a2')

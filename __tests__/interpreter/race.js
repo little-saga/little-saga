@@ -1,4 +1,5 @@
-import { io, deferred, noop, END } from '../../src'
+import { deferred, END, io, stdChannel } from '../../src'
+import runSaga from '../../src/runSaga'
 
 test('saga race between effects handling', () => {
   let actual = []
@@ -6,18 +7,17 @@ test('saga race between effects handling', () => {
 
   let dispatch
 
-  const task = new Env(noop)
-    .use(ctx => {
-      dispatch = ctx.channel.put
-    })
-    .run(function* genFn() {
+  const task = runSaga(
+    { channel: stdChannel().enhancePut(put => (dispatch = put)) },
+    function* genFn() {
       actual.push(
         yield io.race({
           event: io.take('action'),
           timeout: timeout.promise,
         }),
       )
-    })
+    },
+  )
 
   Promise.resolve(1)
     .then(() => timeout.resolve(1))
@@ -37,15 +37,12 @@ test('saga race between array of effects handling', () => {
 
   const timeout = deferred()
 
-  const task = new Env(noop)
-    .use(commonEffects)
-    .use(channelEffects)
-    .use(ctx => {
-      dispatch = ctx.channel.put
-    })
-    .run(function* genFn() {
+  const task = runSaga(
+    { channel: stdChannel().enhancePut(put => (dispatch = put)) },
+    function* genFn() {
       actual.push(yield io.race([io.take('action'), timeout.promise]))
-    })
+    },
+  )
 
   Promise.resolve()
     .then(() => timeout.resolve(1))
@@ -64,20 +61,17 @@ test('saga race between effects: handle END', () => {
   let dispatch
   const timeout = deferred()
 
-  const task = new Env(noop)
-    .use(commonEffects)
-    .use(channelEffects)
-    .use(ctx => {
-      dispatch = ctx.channel.put
-    })
-    .run(function* genFn() {
+  const task = runSaga(
+    { channel: stdChannel().enhancePut(put => (dispatch = put)) },
+    function* genFn() {
       actual.push(
         yield io.race({
           event: io.take('action'),
           timeout: timeout.promise,
         }),
       )
-    })
+    },
+  )
 
   Promise.resolve(1)
     .then(() => dispatch(END))
@@ -95,13 +89,9 @@ test('saga race between sync effects', () => {
   let actual = []
   let dispatch
 
-  const task = new Env(noop)
-    .use(commonEffects)
-    .use(channelEffects)
-    .use(ctx => {
-      dispatch = ctx.channel.put
-    })
-    .run(function* genFn() {
+  const task = runSaga(
+    { channel: stdChannel().enhancePut(put => (dispatch = put)) },
+    function* genFn() {
       const xChan = yield io.actionChannel('x')
       const yChan = yield io.actionChannel('y')
 
@@ -115,7 +105,8 @@ test('saga race between sync effects', () => {
       yield Promise.resolve(1) // waiting for next tick
 
       actual.push(yield io.flush(xChan), yield io.flush(yChan))
-    })
+    },
+  )
 
   Promise.resolve(1)
     .then(() => dispatch({ type: 'x' }))

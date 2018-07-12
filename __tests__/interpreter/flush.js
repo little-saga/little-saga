@@ -1,24 +1,21 @@
-import { Env, io, noop } from '../../src'
+import { END, io, runSaga } from '../../src'
 
 test('saga flush handling', () => {
   let actual = []
 
-  const task = new Env(noop)
-    .use(commonEffects)
-    .use(channelEffects)
-    .run(function* genFn() {
-      const chan = yield io.call(channel)
-      actual.push(yield io.flush(chan))
-      yield io.put(chan, 1)
-      yield io.put(chan, 2)
-      yield io.put(chan, 3)
-      actual.push(yield io.flush(chan))
-      yield io.put(chan, 4)
-      yield io.put(chan, 5)
-      chan.close()
-      actual.push(yield io.flush(chan))
-      actual.push(yield io.flush(chan))
-    })
+  const task = runSaga({}, function* genFn() {
+    const chan = yield io.call(channel)
+    actual.push(yield io.flush(chan))
+    yield io.put(chan, 1)
+    yield io.put(chan, 2)
+    yield io.put(chan, 3)
+    actual.push(yield io.flush(chan))
+    yield io.put(chan, 4)
+    yield io.put(chan, 5)
+    chan.close()
+    actual.push(yield io.flush(chan))
+    actual.push(yield io.flush(chan))
+  })
 
   const expected = [[], [1, 2, 3], [4, 5], END]
 

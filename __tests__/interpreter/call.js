@@ -1,10 +1,11 @@
-import { Env, noop, io } from '../../src'
+import { runSaga, noop, io, stdChannel } from '../../src'
 
-const simpleRun = fn =>
-  new Env(noop)
-    .use(commonEffects)
-    .use(channelEffects)
-    .run(fn)
+const simpleRun = fn => runSaga({}, fn)
+
+const collect = array => put => action => {
+  array.push(action.type)
+  return put(action)
+}
 
 function fail(message) {
   throw new Error(message)
@@ -68,16 +69,7 @@ test('saga handles call effects and throw the rejected values inside the generat
 
   const expected = ['start', 'failure']
 
-  return new Env(noop)
-    .use(commonEffects)
-    .use(channelEffects)
-    .use(ctx => {
-      ctx.channel.take(function taker(payload) {
-        actual.push(payload.type)
-        ctx.channel.take(taker)
-      })
-    })
-    .run(genFnParent)
+  return runSaga({ channel: stdChannel().enhancePut(collect(actual)) }, genFnParent)
     .toPromise()
     .then(() => {
       // saga dispatches appropriate actions
@@ -108,16 +100,7 @@ test("saga handles call's synchronous failures and throws in the calling generat
     }
   }
 
-  const task = new Env(noop)
-    .use(commonEffects)
-    .use(channelEffects)
-    .use(ctx => {
-      ctx.channel.take(function taker(payload) {
-        actual.push(payload.type)
-        ctx.channel.take(taker)
-      })
-    })
-    .run(genFnParent)
+  const task = runSaga({ channel: stdChannel().enhancePut(collect(actual)) }, genFnParent)
 
   const expected = ['start parent', 'startChild', 'failure child', 'success parent']
 
@@ -145,16 +128,7 @@ test("saga handles call's synchronous failures and throws in the calling generat
     }
   }
 
-  const task = new Env(noop)
-    .use(commonEffects)
-    .use(channelEffects)
-    .use(ctx => {
-      ctx.channel.take(function taker(payload) {
-        actual.push(payload.type)
-        ctx.channel.take(taker)
-      })
-    })
-    .run(genFnParent)
+  const task = runSaga({ channel: stdChannel().enhancePut(collect(actual)) }, genFnParent)
 
   const expected = ['start parent', 'child error', 'failure parent']
 

@@ -1,5 +1,4 @@
-import { io, noop } from '../../src'
-import { END, channel } from '../../src'
+import { channel, END, io, runSaga, stdChannel } from '../../src'
 
 test('saga take from default channel', () => {
   const typeSymbol = Symbol('action-symbol')
@@ -22,11 +21,7 @@ test('saga take from default channel', () => {
     }
   }
 
-  const task = new Env(noop)
-    .use(commonEffects)
-    .use(channelEffects)
-    .use(ctx => (dispatch = ctx.channel.put))
-    .run(genFn)
+  const task = runSaga({ channel: stdChannel().enhancePut(put => (dispatch = put)) }, genFn)
 
   const expected = [
     { type: 'action-*' },
@@ -68,10 +63,7 @@ test('saga take from provided channel', () => {
     actual.push(yield io.takeMaybe(chan))
   }
 
-  const task = new Env(noop)
-    .use(commonEffects)
-    .use(channelEffects)
-    .run(genFn)
+  const task = runSaga({}, genFn)
 
   Promise.resolve()
     .then(() => chan.put(1))
