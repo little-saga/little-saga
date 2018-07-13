@@ -33,8 +33,22 @@ function runForkEffect({ fn, args, detached }, cb, { env, task }) {
   }
 }
 
-// TODO taskToJoin maybe an array
-function runJoinEffect(taskToJoin, cb, { task }) {
+function runJoinEffect(taskOrTasks, cb, { task }) {
+  if (is.array(taskOrTasks)) {
+    if (taskOrTasks.length === 0) {
+      cb([])
+      return
+    }
+    const { childCallbacks } = createAllStyleChildCallbacks(taskOrTasks, cb)
+    taskOrTasks.forEach((t, i) => {
+      joinSingleTask(t, childCallbacks[i], task)
+    })
+  } else {
+    joinSingleTask(taskOrTasks, cb, task)
+  }
+}
+
+function joinSingleTask(taskToJoin, cb, task) {
   if (taskToJoin.isRunning) {
     const joiner = { task, cb }
     cb.cancel = () => remove(taskToJoin.joiners, joiner)

@@ -755,7 +755,7 @@ test('cancel + all to cancel multiple tasks', async () => {
     const t1 = yield io.fork(worker, 0)
     const t2 = yield io.fork(worker, 1)
     const t3 = yield io.fork(worker, 2)
-    yield io.all([t1, t2, t3].map(io.cancel))
+    yield io.cancel([t1, t2, t3])
   }
 
   const task = run(genFn)
