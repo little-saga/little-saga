@@ -1,6 +1,5 @@
 import EventEmitter from 'events'
-import { cancel, take, takeLeading } from '../../src/compat'
-import { deferred, runSaga, stdChannel } from '../../src'
+import { deferred, runSaga, stdChannel, io, takeLeading } from '../../src'
 
 test('takeLeading', () => {
   const defs = [deferred(), deferred(), deferred(), deferred()]
@@ -16,7 +15,7 @@ test('takeLeading', () => {
 
   function* root() {
     const task = yield takeLeading('ACTION', worker, 'a1', 'a2')
-    yield take('CANCEL_WATCHER')
+    yield io.take('CANCEL_WATCHER')
     yield cancel(task)
   }
 

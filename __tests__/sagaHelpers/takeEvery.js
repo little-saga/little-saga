@@ -1,7 +1,5 @@
 import EventEmitter from 'events'
-import { cancel, take, takeEvery } from '../../src/compat'
-import { noop, stdChannel } from '../../src'
-import runSaga from '../../src/runSaga'
+import { io, runSaga, stdChannel, takeEvery } from '../../src'
 
 test('takeEvery', async () => {
   const loop = 10
@@ -16,8 +14,8 @@ test('takeEvery', async () => {
 
   function* root() {
     const task = yield takeEvery('ACTION', worker, 'a1', 'a2')
-    yield take('CANCEL_WATCHER')
-    yield cancel(task)
+    yield io.take('CANCEL_WATCHER')
+    yield io.cancel(task)
   }
 
   function* worker(arg1, arg2, action) {

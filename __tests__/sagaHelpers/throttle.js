@@ -1,7 +1,5 @@
 import EventEmitter from 'events'
-import { cancel, delay, take, throttle } from '../../src/compat'
-import { noop, stdChannel } from '../../src'
-import runSaga from '../../src/runSaga'
+import { throttle, io, delay, stdChannel, runSaga } from '../../src'
 
 jest.useFakeTimers()
 
@@ -29,7 +27,7 @@ test('throttle', () => {
 
   function* root() {
     const task = yield throttle(100, 'ACTION', worker, 'a1', 'a2')
-    yield take('CANCEL_WATCHER')
+    yield io.take('CANCEL_WATCHER')
     yield cancel(task)
   }
 
