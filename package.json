@@ -7,7 +7,7 @@
     "start": "babel --watch src -d lib",
     "build": "babel src -d lib",
     "test": "jest --coverage && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
-    "prepublishOnly": "rm -rf lib/ && npm run-script build"
+    "prepublishOnly": "rimraf lib/ && npm run-script build"
   },
   "author": {
     "name": "Shi Feichao",
@@ -19,15 +19,11 @@
   "main": "lib/index.js",
   "typings": "./little-saga.d.ts",
   "files": [
-    "channelEffects/",
-    "commonEffects/",
-    "compat/",
     "docs/",
     "lib/",
-    "sagaHelpers/",
-    "typings/",
     ".editorconfig",
     ".gitignore",
+    "little-saga.d.ts",
     "package.json",
     "readme.md"
   ],
@@ -64,7 +60,8 @@
     "husky": "^1.0.0-rc.9",
     "jest": "^23.4.0",
     "lint-staged": "^7.2.0",
-    "prettier": "1.13.7"
+    "prettier": "1.13.7",
+    "rimraf": "^2.6.2"
   },
   "dependencies": {
     "@types/node": "^10.5.2"
