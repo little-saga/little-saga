@@ -1,4 +1,5 @@
-import { deferred, Env, io, noop } from '../../src'
+import { deferred, io, stdChannel } from '../../src'
+import runSaga from '../../src/runSaga'
 
 test('saga nested iterator handling', () => {
   const actual = []
@@ -37,11 +38,12 @@ test('saga nested iterator handling', () => {
     'caught child error',
   ]
 
-  const task = new Env(noop)
-    .use(commonEffects)
-    .use(channelEffects)
-    .use(ctx => (dispatch = ctx.channel.put))
-    .run(main)
+  const task = runSaga(
+    {
+      channel: stdChannel().enhancePut(put => (dispatch = put)),
+    },
+    main,
+  )
 
   Promise.resolve(1)
     .then(() => def1.resolve(1))

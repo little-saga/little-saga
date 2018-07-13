@@ -1,4 +1,4 @@
-import { END, io, runSaga } from '../../src'
+import { channel, END, io, runSaga } from '../../src'
 
 test('saga flush handling', () => {
   let actual = []

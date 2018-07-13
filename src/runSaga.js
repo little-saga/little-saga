@@ -5,7 +5,7 @@ import coreEffectRunnerMap from './coreEffectRunnerMap'
 
 export default function runSaga(options, fn, ...args) {
   const {
-    ctx = {},
+    taskContext = {},
     cont = reportErrorOnly,
     channel = stdChannel(),
     customEffectRunnerMap = {},
@@ -22,5 +22,5 @@ export default function runSaga(options, fn, ...args) {
   }
 
   const iterator = createTaskIterator(fn, args)
-  return proc(env, iterator, ctx, cont)
+  return proc(env, iterator, taskContext, cont)
 }

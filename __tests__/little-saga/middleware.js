@@ -1,4 +1,4 @@
-import createSagaMiddleware, { put, select } from '../../src/compat'
+import { io, createSagaMiddleware } from '../../src'
 
 function applyMiddleware(...middlewares) {
   function compose(...funcs) {
@@ -66,20 +66,20 @@ test('a simple counter example using redux', () => {
   const actual = []
 
   sagaMiddleware.run(function*() {
-    actual.push(yield select()) // count: 0
-    yield put({ type: 'inc' }) // 0 -> 1
-    actual.push(yield select()) // count: 1
-    yield put({ type: 'inc' }) // 1 -> 2
-    yield put({ type: 'inc' }) // 2 -> 3
-    actual.push(yield select()) // count: 3
+    actual.push(yield io.select()) // count: 0
+    yield io.put({ type: 'inc' }) // 0 -> 1
+    actual.push(yield io.select()) // count: 1
+    yield io.put({ type: 'inc' }) // 1 -> 2
+    yield io.put({ type: 'inc' }) // 2 -> 3
+    actual.push(yield io.select()) // count: 3
 
-    yield put({ type: 'other' })
-    yield put({ type: 'other-again' })
-    yield put(['some', 'array'])
-    yield put(1234)
+    yield io.put({ type: 'other' })
+    yield io.put({ type: 'other-again' })
+    yield io.put(['some', 'array'])
+    yield io.put(1234)
 
-    yield put({ type: 'dec' }) // 3 -> 2
-    actual.push(yield select()) // count: 2
+    yield io.put({ type: 'dec' }) // 3 -> 2
+    actual.push(yield io.select()) // count: 2
   })
 
   store.dispatch({ type: 'dec' }) // 2 -> 1

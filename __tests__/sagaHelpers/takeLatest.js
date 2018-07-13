@@ -1,19 +1,22 @@
 import EventEmitter from 'events'
-import { cancel, PrimaryEnv, take, takeLatest } from '../../src/compat'
-import { deferred, noop } from '../../src'
+import { runSaga, deferred, stdChannel, io, takeLatest } from '../../src'
 
 test('takeLatest', () => {
   const defs = [deferred(), deferred(), deferred(), deferred()]
 
   const actual = []
   const emitter = new EventEmitter()
+  const channel = stdChannel().enhancePut(put => {
+    emitter.on('action', put)
+    return action => emitter.emit('action', action)
+  })
 
-  new PrimaryEnv(noop).use(connectToEmitter(emitter)).run(root)
+  runSaga({ channel }, root)
 
   function* root() {
     const task = yield takeLatest('ACTION', worker, 'a1', 'a2')
-    yield take('CANCEL_WATCHER')
-    yield cancel(task)
+    yield io.take('CANCEL_WATCHER')
+    yield io.cancel(task)
   }
 
   function* worker(arg1, arg2, action) {
@@ -33,7 +36,7 @@ test('takeLatest', () => {
       emitter.emit('action', { type: 'ACTION', payload: 4 })
       /*
       We immediately cancel the watcher after firing the action
-      The watcher should be canceleld after this
+      The watcher should be cancelleld after this
       no further task should be forked
       the last forked task should also be cancelled
     */

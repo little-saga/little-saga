@@ -1,23 +1,19 @@
-import { Env, noop, io } from '../src'
-import { channel } from '../src/channel-utils/channels'
+import { noop, channel, runSaga, io } from '../src'
 
 test('channel: watcher + max workers', async () => {
   const actual = []
   const chan = channel()
-  const task = new Env(noop)
-    .use(commonEffects)
-    .use(channelEffects)
-    .run(function* saga() {
-      const { fork, put } = io
-      for (let i = 0; i < 3; i++) {
-        yield fork(worker, i + 1, chan)
-      }
+  const task = runSaga({}, function* saga() {
+    const { fork, put } = io
+    for (let i = 0; i < 3; i++) {
+      yield fork(worker, i + 1, chan)
+    }
 
-      for (let i = 0; i < 10; i++) {
-        yield put(chan, i + 1)
-      }
-      chan.close()
-    })
+    for (let i = 0; i < 10; i++) {
+      yield put(chan, i + 1)
+    }
+    chan.close()
+  })
 
   function* worker(idx, chan) {
     let count = 0

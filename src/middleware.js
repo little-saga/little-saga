@@ -1,6 +1,6 @@
-import { stdChannel } from '../channel-utils/channels'
-import runSaga from '../runSaga'
-import { reportErrorOnly } from '../internal-utils'
+import { stdChannel } from './channel-utils/channels'
+import runSaga from './runSaga'
+import { reportErrorOnly } from './internal-utils'
 
 export default function createSagaMiddleware({
   ctx = {},

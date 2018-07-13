@@ -63,7 +63,9 @@ function* iteratorAlwaysYieldReturn(result) {
   return yield result
 }
 
-export const reportErrorOnly = (result, isErr) => isErr && console.error(result)
+const REPORT_ERROR_ONLY =
+  'This following error is reported by reportErrorOnly, this means you have aborted root saga or detached tasks\n'
+export const reportErrorOnly = (result, isErr) => isErr && console.error(REPORT_ERROR_ONLY, result)
 
 export function createMutexCallback(parentCallback) {
   let settled = false

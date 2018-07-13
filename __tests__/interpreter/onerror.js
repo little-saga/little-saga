@@ -1,4 +1,4 @@
-import { Env, noop, io } from '../../src'
+import { io, noop, runSaga } from '../../src'
 
 test('saga onError is optional', () => {
   const expectedError = new Error('child error')
@@ -11,7 +11,7 @@ test('saga onError is optional', () => {
     yield io.call(child)
   }
 
-  const task = new Env(noop).use(commonEffects).run(main)
+  const task = runSaga({ cont: noop }, main)
 
   return task.toPromise().catch(err => {
     expect(err).toBe(expectedError)
@@ -32,12 +32,15 @@ test('saga onError is called for uncaught error', () => {
     yield io.call(child)
   }
 
-  const task = new Env((result, isErr) => {
-    actualIsErr = isErr
-    actualResult = result
-  })
-    .use(commonEffects)
-    .run(main)
+  const task = runSaga(
+    {
+      cont(result, isErr) {
+        actualIsErr = isErr
+        actualResult = result
+      },
+    },
+    main,
+  )
 
   return task.toPromise().catch(() => {
     expect(actualResult).toBe(expectedError)
@@ -64,12 +67,15 @@ test('saga onError is not called for caught errors', () => {
     }
   }
 
-  const task = new Env((result, isErr) => {
-    actualIsErr = isErr
-    actualResult = result
-  })
-    .use(commonEffects)
-    .run(main)
+  const task = runSaga(
+    {
+      cont: (result, isErr) => {
+        actualIsErr = isErr
+        actualResult = result
+      },
+    },
+    main,
+  )
 
   return task.toPromise().then(() => {
     expect(actualIsErr).toBeFalsy()

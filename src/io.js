@@ -2,7 +2,7 @@ import { IO, SELF_CANCELLATION } from './symbols'
 import { identity, is } from './utils'
 import { resolveContextAndFn } from './internal-utils'
 
-export function makeEffect(type, payload) {
+function makeEffect(type, payload) {
   return { [IO]: true, type, payload }
 }
 

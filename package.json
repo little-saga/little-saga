@@ -17,7 +17,7 @@
     "node": ">=8.3"
   },
   "main": "lib/index.js",
-  "typings": "./typings/index.d.ts",
+  "typings": "./little-saga.d.ts",
   "files": [
     "channelEffects/",
     "commonEffects/",

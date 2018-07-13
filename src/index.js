@@ -7,6 +7,7 @@ export * from './channel-utils/channels'
 import * as buffers from './channel-utils/buffers'
 
 import runSaga from './runSaga'
-import io, { makeEffect, detach } from './io'
+import io, { detach } from './io'
+import createSagaMiddleware from './middleware'
 
-export { runSaga, io, makeEffect, detach, buffers }
+export { runSaga, io, detach, buffers, createSagaMiddleware }
