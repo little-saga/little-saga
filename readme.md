@@ -1,11 +1,16 @@
-[![Build Status](https://img.shields.io/travis/shinima/little-saga/master.svg?style=flat-square)](https://travis-ci.org/shinima/little-saga) [![Coverage Status](https://img.shields.io/coveralls/shinima/little-saga/master.svg?style=flat-square)](https://coveralls.io/github/shinima/little-saga?branch=master) [![NPM Package](https://img.shields.io/npm/v/little-saga.svg?style=flat-square)](https://www.npmjs.org/package/little-saga)
+[![Build Status](https://img.shields.io/travis/little-saga/little-saga/master.svg?style=flat-square)](https://travis-ci.org/little-saga/little-saga) [![Coverage Status](https://img.shields.io/coveralls/little-saga/little-saga/master.svg?style=flat-square)](https://coveralls.io/github/little-saga/little-saga?branch=master) [![NPM Package](https://img.shields.io/npm/v/little-saga.svg?style=flat-square)](https://www.npmjs.org/package/little-saga)
 
 # little-saga
 
-Just a little saga.
-
-[👉 炒鸡详细的介绍 redux-saga/little-saga 原理的文章](docs/building-your-own-redux-saga.md)
+little-saga 是 redux-saga 的简化版本，主要功能和 redux-saga 保持一致。little-saga 去掉了一些不常用的特性，并使用了更现代化的 JavaScript 进行编写（要求 node >= 8.3）。little-saga 的初衷是希望通过简化源代码，让更多人了解 redux-saga 背后的原理，详情请戳 [👉 炒鸡详细的介绍 redux-saga/little-saga 原理的文章](docs/building-your-own-redux-saga.md)。
 
 ## API 文档
 
-** WIP v0.4.0 API 文档仍在施工中。**
+little-saga 的 API 与 redux-saga 稍微有些不一样。little-saga API 请以下面的文档为准。
+
+**注意：API 文档仍在施工中。**
+
+#### runSaga
+
+`runSaga(options, fn, ...args)`
+

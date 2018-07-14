@@ -206,7 +206,7 @@ interface RunSagaOptions {
   getState(): any
 }
 
-export function runSaga(options: RunSagaOptions, fn: any, ...args: any[]): Task
+export function runSaga(options: Partial<RunSagaOptions>, fn: any, ...args: any[]): Task
 
 export function createSagaMiddleware(
   options?: Partial<RunSagaOptions>,
