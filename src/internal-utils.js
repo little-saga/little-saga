@@ -1,5 +1,5 @@
 import { always, is, noop } from './utils'
-import { TASK_CANCEL } from './index'
+import { TASK_CANCEL } from './symbols'
 
 export function makeMatcher(pattern) {
   if (pattern === '*' || pattern === undefined) {

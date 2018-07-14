@@ -4,10 +4,9 @@
   "description": "Just a little-saga.",
   "version": "0.4.0-SNAPSHOT",
   "scripts": {
-    "start": "babel --watch src -d lib",
-    "build": "babel src -d lib",
+    "build": "cross-env BABEL_ENV=es rollup -c -i src/index.js -o dist/little-saga.js",
     "test": "jest --coverage && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
-    "prepublishOnly": "rimraf lib/ && npm run-script build"
+    "prepublishOnly": "rimraf dist/ && npm run-script build"
   },
   "author": {
     "name": "Shi Feichao",
@@ -16,30 +15,16 @@
   "engines": {
     "node": ">=8.3"
   },
-  "main": "lib/index.js",
+  "main": "dist/little-saga.js",
   "typings": "./little-saga.d.ts",
   "files": [
-    "docs/",
-    "lib/",
+    "dist/",
     ".editorconfig",
     ".gitignore",
     "little-saga.d.ts",
     "package.json",
     "readme.md"
   ],
-  "prettier": {
-    "printWidth": 100,
-    "semi": false,
-    "singleQuote": true,
-    "trailingComma": "all"
-  },
-  "babel": {
-    "plugins": [
-      "@babel/plugin-transform-modules-commonjs",
-      "@babel/plugin-proposal-class-properties",
-      "@babel/plugin-syntax-object-rest-spread"
-    ]
-  },
   "jest": {
     "testRegex": "(/__tests__/.*|\\.(test|spec))\\.jsx?$",
     "moduleFileExtensions": [
@@ -57,11 +42,14 @@
     "babel-core": "7.0.0-bridge.0",
     "babel-jest": "^23.4.0",
     "coveralls": "^3.0.2",
+    "cross-env": "^5.2.0",
     "husky": "^1.0.0-rc.9",
     "jest": "^23.4.0",
     "lint-staged": "^7.2.0",
     "prettier": "1.13.7",
-    "rimraf": "^2.6.2"
+    "rimraf": "^2.6.2",
+    "rollup": "^0.62.0",
+    "rollup-plugin-babel": "4.0.0-beta.7"
   },
   "dependencies": {
     "@types/node": "^10.5.2"
