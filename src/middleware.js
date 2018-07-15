@@ -1,23 +1,11 @@
-import { stdChannel } from './channel-utils/channels'
 import runSaga from './runSaga'
-import { reportErrorOnly } from './internal-utils'
+import { stdChannel } from './channel-utils/channels'
 
-export default function createSagaMiddleware({
-  ctx = {},
-  cont = reportErrorOnly,
-  channel = stdChannel(),
-  customEffectRunnerMap = {},
-} = {}) {
+export default function createSagaMiddleware(options = {}) {
   function middleware({ dispatch, getState }) {
-    const options = {
-      ctx,
-      cont,
-      channel,
-      customEffectRunnerMap,
-      dispatch,
-      getState,
-    }
-    middleware.run = (...args) => runSaga(options, ...args)
+    const { channel = stdChannel(), ...otherOptions } = options
+    const runSagaOptions = Object.assign({ dispatch, getState, channel }, otherOptions)
+    middleware.run = (...args) => runSaga(runSagaOptions, ...args)
 
     return next => action => {
       const result = next(action) // hit reducers
