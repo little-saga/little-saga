@@ -86,6 +86,7 @@ export type Effect =
   | PutEffect
   | FlushEffect
   | ActionChannelEffect
+  | CustomEffect
 
 export interface ForkEffect {
   type: 'FORK'
@@ -194,6 +195,9 @@ export const io: {
 }
 
 export function detach(effect: ForkEffect): ForkEffect
+
+type CustomEffect = { type: string; payload: any }
+export function makeEffect(type: string, payload: any): CustomEffect
 // endregion
 
 // region runSaga and middleware
