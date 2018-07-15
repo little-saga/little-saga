@@ -206,6 +206,7 @@ interface RunSagaOptions {
   cont: Callback
   channel: MulticastChannel
   customEffectRunnerMap: { [key: string]: any }
+  customEnv: any
   dispatch(action: any): void
   getState(): any
 }
