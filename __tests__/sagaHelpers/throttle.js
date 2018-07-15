@@ -28,7 +28,7 @@ test('throttle', () => {
   function* root() {
     const task = yield throttle(100, 'ACTION', worker, 'a1', 'a2')
     yield io.take('CANCEL_WATCHER')
-    yield cancel(task)
+    yield io.cancel(task)
   }
 
   function* worker(arg1, arg2, { payload }) {
