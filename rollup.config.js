@@ -1,11 +1,21 @@
 import babel from 'rollup-plugin-babel'
 
-const config = {
-  output: {
-    file: 'little-saga.js',
-    format: 'cjs',
+export default [
+  // TODO 需要指定目录
+  {
+    input: 'src/index.js',
+    output: {
+      file: 'dist/little-saga.js',
+      format: 'cjs',
+    },
+    plugins: [babel({})],
   },
-  plugins: [babel({})],
-}
-
-export default config
+  {
+    input: 'src/index.js',
+    output: {
+      file: 'dist/little-saga.es.js',
+      format: 'es',
+    },
+    plugins: [babel({})],
+  },
+]

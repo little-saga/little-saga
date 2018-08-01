@@ -180,14 +180,14 @@ export const io: {
   join(t: Task | Task[]): JoinEffect
   cancel(t?: Task | Task[]): CancelEffect
   cancelled(): CancelledEffect
-  all(effects: Effect[] | { [key: string]: Effect }): AllEffect
-  race(effects: Effect[] | { [key: string]: Effect }): RaceEffect
+  all(effects: any[] | { [key: string]: any }): AllEffect
+  race(effects: any[] | { [key: string]: any }): RaceEffect
   cps(fn: any, ...args: any[]): CPSEffect
   call(fn: any, ...args: any[]): CallEffect
   apply(context: any, fn: any, ...args: any[]): CallEffect
   setContext(partialContext: any): SetContextEffect
   getContext(prop: string | symbol): GetContextEffect
-  select(selector: any, ...args: any[]): SelectEffect
+  select(selector?: any, ...args: any[]): SelectEffect
   take(arg1: any, arg2?: any): TakeEffect
   put(arg1: any, arg2?: any): PutEffect
   flush(chan: Channel): FlushEffect

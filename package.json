@@ -4,7 +4,7 @@
   "description": "Just a little-saga.",
   "version": "0.4.2",
   "scripts": {
-    "build": "cross-env BABEL_ENV=es rollup -c -i src/index.js -o dist/little-saga.js",
+    "build": "cross-env BABEL_ENV=es rollup -c rollup.config.js",
     "test": "jest",
     "prepublishOnly": "rimraf dist/ && npm run-script build"
   },
@@ -16,6 +16,8 @@
     "node": ">=8.3"
   },
   "main": "dist/little-saga.js",
+  "module": "dist/little-saga.es.js",
+  "jsnext:main": "dist/little-saga.es.js",
   "typings": "./little-saga.d.ts",
   "files": [
     "dist/",
