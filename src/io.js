@@ -7,10 +7,7 @@ export function makeEffect(type, payload) {
 }
 
 export function detach({ type, payload }) {
-  return {
-    type,
-    payload: { ...payload, detached: false },
-  }
+  return makeEffect(type, { ...payload, detached: true })
 }
 
 function applyEffectCreator(context, fn, ...args) {
