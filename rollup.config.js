@@ -1,11 +1,11 @@
 import babel from 'rollup-plugin-babel'
+import pkg from './package.json'
 
 export default [
-  // TODO 需要指定目录
   {
     input: 'src/index.js',
     output: {
-      file: 'dist/little-saga.js',
+      file: pkg.main,
       format: 'cjs',
     },
     plugins: [babel({})],
@@ -13,7 +13,7 @@ export default [
   {
     input: 'src/index.js',
     output: {
-      file: 'dist/little-saga.es.js',
+      file: pkg.module,
       format: 'es',
     },
     plugins: [babel({})],

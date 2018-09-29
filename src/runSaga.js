@@ -7,7 +7,7 @@ export default function runSaga(options, fn, ...args) {
   const {
     taskContext = {},
     cont = reportErrorOnly,
-    channel: channel_0,
+    channel = stdChannel(),
     customEffectRunnerMap = {},
     customEnv = {},
     dispatch,
@@ -15,9 +15,6 @@ export default function runSaga(options, fn, ...args) {
   } = options
 
   const effectRunnerMap = Object.assign({}, customEffectRunnerMap, coreEffectRunnerMap)
-
-  // TODO 之所以没有在解构 options 中使用默认参数，是因为 rollup（也可能是 babel）有 bug
-  const channel = channel_0 || stdChannel()
 
   const env = {
     effectRunnerMap,

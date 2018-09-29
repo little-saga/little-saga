@@ -16,8 +16,7 @@
     "node": ">=8.3"
   },
   "main": "dist/little-saga.js",
-  "module": "dist/little-saga.es.js",
-  "jsnext:main": "dist/little-saga.es.js",
+  "module": "dist/little-saga.mjs",
   "typings": "./little-saga.d.ts",
   "files": [
     "dist/",
@@ -36,24 +35,24 @@
     ]
   },
   "devDependencies": {
-    "@babel/cli": "^7.0.0-beta.53",
-    "@babel/core": "^7.0.0-beta.53",
-    "@babel/plugin-proposal-class-properties": "^7.0.0-beta.53",
-    "@babel/plugin-syntax-object-rest-spread": "^7.0.0-beta.53",
-    "@babel/plugin-transform-modules-commonjs": "^7.0.0-beta.53",
+    "@babel/cli": "^7.1.2",
+    "@babel/core": "^7.1.2",
+    "@babel/plugin-proposal-class-properties": "^7.1.0",
+    "@babel/plugin-syntax-object-rest-spread": "^7.0.0",
+    "@babel/plugin-transform-modules-commonjs": "^7.1.0",
     "babel-core": "7.0.0-bridge.0",
-    "babel-jest": "^23.4.0",
+    "babel-jest": "^23.6.0",
     "cross-env": "^5.2.0",
-    "husky": "^1.0.0-rc.9",
-    "jest": "^23.4.0",
-    "lint-staged": "^7.2.0",
-    "prettier": "1.13.7",
+    "husky": "^1.0.1",
+    "jest": "^23.6.0",
+    "lint-staged": "^7.3.0",
+    "prettier": "1.14.3",
     "rimraf": "^2.6.2",
-    "rollup": "^0.62.0",
-    "rollup-plugin-babel": "4.0.0-beta.7"
+    "rollup": "^0.66.2",
+    "rollup-plugin-babel": "4.0.3"
   },
   "dependencies": {
-    "@types/node": "^10.5.2"
+    "@types/node": "^10.11.3"
   },
   "lint-staged": {
     "*.js": [
