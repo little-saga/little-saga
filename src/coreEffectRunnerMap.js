@@ -13,24 +13,21 @@ import {
 
 function runForkEffect({ fn, args, detached }, cb, { env, task }) {
   const iterator = createTaskIterator(fn, args)
-  try {
-    suspend()
-    if (detached) {
-      cb(proc(env, iterator, task.taskContext, reportErrorOnly))
+  suspend()
+  if (detached) {
+    cb(proc(env, iterator, task.taskContext, reportErrorOnly))
+  } else {
+    const subTask = proc(env, iterator, task.taskContext, noop)
+    if (subTask.isRunning) {
+      task.taskQueue.addTask(subTask)
+      cb(subTask)
+    } else if (subTask.error) {
+      task.taskQueue.abort(subTask.error)
     } else {
-      const subTask = proc(env, iterator, task.taskContext, noop)
-      if (subTask.isRunning) {
-        task.taskQueue.addTask(subTask)
-        cb(subTask)
-      } else if (subTask.error) {
-        task.taskQueue.abort(subTask.error)
-      } else {
-        cb(subTask)
-      }
+      cb(subTask)
     }
-  } finally {
-    flush()
   }
+  flush()
 }
 
 function runJoinEffect(taskOrTasks, cb, { task }) {

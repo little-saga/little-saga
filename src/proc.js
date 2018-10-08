@@ -2,7 +2,6 @@ import { CANCEL, TASK_CANCEL } from './symbols'
 import { is } from './utils'
 import { createMutexCallback } from './internal-utils'
 import Task from './Task'
-import ForkQueue from './ForkQueue'
 
 export default function proc(env, iterator, parentContext, cont) {
   const mainTask = {
@@ -16,12 +15,8 @@ export default function proc(env, iterator, parentContext, cont) {
       }
     },
   }
-
-  const taskQueue = new ForkQueue(mainTask)
-  const task = new Task(taskQueue, Object.create(parentContext))
-  taskQueue.cont = task.end
+  const task = new Task(mainTask, Object.create(parentContext))
   task.cont = cont
-
   cont.cancel = task.cancel
   next()
 

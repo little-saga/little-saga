@@ -10,10 +10,6 @@ export function detach({ type, payload }) {
   return makeEffect(type, { ...payload, detached: true })
 }
 
-function applyEffectCreator(context, fn, ...args) {
-  return makeEffect('CALL', { ...resolveContextAndFn({ context, fn }), args })
-}
-
 function takeEffectCreatorFactory(maybe) {
   return (channel, pattern) => {
     if (!is.channel(channel)) {
@@ -44,7 +40,8 @@ const io = {
   race: effects => makeEffect('RACE', effects),
   cps: (fn, ...args) => makeEffect('CPS', { ...resolveContextAndFn(fn), args }),
   call: (fn, ...args) => makeEffect('CALL', { ...resolveContextAndFn(fn), args }),
-  apply: applyEffectCreator,
+  apply: (context, fn, ...args) =>
+    makeEffect('CALL', { ...resolveContextAndFn({ context, fn }), args }),
   setContext: partialContext => makeEffect('SET_CONTEXT', partialContext),
   getContext: prop => makeEffect('GET_CONTEXT', prop),
   select: (selector = identity, ...args) => makeEffect('SELECT', { selector, args }),
