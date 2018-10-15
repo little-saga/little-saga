@@ -63,11 +63,10 @@ export function channel(buffer = buffers.expanding()) {
     checkForbiddenStates()
     if (!closed) {
       closed = true
-      if (takers.length) {
-        const arr = takers
+      if (takers.length > 0) {
+        const array = takers
         takers = []
-        for (let i = 0, len = arr.length; i < len; i++) {
-          const taker = arr[i]
+        for (const taker of array) {
           taker(END)
         }
       }
@@ -168,8 +167,7 @@ export function multicastChannel() {
     closed = true
     const takers = (currentTakers = nextTakers)
 
-    for (let i = 0; i < takers.length; i++) {
-      const taker = takers[i]
+    for (const taker of takers) {
       taker(END)
     }
 
@@ -187,8 +185,7 @@ export function multicastChannel() {
     }
 
     const takers = (currentTakers = nextTakers)
-    for (let i = 0; i < takers.length; i++) {
-      const taker = takers[i]
+    for (const taker of takers) {
       if (taker[MATCH](input)) {
         taker.cancel()
         taker(input)
