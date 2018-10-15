@@ -4,15 +4,13 @@
 
 little-saga 是 redux-saga 的简化版本，主要功能和 redux-saga 保持一致。little-saga 去掉了一些不常用的特性，并使用了更现代化的 JavaScript 进行编写（要求 node >= 8.3）。little-saga 的初衷是希望通过简化源代码，让更多人了解 redux-saga 背后的原理，详情请戳 [👉 炒鸡详细的介绍 redux-saga/little-saga 原理的文章](docs/building-your-own-redux-saga.md)。
 
-如果你的项目中用到了 redux，那么你应该使用 redux-saga 来作为 redux 的中间件，redux-saga 有着更完善的测试和文档。如果你没有使用 redux，而是希望拥有一个 saga runtime，并使用 fork-model 和 channel 来管理你的异步代码，那么 little-saga 也许是不错的选择。
+如果你的项目中用到了 redux，那么你应该使用 redux-saga 来作为 redux 的中间件，redux-saga 有着更完善的测试和文档。如果你没有使用 redux，而是希望拥有一个 saga runtime，并使用 fork-model 和 channel 来管理你的异步代码，那么 little-saga 是个不错的选择。
 
 ## API 文档
 
 little-saga 的 API 与 redux-saga 稍微有些不一样。little-saga API 请以下面的文档为准。
 
-**注意：API 文档仍在施工中。**
-
-### createSagaMiddleware
+### `createSagaMiddleware`
 
 ```javascript
 import { createSagaMiddleware } from 'little-saga'
@@ -22,18 +20,18 @@ const sagaMiddleware = createSagaMiddleware(options)
 sagaMiddleware.run(saga, ...args)
 ```
 
-该函数用于创建 sagaMiddleware，注意其引入方式和 redux-saga 中的不一样。`sagaMiddleware.run` 的底层仍然是调用了 runSaga 函数，故其参数 options 和 runSaga 的一致。
+该函数用于创建 saga 的 redux 中间件，需要注意的是该函数的引入方式和 redux-saga 中的不一样。`sagaMiddleware.run` 的底层仍然是调用了 `runSaga` 函数，故参数 `options` 和 `runSaga` 的一致。
 
-使用 createSagaMiddleware 时，请不要提供 options.dispatch 和 options.getState，这两个字段会由 store 进行提供。
+使用 `createSagaMiddleware` 时，请不要提供 `options.dispatch` 和 `options.getState`，这两个字段会由 redux store 进行提供。
 
-### runSaga
+### `runSaga`
 
 ```javascript
 import { runSaga } from 'little-saga'
 const rootTask = runSaga(options, saga, ...args)
 ```
 
-启动 saga 函数，返回一个 Task 对象用来描述 saga 的运行状态。参数 saga 是一个生成器函数，参数 args 将被传递给 saga 参数。参数 options 可以用来对 saga 运行环境进行配置。options 中每个字段都是可选的，具体如下：
+启动 saga，返回一个 `Task` 对象用来描述根任务的运行状态。参数 `saga` 是一个生成器函数，参数 `args` 将被传递给该生成器函数。参数 `options` 可以用来对 saga 运行环境进行配置。`options` 中所有字段 **都是可选的**，每个字段的含义如下：
 
 | 字段名                | 作用                                                                                                                                                                                                 |
 | --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -54,27 +52,17 @@ const rootTask = runSaga(options, saga, ...args)
 
 ### effect 创建器
 
-little-saga 中的创建器和 redux-saga 保持一致，具体详见 redux-saga 文档。注意在 little-saga 中 effect 创建器都位于 io 对象中，需要引入 io 对象才能使用这些创建器。
+little-saga 默认所支持的 effect 类型和 redux-saga 一致，具体详见 redux-saga 文档。在 little-saga，effect 创建器位于 `io` 对象中，我们需要引入 `io` 对象才能使用这些创建器。
 
 ```javascript
 import { io } from 'little-saga'
 
 function* genFn() {
   yield io.call(fn1, ...args1)
-  yield io.race({
-    foo: io.cps(cb => {
-      /* ... */
-    }),
-    bar: io.join(task1),
-  })
+  yield io.all([effect1, effect2])
   yield io.fork(gen2, ...args2)
 }
 ```
-
-little-saga 部分 effect 创建器的接口与 redux-saga 目前版本(v1.0.0-beta.1)不同，使用了[redux-saga#1527](https://github.com/redux-saga/redux-saga/pull/1527) 中的实现方式。具体差别如下：
-
-- join 多个任务对象的使用方式变为 `io.join([...tasks])`
-- cancel 多个任务对象的使用方式变为 `io.cancel([...tasks])`
 
 ### 工具函数与 saga 辅助函数
 
@@ -87,13 +75,13 @@ little-saga 提供的工具函数和 redux-saga 中的一致，详见 redux-saga
 
 辅助函数包括：takeEvery / takeLeading / takeLatest / throttle / debounce
 
-这五个辅助函数与 redux-saga 中的一致，详见 redux-saga 文档。（注：debounce 将会在 redux-saga v1 中加入）
+这五个辅助函数与 redux-saga 中的一致，详见 redux-saga 文档 (￣ ▽ ￣)
 
-## 使用 stdChannel
+## 使用 `stdChannel`
 
-stdChannel 是一种特殊的 multicastChannel，我们可以创建新的 stdChannel 实例，并使用它来连接外部输入输出。
+`stdChannel` 是一种特殊的 `multicastChannel`，我们可以创建新的 `stdChannel` 实例，并使用它来连接外部输入输出。
 
-`stdChannel.enhancePut(enhancer)` 参数 enhancer 是一个函数，用于「提升该 stdChannel 的 put 方法」。enhancer 接受原来的 put，并返回一个新的 put 来代替原来的 put。
+`stdChannel.enhancePut(enhancer)` 参数 `enhancer` 是一个函数，用于「提升该 stdChannel 的 put 方法」。`enhancer` 接受原来的 put，并返回一个新的 put 来代替原来的 put。
 
 `enhancePut` 可以用来作为 stdChannel 的「中间件」，例如下面这个例子中，我们使用该方法来处理 put 数组的情况：
 
@@ -148,6 +136,8 @@ const put1 = chan.put // 不要这么做，因为调用 enhancePut 之后 chan.p
 ```
 
 ## 使用自定义 effect 类型
+
+自定义 effect 类型是一个非常灵活的机制，允许我们定义新的 effect 类型并为其指定相应的 effect runner。我们在 effect runner 中能够使用一些较为底层的 API，故该机制也能用于实现一些较为底层的功能。little-saga 默认的 effect 用的也是同样的 effect runner 接口，故自定义类型和默认类型并没有什么本质区别。
 
 在下面这个简单的例子中，我们定义了类型为 `'NOW'` 的 effect。
 

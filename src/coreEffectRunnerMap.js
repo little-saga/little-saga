@@ -200,6 +200,12 @@ function runActionChannelEffect({ pattern, buffer }, cb, { env }) {
     chan.put(action)
   }
 
+  const { close } = chan
+  chan.close = () => {
+    taker.cancel()
+    close()
+  }
+
   env.channel.take(taker, match)
   cb(chan)
 }
