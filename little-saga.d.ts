@@ -10,6 +10,8 @@ declare global {
   }
 }
 
+type Func<ARGS extends any[], Ret = any> = (...args: ARGS) => Ret
+
 export interface Task {
   isRunning: boolean
   isCancelled: boolean
@@ -174,23 +176,33 @@ export interface ActionChannelEffect {
   }
 }
 
+type TakePattern<T> = '*' | string | ((message: T) => boolean) | any[]
+
 export const io: {
-  fork(fn: any, ...args: any[]): ForkEffect
-  spawn(fn: any, ...args: any[]): ForkEffect
+  fork<ARGS extends any[]>(fn: Func<ARGS>, ...args: ARGS): ForkEffect
+  spawn<ARGS extends any[]>(fn: Func<ARGS>, ...args: ARGS): ForkEffect
   join(t: Task | Task[]): JoinEffect
   cancel(t?: Task | Task[]): CancelEffect
   cancelled(): CancelledEffect
   all(effects: any[] | { [key: string]: any }): AllEffect
   race(effects: any[] | { [key: string]: any }): RaceEffect
-  cps(fn: any, ...args: any[]): CPSEffect
-  call(fn: any, ...args: any[]): CallEffect
-  apply(context: any, fn: any, ...args: any[]): CallEffect
+  cps<T, ARGS extends any[]>(
+    fn: (cb: (err: any, result: T) => any, ...args: ARGS) => any,
+    ...args: ARGS
+  ): CPSEffect
+  call<ARGS extends any[]>(fn: Func<ARGS>, ...args: ARGS): CallEffect
+  apply<ARGS extends any[]>(context: any, fn: Func<ARGS>, ...args: ARGS): CallEffect
   setContext(partialContext: any): SetContextEffect
   getContext(prop: string | symbol): GetContextEffect
-  select(selector?: any, ...args: any[]): SelectEffect
-  take(arg1: any, arg2?: any): TakeEffect
-  put(arg1: any, arg2?: any): PutEffect
-  flush(chan: Channel): FlushEffect
+  select<S, ARGS extends any[]>(
+    selector?: (state: S, ...args: ARGS) => any,
+    ...args: ARGS
+  ): SelectEffect
+  take(pattern?: TakePattern<any>): TakeEffect
+  take<T>(channel: Channel<T> | MulticastChannel<T>, pattern?: TakePattern<T>): TakeEffect
+  put<T>(message: T): PutEffect
+  put<T>(ch: Channel<T> | MulticastChannel<T>, message: T | typeof END): PutEffect
+  flush<T>(chan: Channel<T>): FlushEffect
   actionChannel(pattern: any, buffer?: Buffer<any>): ActionChannelEffect
 }
 
