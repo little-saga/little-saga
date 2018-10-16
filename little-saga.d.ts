@@ -132,7 +132,7 @@ export interface CallEffect {
 
 export interface SetContextEffect {
   type: 'SET_CONTEXT'
-  payload: any
+  payload: { prop: string, value: any }
 }
 
 export interface GetContextEffect {
@@ -192,7 +192,7 @@ export const io: {
   ): CPSEffect
   call<ARGS extends any[]>(fn: Func<ARGS>, ...args: ARGS): CallEffect
   apply<ARGS extends any[]>(context: any, fn: Func<ARGS>, ...args: ARGS): CallEffect
-  setContext(partialContext: any): SetContextEffect
+  setContext(prop: string, value: any): SetContextEffect
   getContext(prop: string | symbol): GetContextEffect
   select<S, ARGS extends any[]>(
     selector?: (state: S, ...args: ARGS) => any,

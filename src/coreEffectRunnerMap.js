@@ -130,8 +130,8 @@ function runCallEffect({ context, fn, args }, cb, { runEffect }) {
   }
 }
 
-export function runSetContextEffect(partialContext, cb, { task }) {
-  Object.assign(task.taskContext, partialContext)
+export function runSetContextEffect({ prop, value }, cb, { task }) {
+  task.taskContext[prop] = value
   cb()
 }
 

@@ -42,7 +42,7 @@ const io = {
   call: (fn, ...args) => makeEffect('CALL', { ...resolveContextAndFn(fn), args }),
   apply: (context, fn, ...args) =>
     makeEffect('CALL', { ...resolveContextAndFn({ context, fn }), args }),
-  setContext: partialContext => makeEffect('SET_CONTEXT', partialContext),
+  setContext: (prop, value) => makeEffect('SET_CONTEXT', { prop, value }),
   getContext: prop => makeEffect('GET_CONTEXT', prop),
   select: (selector = identity, ...args) => makeEffect('SELECT', { selector, args }),
   take: takeEffectCreatorFactory(false),
