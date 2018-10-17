@@ -28,7 +28,7 @@ export function channel(buffer = buffers.expanding()) {
     if (closed) {
       return
     }
-    if (!takers.length) {
+    if (takers.length === 0) {
       return buffer.put(input)
     }
     const cb = takers[0]

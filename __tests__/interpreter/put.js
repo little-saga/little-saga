@@ -25,7 +25,7 @@ test('saga put handling', () => {
 test('saga put in a channel', () => {
   const buffer = []
   const spyBuffer = {
-    isEmpty: () => !buffer.length,
+    isEmpty: () => buffer.length === 0,
     put: it => buffer.push(it),
     take: () => buffer.shift(),
   }

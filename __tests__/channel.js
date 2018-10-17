@@ -59,7 +59,7 @@ test('Unbuffered channel', done => {
 test('buffered channel', done => {
   const buffer = []
   const spyBuffer = {
-    isEmpty: () => !buffer.length,
+    isEmpty: () => buffer.length === 0,
     put: it => buffer.push(it),
     take: () => buffer.shift(),
   }

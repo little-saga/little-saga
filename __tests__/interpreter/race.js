@@ -56,33 +56,30 @@ test('saga race between array of effects handling', () => {
   })
 })
 
-test('saga race between effects: handle END', () => {
-  let actual = []
-  let dispatch
+test('saga race between effects: handle END', async () => {
+  const actual = []
+  const channel = stdChannel()
   const timeout = deferred()
 
-  const task = runSaga(
-    { channel: stdChannel().enhancePut(put => (dispatch = put)) },
-    function* genFn() {
+  const task = runSaga({ channel }, function* genFn() {
+    try {
       actual.push(
         yield io.race({
           event: io.take('action'),
           timeout: timeout.promise,
         }),
       )
-    },
-  )
-
-  Promise.resolve(1)
-    .then(() => dispatch(END))
-    .then(() => timeout.resolve(1))
-
-  const expected = [{ timeout: 1 }]
-
-  return task.toPromise().then(() => {
-    // saga must not resolve race effects with END
-    expect(actual).toEqual(expected)
+    } finally {
+      actual.push(yield io.cancelled())
+    }
   })
+
+  await Promise.resolve()
+  channel.put(END)
+  timeout.resolve(1)
+
+  await task.toPromise()
+  expect(actual).toEqual([true])
 })
 
 test('saga race between sync effects', () => {

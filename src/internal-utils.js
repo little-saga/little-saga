@@ -159,15 +159,15 @@ export function createRaceStyleChildCallbacks(shape, parentCallback) {
         return
       }
 
-      if (isErr) {
+      if (isErr || res === TASK_CANCEL) {
         parentCallback.cancel()
-        parentCallback(res, true)
-      } else if (res !== TASK_CANCEL) {
+        parentCallback(res, isErr)
+      } else {
         parentCallback.cancel()
         completed = true
         const response = { [key]: res }
         if (is.array(shape)) {
-          parentCallback(Array.from(Object.assign(response, { length: keys.length })))
+          parentCallback(Array.from({ ...response, length: keys.length }))
         } else {
           parentCallback(response)
         }
