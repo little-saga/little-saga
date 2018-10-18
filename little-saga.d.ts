@@ -132,7 +132,7 @@ export interface CallEffect {
 
 export interface SetContextEffect {
   type: 'SET_CONTEXT'
-  payload: { prop: string, value: any }
+  payload: { prop: string; value: any }
 }
 
 export interface GetContextEffect {
@@ -203,7 +203,7 @@ export const io: {
   put<T>(message: T): PutEffect
   put<T>(ch: Channel<T> | MulticastChannel<T>, message: T | typeof END): PutEffect
   flush<T>(chan: Channel<T>): FlushEffect
-  actionChannel(pattern: any, buffer?: Buffer<any>): ActionChannelEffect
+  actionChannel(pattern: TakePattern<any>, buffer?: Buffer<any>): ActionChannelEffect
 }
 
 export function detach(effect: ForkEffect): ForkEffect
