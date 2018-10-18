@@ -1,6 +1,12 @@
-## v0.5 [[unreleased]]
+## v0.5.1 (unreleased)
 
-* setContext 函数的参数形式变更为 `setContext(prop: string, value: any)`
+- scheduler 重构：移除 suspend/flush 函数，新增 immediately 函数
+- root-saga 启动时使用 immediately 进行调度
+- 不再导出 scheduler 相关 API
+
+## v0.5.0
+
+- setContext 函数的参数形式变更为 `setContext(prop: string, value: any)`
 
 ## v0.4
 

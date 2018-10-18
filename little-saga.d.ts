@@ -30,11 +30,6 @@ export const IO: unique symbol
 export const SELF_CANCELLATION: unique symbol
 // endregion
 
-// region scheduler
-export function asap(task: () => void): void
-export function immediately(task: () => void): void
-// endregion
-
 // region utils
 export function identity<T>(arg: T): T
 export type DeferredEnd<T, P> = {

@@ -1,5 +1,4 @@
 export * from './symbols'
-export * from './scheduler'
 export * from './utils'
 export * from './sagaHelpers'
 export * from './channel-utils/channels'
