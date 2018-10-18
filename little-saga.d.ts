@@ -32,8 +32,7 @@ export const SELF_CANCELLATION: unique symbol
 
 // region scheduler
 export function asap(task: () => void): void
-export function suspend(): void
-export function flush(): void
+export function immediately(task: () => void): void
 // endregion
 
 // region utils

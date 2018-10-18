@@ -2,6 +2,7 @@ import proc from './proc'
 import { createTaskIterator, reportErrorOnly } from './internal-utils'
 import { stdChannel } from './channel-utils/channels'
 import coreEffectRunnerMap from './coreEffectRunnerMap'
+import { immediately } from './scheduler'
 
 export default function runSaga(options, fn, ...args) {
   const {
@@ -24,5 +25,5 @@ export default function runSaga(options, fn, ...args) {
   }
 
   const iterator = createTaskIterator(fn, args)
-  return proc(env, iterator, taskContext, cont)
+  return immediately(() => proc(env, iterator, taskContext, cont))
 }

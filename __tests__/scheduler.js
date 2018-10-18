@@ -1,4 +1,4 @@
-import { asap, flush, suspend } from '../src'
+import { asap, immediately } from '../src/scheduler'
 
 test('scheduler executes all recursively triggered tasks in order', () => {
   const actual = []
@@ -16,16 +16,16 @@ test('scheduler executes all recursively triggered tasks in order', () => {
 
 test('scheduler when suspended queues up and executes all tasks on flush', () => {
   const actual = []
-  suspend()
-  asap(() => {
-    actual.push('1')
+  immediately(() => {
     asap(() => {
-      actual.push('2')
-    })
-    asap(() => {
-      actual.push('3')
+      actual.push('1')
+      asap(() => {
+        actual.push('2')
+      })
+      asap(() => {
+        actual.push('3')
+      })
     })
   })
-  flush()
   expect(actual).toEqual(['1', '2', '3'])
 })

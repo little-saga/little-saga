@@ -1,5 +1,5 @@
 import { is, noop, remove } from './utils'
-import { asap, flush, suspend } from './scheduler'
+import { asap, immediately } from './scheduler'
 import proc from './proc'
 import { channel, END } from './channel-utils/channels'
 import { SELF_CANCELLATION, TASK_CANCEL } from './symbols'
@@ -12,22 +12,22 @@ import {
 } from './internal-utils'
 
 function runForkEffect({ fn, args, detached }, cb, { env, task }) {
-  const iterator = createTaskIterator(fn, args)
-  suspend()
-  if (detached) {
-    cb(proc(env, iterator, task.taskContext, reportErrorOnly))
-  } else {
-    const subTask = proc(env, iterator, task.taskContext, noop)
-    if (subTask.isRunning) {
-      task.taskQueue.addTask(subTask)
-      cb(subTask)
-    } else if (subTask.error) {
-      task.taskQueue.abort(subTask.error)
+  immediately(() => {
+    const iterator = createTaskIterator(fn, args)
+    if (detached) {
+      cb(proc(env, iterator, task.taskContext, reportErrorOnly))
     } else {
-      cb(subTask)
+      const subTask = proc(env, iterator, task.taskContext, noop)
+      if (subTask.isRunning) {
+        task.taskQueue.addTask(subTask)
+        cb(subTask)
+      } else if (subTask.error) {
+        task.taskQueue.abort(subTask.error)
+      } else {
+        cb(subTask)
+      }
     }
-  }
-  flush()
+  })
 }
 
 function runJoinEffect(taskOrTasks, cb, { task }) {
@@ -165,8 +165,8 @@ function runTakeEffect({ channel, pattern, maybe }, cb, { env }) {
   cb.cancel = takeCb.cancel
 }
 
-function runPutEffect({ channel, action, resolve }, cb, { env, runEffect }) {
-  channel = channel || env.channel
+function runPutEffect(payload, cb, { env, runEffect }) {
+  const { channel = env.channel, action, resolve } = payload
   asap(() => {
     let result
     try {
