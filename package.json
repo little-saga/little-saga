@@ -2,7 +2,7 @@
   "name": "little-saga",
   "license": "MIT",
   "description": "Just a little-saga.",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "scripts": {
     "build": "cross-env BABEL_ENV=es rollup -c rollup.config.js",
     "test": "jest",
