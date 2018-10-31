@@ -1,18 +1,5 @@
-import { always, is, noop } from './utils'
+import { is, noop } from './utils'
 import { TASK_CANCEL } from './symbols'
-
-export function makeMatcher(pattern) {
-  if (pattern === '*' || pattern === undefined) {
-    return always(true)
-  } else if (is.string(pattern) || is.symbol(pattern)) {
-    return action => action && action.type === pattern
-  } else if (is.array(pattern)) {
-    const matchers = pattern.map(makeMatcher)
-    return action => matchers.some(matcher => matcher(action))
-  } else {
-    return pattern
-  }
-}
 
 export function resolveContextAndFn(fnobj) {
   if (is.func(fnobj)) {

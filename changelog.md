@@ -1,6 +1,10 @@
 little-saga 在一些功能上会和 redux-saga 保持同步，🔗 表示在 redux-saga 中的相关 pull request
 
-## v0.5.1 (unreleased)
+## (unreleased)
+
+- 导出 makeMatcher 函数
+
+## v0.5.1
 
 - scheduler 重构：移除 suspend/flush 函数，新增 immediately 函数 [🔗#1641](https://github.com/redux-saga/redux-saga/pull/1641)
 - root-saga 启动时使用 immediately 进行调度 [🔗#1628](https://github.com/redux-saga/redux-saga/pull/1628)

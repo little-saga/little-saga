@@ -57,3 +57,16 @@ export function remove(array, item) {
     array.splice(index, 1)
   }
 }
+
+export function makeMatcher(pattern = '*') {
+  if (pattern === '*') {
+    return always(true)
+  } else if (is.string(pattern) || is.symbol(pattern)) {
+    return action => action && action.type === pattern
+  } else if (is.array(pattern)) {
+    const matchers = pattern.map(makeMatcher)
+    return action => matchers.some(matcher => matcher(action))
+  } else {
+    return pattern
+  }
+}

@@ -1,4 +1,4 @@
-import { is, noop, remove } from './utils'
+import { is, makeMatcher, noop, remove } from './utils'
 import { asap, immediately } from './scheduler'
 import proc from './proc'
 import { channel, END } from './channel-utils/channels'
@@ -7,7 +7,6 @@ import {
   createAllStyleChildCallbacks,
   createRaceStyleChildCallbacks,
   createTaskIterator,
-  makeMatcher,
   reportErrorOnly,
 } from './internal-utils'
 

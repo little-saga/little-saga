@@ -55,6 +55,7 @@ export const is: {
   effect: (eff: any) => eff is Effect
 }
 export function remove<T>(array: T[], item: T): void
+export function makeMatcher<T>(pattern?: TakePattern<T>): (message: T) => boolean
 // endregion
 
 // region sagaHelpers
@@ -193,7 +194,10 @@ export const io: {
     ...args: ARGS
   ): SelectEffect
   take(pattern?: TakePattern<any>): TakeEffect
-  take<T>(channel: Channel<T> | MulticastChannel<T>, pattern?: TakePattern<T>): TakeEffect
+  take<T>(
+    channel: Channel<T> | MulticastChannel<T> | EventChannel<T>,
+    pattern?: TakePattern<T>,
+  ): TakeEffect
   put<T>(message: T): PutEffect
   put<T>(ch: Channel<T> | MulticastChannel<T>, message: T | typeof END): PutEffect
   flush<T>(chan: Channel<T>): FlushEffect
