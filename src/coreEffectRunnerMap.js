@@ -138,6 +138,10 @@ export function runGetContextEffect(prop, cb, { task }) {
   cb(task.taskContext[prop])
 }
 
+export function runGetEnvEffect(prop, cb, { env }) {
+  cb(env[prop])
+}
+
 export function runSelectEffect({ selector, args }, cb, { env }) {
   cb(selector(env.getState(), ...args))
 }
@@ -220,6 +224,7 @@ export default {
   CALL: runCallEffect,
   SET_CONTEXT: runSetContextEffect,
   GET_CONTEXT: runGetContextEffect,
+  GET_ENV: runGetEnvEffect,
   SELECT: runSelectEffect,
   TAKE: runTakeEffect,
   PUT: runPutEffect,

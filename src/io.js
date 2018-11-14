@@ -44,6 +44,7 @@ const io = {
     makeEffect('CALL', { ...resolveContextAndFn({ context, fn }), args }),
   setContext: (prop, value) => makeEffect('SET_CONTEXT', { prop, value }),
   getContext: prop => makeEffect('GET_CONTEXT', prop),
+  getEnv: prop => makeEffect('GET_ENV', prop),
   select: (selector = identity, ...args) => makeEffect('SELECT', { selector, args }),
   take: takeEffectCreatorFactory(false),
   takeMaybe: takeEffectCreatorFactory(true),

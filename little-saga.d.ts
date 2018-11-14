@@ -78,6 +78,7 @@ export type Effect =
   | CallEffect
   | SetContextEffect
   | GetContextEffect
+  | GetEnvEffect
   | SelectEffect
   | TakeEffect
   | PutEffect
@@ -135,6 +136,11 @@ export interface GetContextEffect {
   prop: string
 }
 
+export interface GetEnvEffect {
+  type: 'GET_ENV'
+  prop: string
+}
+
 export interface SelectEffect {
   type: 'SELECT'
   payload: { selector: (state: any) => any; args: any[] }
@@ -189,6 +195,7 @@ export const io: {
   apply<ARGS extends any[]>(context: any, fn: Func<ARGS>, ...args: ARGS): CallEffect
   setContext(prop: string, value: any): SetContextEffect
   getContext(prop: string | symbol): GetContextEffect
+  getEnv(prop: string | symbol): GetEnvEffect
   select<S, ARGS extends any[]>(
     selector?: (state: S, ...args: ARGS) => any,
     ...args: ARGS
