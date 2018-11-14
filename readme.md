@@ -64,6 +64,12 @@ function* genFn() {
 
 **备注:** `setContext` 的接口在 little-saga 中为 `io.setContext(prop: string, value: any)`
 
+### 额外的 effect 类型
+
+`GET_ENV` effect 用于获取 `env` 对象中的字段。当 saga 运行在某个特定环境下时（例如运行在某个 React 组件的生命周期内），我们可以通过 `runSaga#options.customEnv` 在 `env` 对象设置某些字段，然后在 saga 中使用 `GET_ENV` effect 可以访问这些字段。
+
+该类型的 effect 创建器的签名为 `io.getEnv(prop: string)`
+
 ### 工具函数
 
 little-saga 提供的工具函数和 redux-saga 中的一致，详见 redux-saga 文档：
