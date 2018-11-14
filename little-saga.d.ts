@@ -195,7 +195,7 @@ export const io: {
   apply<ARGS extends any[]>(context: any, fn: Func<ARGS>, ...args: ARGS): CallEffect
   setContext(prop: string, value: any): SetContextEffect
   getContext(prop: string | symbol): GetContextEffect
-  getEnv(prop: string | symbol): GetEnvEffect
+  getEnv(): GetEnvEffect
   select<S, ARGS extends any[]>(
     selector?: (state: S, ...args: ARGS) => any,
     ...args: ARGS
