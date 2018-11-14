@@ -2,7 +2,7 @@ little-saga 在一些功能上会和 redux-saga 保持同步，🔗 表示在 re
 
 ## (unreleased)
 
-## v0.5.2
+## v0.5.3
 
 - 新增 GET_ENV effect
 - 导出 makeMatcher 函数

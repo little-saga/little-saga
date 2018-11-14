@@ -68,7 +68,7 @@ function* genFn() {
 
 `GET_ENV` effect 用于获取 `env` 对象中的字段。当 saga 运行在某个特定环境下时（例如运行在某个 React 组件的生命周期内），我们可以通过 `runSaga#options.customEnv` 在 `env` 对象设置某些字段，然后在 saga 中使用 `GET_ENV` effect 可以访问这些字段。
 
-该类型的 effect 创建器的签名为 `io.getEnv(prop: string)`
+执行 `yield io.getEnv()` 会直接返回 `env` 对象，在 saga 中请不要对该对象进行任何修改。
 
 ### 工具函数
 

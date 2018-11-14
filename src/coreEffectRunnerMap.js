@@ -77,7 +77,7 @@ function cancelSingleTask(taskToCancel) {
   }
 }
 
-function runCancelledEffect(effect, cb, { task }) {
+function runCancelledEffect(payload, cb, { task }) {
   cb(task.taskQueue.mainTask.isCancelled)
 }
 
@@ -138,8 +138,8 @@ export function runGetContextEffect(prop, cb, { task }) {
   cb(task.taskContext[prop])
 }
 
-export function runGetEnvEffect(prop, cb, { env }) {
-  cb(env[prop])
+export function runGetEnvEffect(payload, cb, { env }) {
+  cb(env)
 }
 
 export function runSelectEffect({ selector, args }, cb, { env }) {
