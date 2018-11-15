@@ -49,9 +49,12 @@ const chan = stdChannel().enhancePut(put => {
 runSaga({ channel: chan }, saga)
 ```
 
-注意，调用 `enhancerPut` 会直接改变 `channel.put` 字段，所以**应该总是用 `channel.put` 的形式来调用 put 方法。**
+注意，调用 `enhancerPut` 会原地修改 `channel.put` 字段，即调用该方法之后 `channel.put` 会指向新的函数（也就是我们 enhancer 返回的那个函数）。
 
 ```javascript
 const chan = stdChannel()
-const put1 = chan.put // 不要这么做，因为调用 enhancePut 之后 chan.put 就会指向新的对象
+const put1 = chan.put
+chan.enhancePut(enhancer)
+const put2 = chan.put
+// 此时 put1 和 put2 会指向两个不同的函数
 ```
