@@ -1,9 +1,7 @@
-import { deferred, io, stdChannel } from '../../src'
-import runSaga from '../../src/runSaga'
+import { runSaga, deferred, io, makeScheduler, stdChannel } from '../../src'
 
 test('saga nested iterator handling', () => {
   const actual = []
-  let dispatch
   const def1 = deferred()
   const def2 = deferred()
   const def3 = deferred()
@@ -38,20 +36,17 @@ test('saga nested iterator handling', () => {
     'caught child error',
   ]
 
-  const task = runSaga(
-    {
-      channel: stdChannel().enhancePut(put => (dispatch = put)),
-    },
-    main,
-  )
+  const scheduler = makeScheduler()
+  const channel = stdChannel(scheduler)
+  const task = runSaga({ scheduler, channel }, main)
 
   Promise.resolve(1)
     .then(() => def1.resolve(1))
-    .then(() => dispatch({ type: 'action-1' }))
+    .then(() => channel.put({ type: 'action-1' }))
     .then(() => def2.resolve(2))
-    .then(() => dispatch({ type: 'action-2' }))
+    .then(() => channel.put({ type: 'action-2' }))
     .then(() => def3.resolve(3))
-    .then(() => dispatch({ type: 'action-3' }))
+    .then(() => channel.put({ type: 'action-3' }))
 
   return task.toPromise().then(() => {
     // saga must fullfill nested iterator effects

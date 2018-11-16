@@ -1,7 +1,8 @@
 import { CANCEL, TASK_CANCEL } from './symbols'
 import { is } from './utils'
-import { createMutexCallback } from './internal-utils'
+import { createMutexCallback, EXCEPTION_DURING_CANCELLATION } from './internal-utils'
 import Task from './Task'
+import effectRunnerMap from './effectRunnerMap'
 
 export default function proc(env, iterator, parentContext, cont) {
   const mainTask = {
@@ -48,7 +49,7 @@ export default function proc(env, iterator, parentContext, cont) {
       }
     } catch (error) {
       if (mainTask.isCancelled) {
-        console.error(error)
+        console.error(EXCEPTION_DURING_CANCELLATION, error)
       }
       mainTask.isRunning = false
       mainTask.cont(error, true)
@@ -61,12 +62,8 @@ export default function proc(env, iterator, parentContext, cont) {
     } else if (is.iterator(effect)) {
       resolveIterator(effect, cb)
     } else if (is.effect(effect)) {
-      const runner = env.effectRunnerMap[effect.type]
-      if (runner == null) {
-        cb(new Error(`${effect.type} effect is not supported`), true)
-        return
-      }
-      runner(effect.payload, cb, { env, task, runEffect })
+      const runner = effectRunnerMap[effect.type]
+      runner(env, task, effect.payload, cb, { runEffect })
     } else {
       cb(effect)
     }

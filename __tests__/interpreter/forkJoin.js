@@ -1,5 +1,5 @@
 import EventEmitter from 'events'
-import { deferred, io, is, runSaga, stdChannel } from '../../src'
+import { deferred, io, is, makeScheduler, runSaga, stdChannel } from '../../src'
 
 test('saga fork handling: generators', async () => {
   let task1
@@ -58,9 +58,12 @@ test('saga join handling : generators', () => {
   }
 
   const emitter = new EventEmitter()
-  const channel = stdChannel()
-  emitter.on('action', action => channel.put(action))
-  const task = runSaga({ channel, dispatch: action => emitter.emit('action', action) }, genFn)
+  const scheduler = makeScheduler()
+  const channel = stdChannel(scheduler).enhancePut(rawPut => {
+    emitter.on('action', rawPut)
+    return action => emitter.emit('action', action)
+  })
+  const task = runSaga({ scheduler, channel }, genFn)
 
   Promise.resolve(1)
     .then(() => defs[0].resolve(true))

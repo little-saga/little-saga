@@ -1,6 +1,6 @@
 import io from './io'
 import { delay } from './utils'
-import * as buffers from './channel-utils/buffers'
+import * as buffers from './buffers'
 
 export function takeEvery(patternOrChannel, worker, ...args) {
   return io.fork(function*() {

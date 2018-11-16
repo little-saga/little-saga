@@ -1,16 +1,17 @@
 import EventEmitter from 'events'
-import { io, runSaga, stdChannel, takeEvery } from '../../src'
+import { io, makeScheduler, runSaga, stdChannel, takeEvery } from '../../src'
 
 test('takeEvery', async () => {
   const loop = 10
 
   const actual = []
   const emitter = new EventEmitter()
-  const channel = stdChannel().enhancePut(put => {
+  const scheduler = makeScheduler()
+  const channel = stdChannel(scheduler).enhancePut(put => {
     emitter.on('action', put)
     return action => emitter.emit('action', action)
   })
-  const mainTask = runSaga({ channel }, root)
+  const mainTask = runSaga({ scheduler, channel }, root)
 
   function* root() {
     const task = yield takeEvery('ACTION', worker, 'a1', 'a2')

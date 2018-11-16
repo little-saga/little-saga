@@ -1,4 +1,4 @@
-import { SAGA_ACTION, runSaga, deferred, delay, io, END } from '../../src'
+import { SCHEDULED, runSaga, deferred, delay, io, END } from '../../src'
 
 test('saga parallel effects handling', () => {
   let actual
@@ -6,7 +6,7 @@ test('saga parallel effects handling', () => {
   let cpsCb = {}
   const cps = (val, cb) => (cpsCb = { val, cb })
 
-  const expected = [1, 2, { [SAGA_ACTION]: true, type: 'action' }]
+  const expected = [1, 2, { [SCHEDULED]: true, type: 'action' }]
 
   return runSaga({}, function* genFn() {
     const { all, take, fork, put } = io
@@ -110,7 +110,7 @@ test('saga parallel effect: named effects', () => {
     .toPromise()
     .then(() => {
       expect(actual).toEqual({
-        ac: { [SAGA_ACTION]: true, type: 'action' },
+        ac: { [SCHEDULED]: true, type: 'action' },
         prom: 1,
       })
     })

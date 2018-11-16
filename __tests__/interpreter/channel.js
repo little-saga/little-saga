@@ -1,11 +1,11 @@
-import { buffers, io, runSaga, stdChannel } from '../../src'
+import { buffers, io, makeScheduler, runSaga, stdChannel } from '../../src'
 
 test('saga create channel for store actions', () => {
-  let actual = []
-  let dispatch
-  const channel = stdChannel().enhancePut(put => (dispatch = put))
+  const actual = []
+  const scheduler = makeScheduler()
+  const channel = stdChannel(scheduler)
 
-  const task = runSaga({ channel }, function* genFn() {
+  const task = runSaga({ scheduler, channel }, function* genFn() {
     const chan = yield io.actionChannel('action')
     for (let i = 0; i < 10; i++) {
       yield Promise.resolve(1)
@@ -15,7 +15,7 @@ test('saga create channel for store actions', () => {
   })
 
   for (let i = 0; i < 10; i++) {
-    dispatch({ type: 'action', payload: i + 1 })
+    channel.put({ type: 'action', payload: i + 1 })
   }
 
   const expected = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
@@ -27,18 +27,15 @@ test('saga create channel for store actions', () => {
 
 test('saga create channel for store actions (with buffer)', () => {
   const buffer = buffers.expanding()
-  let dispatch
-
-  const task = runSaga(
-    { channel: stdChannel().enhancePut(put => (dispatch = put)) },
-    function* genFn() {
-      return yield io.actionChannel('action', buffer)
-    },
-  )
+  const scheduler = makeScheduler()
+  const channel = stdChannel(scheduler)
+  const task = runSaga({ scheduler, channel }, function* genFn() {
+    return yield io.actionChannel('action', buffer)
+  })
 
   Promise.resolve().then(() => {
     for (let i = 0; i < 10; i++) {
-      dispatch({ type: 'action', payload: i + 1 })
+      channel.put({ type: 'action', payload: i + 1 })
     }
   })
 

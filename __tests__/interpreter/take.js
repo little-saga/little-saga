@@ -1,10 +1,10 @@
-import { channel, END, io, runSaga, stdChannel } from '../../src'
+import { channel, END, io, makeScheduler, runSaga, stdChannel } from '../../src'
 
 test('saga take from default channel', () => {
   const typeSymbol = Symbol('action-symbol')
-  let dispatch
-
-  let actual = []
+  const actual = []
+  const scheduler = makeScheduler()
+  const channel = stdChannel(scheduler)
 
   function* genFn() {
     try {
@@ -21,7 +21,7 @@ test('saga take from default channel', () => {
     }
   }
 
-  const task = runSaga({ channel: stdChannel().enhancePut(put => (dispatch = put)) }, genFn)
+  const task = runSaga({ scheduler, channel }, genFn)
 
   const expected = [
     { type: 'action-*' },
@@ -35,15 +35,15 @@ test('saga take from default channel', () => {
   ]
 
   Promise.resolve(1)
-    .then(() => dispatch({ type: 'action-*' }))
-    .then(() => dispatch({ type: 'action-1' }))
-    .then(() => dispatch({ type: 'action-2' }))
-    .then(() => dispatch({ type: 'unnoticeable-action' }))
-    .then(() => dispatch({ type: '', isAction: true }))
-    .then(() => dispatch({ type: '', isMixedWithPredicate: true }))
-    .then(() => dispatch({ type: 'action-3' }))
-    .then(() => dispatch({ type: typeSymbol }))
-    .then(() => dispatch(END))
+    .then(() => channel.put({ type: 'action-*' }))
+    .then(() => channel.put({ type: 'action-1' }))
+    .then(() => channel.put({ type: 'action-2' }))
+    .then(() => channel.put({ type: 'unnoticeable-action' }))
+    .then(() => channel.put({ type: '', isAction: true }))
+    .then(() => channel.put({ type: '', isMixedWithPredicate: true }))
+    .then(() => channel.put({ type: 'action-3' }))
+    .then(() => channel.put({ type: typeSymbol }))
+    .then(() => channel.put(END))
 
   return task.toPromise().then(() => {
     expect(actual).toEqual(expected)

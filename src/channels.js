@@ -1,10 +1,9 @@
-import { always, is, once, remove } from '../utils'
+import { always, is, once, remove } from './utils'
 import * as buffers from './buffers'
-import { asap } from '../scheduler'
 
 export const END = Symbol('END')
 export const MATCH = Symbol('MATCH')
-export const SAGA_ACTION = Symbol('SAGA_ACTION')
+export const SCHEDULED = Symbol('SCHEDULED')
 
 export function channel(buffer = buffers.expanding()) {
   let closed = false
@@ -119,36 +118,34 @@ export function eventChannel(subscribe, buffer = buffers.none()) {
   }
 }
 
+export const markAsScheduled = put => action => {
+  if (is.object(action) || is.array(action)) {
+    action[SCHEDULED] = true
+  }
+  put(action)
+}
+
 function enhanceable(chan) {
   chan.enhancePut = fn => {
     chan.put = fn(chan.put)
     return chan
   }
 
-  chan._clone = () => enhanceable({ ...chan })
-
-  chan._connect = fn => chan._clone().enhancePut(() => wrapSagaDispatch(fn))
+  chan.clone = () => enhanceable({ ...chan })
 
   return chan
 }
 
-const scheduleSagaPut = put => action => {
-  if (action[SAGA_ACTION]) {
-    put(action)
-  } else {
-    asap(() => put(action))
+export function stdChannel(scheduler) {
+  const ensureScheduled = put => action => {
+    if (action[SCHEDULED]) {
+      put(action)
+    } else {
+      scheduler.asap(() => put(action))
+    }
   }
-}
 
-const wrapSagaDispatch = put => action => {
-  if (is.object(action) || is.array(action)) {
-    action[SAGA_ACTION] = true
-  }
-  put(action)
-}
-
-export function stdChannel() {
-  return enhanceable(multicastChannel()).enhancePut(scheduleSagaPut)
+  return enhanceable(multicastChannel()).enhancePut(ensureScheduled)
 }
 
 export function multicastChannel() {

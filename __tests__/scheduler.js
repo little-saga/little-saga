@@ -1,13 +1,14 @@
-import { asap, immediately } from '../src/scheduler'
+import { makeScheduler } from '../src'
 
 test('scheduler executes all recursively triggered tasks in order', () => {
+  const scheduler = makeScheduler()
   const actual = []
-  asap(() => {
+  scheduler.asap(() => {
     actual.push('1')
-    asap(() => {
+    scheduler.asap(() => {
       actual.push('2')
     })
-    asap(() => {
+    scheduler.asap(() => {
       actual.push('3')
     })
   })
@@ -15,14 +16,15 @@ test('scheduler executes all recursively triggered tasks in order', () => {
 })
 
 test('scheduler when suspended queues up and executes all tasks on flush', () => {
+  const scheduler = makeScheduler()
   const actual = []
-  immediately(() => {
-    asap(() => {
+  scheduler.immediately(() => {
+    scheduler.asap(() => {
       actual.push('1')
-      asap(() => {
+      scheduler.asap(() => {
         actual.push('2')
       })
-      asap(() => {
+      scheduler.asap(() => {
         actual.push('3')
       })
     })

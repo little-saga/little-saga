@@ -1,9 +1,10 @@
-import { channel, deferred, END, io, runSaga, stdChannel } from '../../src'
+import { channel, deferred, END, io, makeScheduler, runSaga, stdChannel } from '../../src'
 
 test('saga put handling', () => {
   const actual = []
 
-  const channel = stdChannel().enhancePut(put => action => {
+  const scheduler = makeScheduler()
+  const channel = stdChannel(scheduler).enhancePut(put => action => {
     actual.push(action.type)
     return put(action)
   })
@@ -13,7 +14,7 @@ test('saga put handling', () => {
     yield io.put({ type: 2 })
   }
 
-  const task = runSaga({ channel }, genFn, 'arg')
+  const task = runSaga({ scheduler, channel }, genFn, 'arg')
 
   const expected = ['arg', 2]
 
@@ -48,7 +49,8 @@ test('saga put in a channel', () => {
 test("saga error put's response handling", () => {
   let actual = []
   const error = new Error('error')
-  const channel = stdChannel().enhancePut(put => action => {
+  const scheduler = makeScheduler()
+  const channel = stdChannel(scheduler).enhancePut(put => action => {
     if (action.error) {
       throw error
     }
@@ -63,7 +65,7 @@ test("saga error put's response handling", () => {
     }
   }
 
-  const task = runSaga({ channel }, genFn, 'arg')
+  const task = runSaga({ scheduler, channel }, genFn, 'arg')
 
   const expected = [error]
 
@@ -110,7 +112,8 @@ test('puts emitted directly after creating a task (caused by another put) should
   let callSubscriber = false
   let dispatch = false
 
-  const channel = stdChannel().enhancePut(put => {
+  const scheduler = makeScheduler()
+  const channel = stdChannel(scheduler).enhancePut(put => {
     dispatch = put
     return action => {
       callSubscriber = action.callSubscriber
@@ -118,7 +121,7 @@ test('puts emitted directly after creating a task (caused by another put) should
     }
   })
 
-  const saga = runSaga({ channel }, function*() {
+  const saga = runSaga({ scheduler, channel }, function*() {
     yield io.take('a')
     yield io.put({ type: 'b', callSubscriber: true })
     yield io.take('c')
@@ -143,9 +146,9 @@ test('puts emitted directly after creating a task (caused by another put) should
 
 test('END should reach tasks created after it gets dispatched', () => {
   const actual = []
-  let dispatch = false
 
-  const channel = stdChannel().enhancePut(put => (dispatch = put))
+  const scheduler = makeScheduler()
+  const channel = stdChannel(scheduler)
 
   function* subTask() {
     try {
@@ -161,7 +164,7 @@ test('END should reach tasks created after it gets dispatched', () => {
 
   const def = deferred()
 
-  const task = runSaga({ channel }, function*() {
+  const task = runSaga({ scheduler, channel }, function*() {
     while (true) {
       yield io.take('START')
       actual.push('start taken')
@@ -172,12 +175,12 @@ test('END should reach tasks created after it gets dispatched', () => {
     }
   })
 
-  dispatch({ type: 'START' })
-  dispatch(END)
+  channel.put({ type: 'START' })
+  channel.put(END)
 
   def.resolve()
-  dispatch({ type: 'NEXT' })
-  dispatch({ type: 'START' })
+  channel.put({ type: 'NEXT' })
+  channel.put({ type: 'START' })
 
   const expected = [
     'start taken',

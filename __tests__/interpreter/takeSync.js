@@ -1,5 +1,5 @@
 import EventEmitter from 'events'
-import { buffers, channel, END, io, runSaga, stdChannel, takeEvery } from '../../src'
+import { buffers, channel, END, io, runSaga, stdChannel, takeEvery, makeScheduler } from '../../src'
 
 test('synchronous sequential takes', () => {
   const actual = []
@@ -14,9 +14,10 @@ test('synchronous sequential takes', () => {
     actual.push(yield io.take('a2'))
   }
 
-  const channel = stdChannel().enhancePut(put => (dispatch = put))
+  const scheduler = makeScheduler()
+  const channel = stdChannel(scheduler).enhancePut(put => (dispatch = put))
 
-  runSaga({ channel }, function*() {
+  runSaga({ scheduler, channel }, function*() {
     yield io.fork(fnA)
     yield io.fork(fnB)
   })
@@ -31,11 +32,11 @@ test('synchronous sequential takes', () => {
 
 test('synchronous concurrent takes', () => {
   const actual = []
-  let dispatch
 
-  const channel = stdChannel().enhancePut(put => (dispatch = put))
+  const scheduler = makeScheduler()
+  const channel = stdChannel(scheduler)
 
-  runSaga({ channel }, function* root() {
+  runSaga({ scheduler, channel }, function* root() {
     // If a1 wins, then a2 cancellation means
     // it will not take the next 'a2' action,
     // dispatched immediately by the store after 'a1';
@@ -50,8 +51,8 @@ test('synchronous concurrent takes', () => {
     actual.push(yield io.take('a2'))
   })
 
-  dispatch({ type: 'a1' })
-  dispatch({ type: 'a2' })
+  channel.put({ type: 'a1' })
+  channel.put({ type: 'a2' })
 
   const expected = [{ a1: { type: 'a1' } }, { type: 'a2' }]
   // In concurrent takes only the winner must take an action
@@ -60,16 +61,16 @@ test('synchronous concurrent takes', () => {
 
 test('synchronous parallel takes', () => {
   const actual = []
-  let dispatch
 
-  const channel = stdChannel().enhancePut(put => (dispatch = put))
+  const scheduler = makeScheduler()
+  const channel = stdChannel(scheduler)
 
-  runSaga({ channel }, function* root() {
+  runSaga({ scheduler, channel }, function* root() {
     actual.push(yield io.all([io.take('a1'), io.take('a2')]))
   })
 
-  dispatch({ type: 'a1' })
-  dispatch({ type: 'a2' })
+  channel.put({ type: 'a1' })
+  channel.put({ type: 'a2' })
 
   const expected = [[{ type: 'a1' }, { type: 'a2' }]]
   // Saga must resolve once all parallel actions dispatched
@@ -78,10 +79,10 @@ test('synchronous parallel takes', () => {
 
 test('synchronous parallel + concurrent takes', () => {
   const actual = []
-  let dispatch
-  const channel = stdChannel().enhancePut(put => (dispatch = put))
+  const scheduler = makeScheduler()
+  const channel = stdChannel(scheduler)
 
-  runSaga({ channel }, function* root() {
+  runSaga({ scheduler, channel }, function* root() {
     actual.push(
       yield io.all([
         io.race({
@@ -93,8 +94,8 @@ test('synchronous parallel + concurrent takes', () => {
     )
   })
 
-  dispatch({ type: 'a1' })
-  dispatch({ type: 'a2' })
+  channel.put({ type: 'a1' })
+  channel.put({ type: 'a2' })
 
   const expected = [[{ a1: { type: 'a1' } }, { type: 'a2' }]]
   // Saga must resolve once all parallel actions dispatched
@@ -103,11 +104,11 @@ test('synchronous parallel + concurrent takes', () => {
 
 test('synchronous takes + puts', () => {
   const actual = []
-  let dispatch
 
-  const channel = stdChannel().enhancePut(put => (dispatch = put))
+  const scheduler = makeScheduler()
+  const channel = stdChannel(scheduler)
 
-  runSaga({ channel }, function* root() {
+  runSaga({ scheduler, channel }, function* root() {
     yield io.fork(function*() {
       while (true) {
         const action = yield io.take('a')
@@ -120,8 +121,8 @@ test('synchronous takes + puts', () => {
     yield io.put({ type: 'a', payload: 'ack-2' })
   })
 
-  dispatch({ type: 'a', payload: 1 })
-  dispatch({ type: 'a', payload: 2 })
+  channel.put({ type: 'a', payload: 1 })
+  channel.put({ type: 'a', payload: 2 })
 
   // Sagas must be able to interleave takes and puts without losing actions
   expect(actual).toEqual([1, 'ack-1', 2, 'ack-2'])
@@ -342,9 +343,13 @@ test('inter-saga fork/take back from forked child 1', async () => {
   }
 
   const emitter = new EventEmitter()
-  const channel = stdChannel()
+  const scheduler = makeScheduler()
+  const channel = stdChannel(scheduler)
   emitter.on('action', action => channel.put(action))
-  const task = runSaga({ channel, dispatch: action => emitter.emit('action', action) }, root)
+  const task = runSaga(
+    { scheduler, channel, dispatch: action => emitter.emit('action', action) },
+    root,
+  )
 
   emitter.emit('action', { type: 'TEST' })
   emitter.emit('action', END)
@@ -398,10 +403,12 @@ test('inter-saga fork/take back from forked child 3', async () => {
   }
 
   const emitter = new EventEmitter()
-  const channel = stdChannel()
+  const scheduler = makeScheduler()
+  const channel = stdChannel(scheduler)
   emitter.on('action', action => channel.put(action))
   const task = runSaga(
     {
+      scheduler,
       channel,
       dispatch: action => emitter.emit('action', action),
     },
@@ -420,32 +427,29 @@ test('inter-saga fork/take back from forked child 3', async () => {
 test('put causing sync dispatch response in store subscriber', () => {
   const actual = []
   const emitter = new EventEmitter()
-  const channel = stdChannel()
-  emitter.on('action', action => channel.put(action))
+  const scheduler = makeScheduler()
+  const channel = stdChannel(scheduler).enhancePut(rawPut => {
+    emitter.on('action', rawPut)
+    return action => emitter.emit('action', action)
+  })
 
-  runSaga(
-    {
-      channel,
-      dispatch: action => emitter.emit('action', action),
-    },
-    function* root() {
-      while (true) {
-        const { a, b } = yield io.race({
-          a: io.take('a'),
-          b: io.take('b'),
-        })
+  runSaga({ scheduler, channel }, function* root() {
+    while (true) {
+      const { a, b } = yield io.race({
+        a: io.take('a'),
+        b: io.take('b'),
+      })
 
-        actual.push(a ? a.type : b.type)
+      actual.push(a ? a.type : b.type)
 
-        if (a) {
-          yield io.put({ type: 'c', test: true })
-          continue
-        }
-
-        yield io.put({ type: 'd', test: true })
+      if (a) {
+        yield io.put({ type: 'c', test: true })
+        continue
       }
-    },
-  )
+
+      yield io.put({ type: 'd', test: true })
+    }
+  })
 
   let lastType
   emitter.on('action', action => {

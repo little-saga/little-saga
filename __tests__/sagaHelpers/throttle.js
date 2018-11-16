@@ -1,5 +1,5 @@
 import EventEmitter from 'events'
-import { throttle, io, delay, stdChannel, runSaga } from '../../src'
+import { throttle, io, delay, stdChannel, runSaga, makeScheduler } from '../../src'
 
 jest.useFakeTimers()
 
@@ -15,9 +15,11 @@ test('throttle', () => {
     ['a1', 'a2', 34],
   ]
 
+  const scheduler = makeScheduler()
   runSaga(
     {
-      channel: stdChannel().enhancePut(put => {
+      scheduler,
+      channel: stdChannel(scheduler).enhancePut(put => {
         emitter.on('action', put)
         return action => emitter.emit('action', action)
       }),

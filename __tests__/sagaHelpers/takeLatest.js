@@ -1,17 +1,18 @@
 import EventEmitter from 'events'
-import { runSaga, deferred, stdChannel, io, takeLatest } from '../../src'
+import { runSaga, deferred, stdChannel, io, takeLatest, makeScheduler } from '../../src'
 
 test('takeLatest', () => {
   const defs = [deferred(), deferred(), deferred(), deferred()]
 
   const actual = []
   const emitter = new EventEmitter()
-  const channel = stdChannel().enhancePut(put => {
+  const scheduler = makeScheduler()
+  const channel = stdChannel(scheduler).enhancePut(put => {
     emitter.on('action', put)
     return action => emitter.emit('action', action)
   })
 
-  runSaga({ channel }, root)
+  runSaga({ scheduler, channel }, root)
 
   function* root() {
     const task = yield takeLatest('ACTION', worker, 'a1', 'a2')

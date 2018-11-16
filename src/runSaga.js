@@ -1,29 +1,26 @@
 import proc from './proc'
 import { createTaskIterator, reportErrorOnly } from './internal-utils'
-import { stdChannel } from './channel-utils/channels'
-import coreEffectRunnerMap from './coreEffectRunnerMap'
-import { immediately } from './scheduler'
+import { markAsScheduled, stdChannel } from './channels'
+import makeScheduler from './makeScheduler'
 
 export default function runSaga(options, fn, ...args) {
   const {
+    scheduler = makeScheduler(),
     taskContext = {},
-    cont = reportErrorOnly,
-    channel = stdChannel(),
-    customEffectRunnerMap = {},
+    channel = stdChannel(scheduler),
     customEnv = {},
-    dispatch,
     getState,
+    cont = reportErrorOnly,
   } = options
 
-  const effectRunnerMap = Object.assign({}, customEffectRunnerMap, coreEffectRunnerMap)
-
   const env = {
-    effectRunnerMap,
+    scheduler,
     getState,
-    channel: channel._connect(dispatch || channel.put),
+    channel: channel.clone().enhancePut(markAsScheduled),
     ...customEnv,
   }
 
   const iterator = createTaskIterator(fn, args)
-  return immediately(() => proc(env, iterator, taskContext, cont))
+
+  return scheduler.immediately(() => proc(env, iterator, taskContext, cont))
 }
