@@ -5,23 +5,20 @@ test('saga race between effects handling', () => {
   let actual = []
   const timeout = deferred()
 
-  let dispatch
+  const channel = stdChannel()
 
-  const task = runSaga(
-    { channel: stdChannel().enhancePut(put => (dispatch = put)) },
-    function* genFn() {
-      actual.push(
-        yield io.race({
-          event: io.take('action'),
-          timeout: timeout.promise,
-        }),
-      )
-    },
-  )
+  const task = runSaga({ channel }, function* genFn() {
+    actual.push(
+      yield io.race({
+        event: io.take('action'),
+        timeout: timeout.promise,
+      }),
+    )
+  })
 
   Promise.resolve(1)
     .then(() => timeout.resolve(1))
-    .then(() => dispatch({ type: 'action' }))
+    .then(() => channel.put({ type: 'action' }))
 
   const expected = [{ timeout: 1 }]
 
@@ -32,21 +29,18 @@ test('saga race between effects handling', () => {
 })
 
 test('saga race between array of effects handling', () => {
-  let actual = []
-  let dispatch
+  const actual = []
 
   const timeout = deferred()
 
-  const task = runSaga(
-    { channel: stdChannel().enhancePut(put => (dispatch = put)) },
-    function* genFn() {
-      actual.push(yield io.race([io.take('action'), timeout.promise]))
-    },
-  )
+  const channel = stdChannel()
+  const task = runSaga({ channel }, function* genFn() {
+    actual.push(yield io.race([io.take('action'), timeout.promise]))
+  })
 
   Promise.resolve()
     .then(() => timeout.resolve(1))
-    .then(() => dispatch({ type: 'action' }))
+    .then(() => channel.put({ type: 'action' }))
 
   const expected = [[undefined, 1]]
 
@@ -83,32 +77,30 @@ test('saga race between effects: handle END', async () => {
 })
 
 test('saga race between sync effects', () => {
-  let actual = []
-  let dispatch
+  const actual = []
 
-  const task = runSaga(
-    { channel: stdChannel().enhancePut(put => (dispatch = put)) },
-    function* genFn() {
-      const xChan = yield io.actionChannel('x')
-      const yChan = yield io.actionChannel('y')
+  const channel = stdChannel()
 
-      yield io.take('start')
+  const task = runSaga({ channel }, function* genFn() {
+    const xChan = yield io.actionChannel('x')
+    const yChan = yield io.actionChannel('y')
 
-      yield io.race({
-        x: io.take(xChan),
-        y: io.take(yChan),
-      })
+    yield io.take('start')
 
-      yield Promise.resolve(1) // waiting for next tick
+    yield io.race({
+      x: io.take(xChan),
+      y: io.take(yChan),
+    })
 
-      actual.push(yield io.flush(xChan), yield io.flush(yChan))
-    },
-  )
+    yield Promise.resolve(1) // waiting for next tick
+
+    actual.push(yield io.flush(xChan), yield io.flush(yChan))
+  })
 
   Promise.resolve(1)
-    .then(() => dispatch({ type: 'x' }))
-    .then(() => dispatch({ type: 'y' }))
-    .then(() => dispatch({ type: 'start' }))
+    .then(() => channel.put({ type: 'x' }))
+    .then(() => channel.put({ type: 'y' }))
+    .then(() => channel.put({ type: 'start' }))
 
   const expected = [[], [{ type: 'y' }]]
 

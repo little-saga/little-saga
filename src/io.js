@@ -1,14 +1,7 @@
-import { IO, SELF_CANCELLATION } from './symbols'
+import { SELF_CANCELLATION } from './symbols'
 import { identity, is } from './utils'
-import { resolveContextAndFn } from './internal-utils'
-
-export function makeEffect(type, payload) {
-  return { [IO]: true, type, payload }
-}
-
-export function detach({ type, payload }) {
-  return makeEffect(type, { ...payload, detached: true })
-}
+import { makeEffect, resolveContextAndFn } from './internal-utils'
+import { detach } from './io-helpers'
 
 function takeEffectCreatorFactory(maybe) {
   return (channel, pattern) => {
@@ -17,16 +10,6 @@ function takeEffectCreatorFactory(maybe) {
       channel = undefined
     }
     return makeEffect('TAKE', { channel, pattern, maybe })
-  }
-}
-
-function putEffectCreatorFactory(resolve) {
-  return (channel, action) => {
-    if (!is.channel(channel)) {
-      action = channel
-      channel = undefined
-    }
-    return makeEffect('PUT', { channel, action, resolve })
   }
 }
 
@@ -48,8 +31,13 @@ const io = {
   select: (selector = identity, ...args) => makeEffect('SELECT', { selector, args }),
   take: takeEffectCreatorFactory(false),
   takeMaybe: takeEffectCreatorFactory(true),
-  put: putEffectCreatorFactory(false),
-  putResolve: putEffectCreatorFactory(true),
+  put: (channel, action) => {
+    if (!is.channel(channel)) {
+      action = channel
+      channel = undefined
+    }
+    return makeEffect('PUT', { channel, action })
+  },
   flush: chan => makeEffect('FLUSH', chan),
   actionChannel: (pattern, buffer) => makeEffect('ACTION_CHANNEL', { pattern, buffer }),
 }

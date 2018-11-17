@@ -1,12 +1,15 @@
 export * from './symbols'
 export * from './utils'
-export * from './sagaHelpers'
-export * from './channel-utils/channels'
+export * from './saga-helpers'
+export * from './channels'
+export * from './stdChannel'
+export * from './io-helpers'
 
-import * as buffers from './channel-utils/buffers'
+import * as buffers from './buffers'
 
-import runSaga from './runSaga'
-import io, { detach, makeEffect } from './io'
-import createSagaMiddleware from './middleware'
+export { buffers }
 
-export { runSaga, io, detach, makeEffect, buffers, createSagaMiddleware }
+export { default as io } from './io'
+export { default as runSaga } from './runSaga'
+export { default as makeScheduler } from './makeScheduler'
+export { defualt as defaultScheduler } from './defaultScheduler'

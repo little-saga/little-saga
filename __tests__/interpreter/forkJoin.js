@@ -58,9 +58,11 @@ test('saga join handling : generators', () => {
   }
 
   const emitter = new EventEmitter()
-  const channel = stdChannel()
-  emitter.on('action', action => channel.put(action))
-  const task = runSaga({ channel, dispatch: action => emitter.emit('action', action) }, genFn)
+  const channel = stdChannel().enhancePut(rawPut => {
+    emitter.on('action', rawPut)
+    return action => emitter.emit('action', action)
+  })
+  const task = runSaga({ channel }, genFn)
 
   Promise.resolve(1)
     .then(() => defs[0].resolve(true))
@@ -98,9 +100,7 @@ test('saga fork/join handling : functions', () => {
     const syncTask = yield io.fork(syncFn)
 
     actual.push(yield defs[0].promise)
-    // TODO 这里和 redux-saga 行为不一致
-    const promise = yield io.join(task)
-    actual.push(yield promise)
+    actual.push(yield io.join(task))
     actual.push(yield io.join(syncTask))
   }
 

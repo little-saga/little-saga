@@ -1,5 +1,9 @@
 import { is, noop } from './utils'
-import { TASK_CANCEL } from './symbols'
+import { IO, TASK_CANCEL } from './symbols'
+
+export function makeEffect(type, payload) {
+  return { [IO]: true, type, payload }
+}
 
 export function resolveContextAndFn(fnobj) {
   if (is.func(fnobj)) {
@@ -51,8 +55,12 @@ function* iteratorAlwaysYieldReturn(result) {
 }
 
 const REPORT_ERROR_ONLY =
-  'This following error is reported by reportErrorOnly, this means you have aborted root saga or detached tasks\n'
+  'The following error is reported by reportErrorOnly, this means you have aborted root saga or detached tasks.\n'
 export const reportErrorOnly = (result, isErr) => isErr && console.error(REPORT_ERROR_ONLY, result)
+
+export const EXCEPTION_DURING_CANCELLATION =
+  'The following exception occurs during the cancellation of an effect/task, ' +
+  'you should remove the unsafe code in the cancellation logic.\n'
 
 export function createMutexCallback(parentCallback) {
   let settled = false
@@ -75,7 +83,7 @@ export function createMutexCallback(parentCallback) {
     try {
       callback.cancel()
     } catch (err) {
-      console.error(err)
+      console.error(EXCEPTION_DURING_CANCELLATION, err)
     }
     callback.cancel = noop
   }

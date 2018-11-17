@@ -84,7 +84,6 @@ export type Effect =
   | PutEffect
   | FlushEffect
   | ActionChannelEffect
-  | CustomEffect
 
 export interface ForkEffect {
   type: 'FORK'
@@ -138,7 +137,6 @@ export interface GetContextEffect {
 
 export interface GetEnvEffect {
   type: 'GET_ENV'
-  prop: string
 }
 
 export interface SelectEffect {
@@ -160,7 +158,6 @@ export interface PutEffect {
   payload: {
     channel: Channel | MulticastChannel
     action: any
-    resolve: boolean
   }
 }
 
@@ -205,6 +202,7 @@ export const io: {
     channel: Channel<T> | MulticastChannel<T> | EventChannel<T>,
     pattern?: TakePattern<T>,
   ): TakeEffect
+  takeMaybe: typeof io.take
   put<T>(message: T): PutEffect
   put<T>(ch: Channel<T> | MulticastChannel<T>, message: T | typeof END): PutEffect
   flush<T>(chan: Channel<T>): FlushEffect
@@ -212,36 +210,33 @@ export const io: {
 }
 
 export function detach(effect: ForkEffect): ForkEffect
-
-type CustomEffect = { type: string; payload: any }
-export function makeEffect(type: string, payload: any): CustomEffect
 // endregion
 
-// region runSaga and middleware
+// region runSaga and scheduler
 interface RunSagaOptions {
+  scheduler: Scheduler
   taskContext: any
-  cont: Callback
   channel: MulticastChannel
-  customEffectRunnerMap: { [key: string]: any }
   customEnv: any
-  dispatch(action: any): void
   getState(): any
+  cont: Callback
 }
 
 export function runSaga(options: Partial<RunSagaOptions>, fn: any, ...args: any[]): Task
 
-export function createSagaMiddleware(
-  options?: Partial<RunSagaOptions>,
-): {
-  (middlewareAPI: any): (next: any) => (action: any) => any
-  run?(fn: Function, ...args: any[]): Task
+export interface Scheduler {
+  asap(task: Func<[], void>)
+  immediately(task: Func<[], any>)
 }
+
+export function makeScheduler(): Scheduler
+export const defaultScheduler: Scheduler
 // endregion
 
 // region channels and buffers
 export const END: unique symbol
 export const MATCH: unique symbol
-export const SAGA_ACTION: unique symbol
+export const SCHEDULED: unique symbol
 
 export const buffers: {
   none<T>(): Buffer<T>
@@ -279,13 +274,12 @@ export interface MulticastChannel<T = any> {
   take(cb: (message: T | typeof END) => void, matcher?: Predicate<T>): void
   put(message: T | typeof END): void
   close(): void
-  connect(dispatch: (action: T | typeof END) => void): this
 }
 export function multicastChannel<T>(): MulticastChannel<T>
 
 type PutFn = (message: any) => void
-interface Ehanceable {
+interface Enhanceable {
   enhancePut(enhancer: (oldPut: PutFn) => PutFn): this
 }
-export function stdChannel(): MulticastChannel & Ehanceable
+export function stdChannel(scheduler?: Scheduler): MulticastChannel & Enhanceable
 // endregion

@@ -143,9 +143,8 @@ test('puts emitted directly after creating a task (caused by another put) should
 
 test('END should reach tasks created after it gets dispatched', () => {
   const actual = []
-  let dispatch = false
 
-  const channel = stdChannel().enhancePut(put => (dispatch = put))
+  const channel = stdChannel()
 
   function* subTask() {
     try {
@@ -172,12 +171,12 @@ test('END should reach tasks created after it gets dispatched', () => {
     }
   })
 
-  dispatch({ type: 'START' })
-  dispatch(END)
+  channel.put({ type: 'START' })
+  channel.put(END)
 
   def.resolve()
-  dispatch({ type: 'NEXT' })
-  dispatch({ type: 'START' })
+  channel.put({ type: 'NEXT' })
+  channel.put({ type: 'START' })
 
   const expected = [
     'start taken',

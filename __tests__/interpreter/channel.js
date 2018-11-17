@@ -1,9 +1,8 @@
 import { buffers, io, runSaga, stdChannel } from '../../src'
 
 test('saga create channel for store actions', () => {
-  let actual = []
-  let dispatch
-  const channel = stdChannel().enhancePut(put => (dispatch = put))
+  const actual = []
+  const channel = stdChannel()
 
   const task = runSaga({ channel }, function* genFn() {
     const chan = yield io.actionChannel('action')
@@ -15,7 +14,7 @@ test('saga create channel for store actions', () => {
   })
 
   for (let i = 0; i < 10; i++) {
-    dispatch({ type: 'action', payload: i + 1 })
+    channel.put({ type: 'action', payload: i + 1 })
   }
 
   const expected = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
@@ -27,18 +26,14 @@ test('saga create channel for store actions', () => {
 
 test('saga create channel for store actions (with buffer)', () => {
   const buffer = buffers.expanding()
-  let dispatch
-
-  const task = runSaga(
-    { channel: stdChannel().enhancePut(put => (dispatch = put)) },
-    function* genFn() {
-      return yield io.actionChannel('action', buffer)
-    },
-  )
+  const channel = stdChannel()
+  const task = runSaga({ channel }, function* genFn() {
+    return yield io.actionChannel('action', buffer)
+  })
 
   Promise.resolve().then(() => {
     for (let i = 0; i < 10; i++) {
-      dispatch({ type: 'action', payload: i + 1 })
+      channel.put({ type: 'action', payload: i + 1 })
     }
   })
 

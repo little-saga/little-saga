@@ -1,7 +1,6 @@
 import { is, makeMatcher, noop, remove } from './utils'
-import { asap, immediately } from './scheduler'
 import proc from './proc'
-import { channel, END } from './channel-utils/channels'
+import { channel, END } from './channels'
 import { SELF_CANCELLATION, TASK_CANCEL } from './symbols'
 import {
   createAllStyleChildCallbacks,
@@ -10,8 +9,8 @@ import {
   reportErrorOnly,
 } from './internal-utils'
 
-function runForkEffect({ fn, args, detached }, cb, { env, task }) {
-  immediately(() => {
+function runForkEffect(env, task, { fn, args, detached }, cb) {
+  env.scheduler.immediately(() => {
     const iterator = createTaskIterator(fn, args)
     if (detached) {
       cb(proc(env, iterator, task.taskContext, reportErrorOnly))
@@ -29,22 +28,22 @@ function runForkEffect({ fn, args, detached }, cb, { env, task }) {
   })
 }
 
-function runJoinEffect(taskOrTasks, cb, { task }) {
-  if (is.array(taskOrTasks)) {
-    if (taskOrTasks.length === 0) {
+function runJoinEffect(env, task, tasksToJoin, cb) {
+  if (is.array(tasksToJoin)) {
+    if (tasksToJoin.length === 0) {
       cb([])
       return
     }
-    const { childCallbacks } = createAllStyleChildCallbacks(taskOrTasks, cb)
-    taskOrTasks.forEach((t, i) => {
-      joinSingleTask(t, childCallbacks[i], task)
+    const { childCallbacks } = createAllStyleChildCallbacks(tasksToJoin, cb)
+    tasksToJoin.forEach((t, i) => {
+      joinSingleTask(task, t, childCallbacks[i])
     })
   } else {
-    joinSingleTask(taskOrTasks, cb, task)
+    joinSingleTask(task, tasksToJoin, cb)
   }
 }
 
-function joinSingleTask(taskToJoin, cb, task) {
+function joinSingleTask(task, taskToJoin, cb) {
   if (taskToJoin.isRunning) {
     const joiner = { task, cb }
     cb.cancel = () => remove(taskToJoin.joiners, joiner)
@@ -58,7 +57,7 @@ function joinSingleTask(taskToJoin, cb, task) {
   }
 }
 
-function runCancelEffect(taskOrTasks, cb, { task }) {
+function runCancelEffect(env, task, taskOrTasks, cb) {
   if (taskOrTasks === SELF_CANCELLATION) {
     cancelSingleTask(task)
   } else if (is.array(taskOrTasks)) {
@@ -77,11 +76,11 @@ function cancelSingleTask(taskToCancel) {
   }
 }
 
-function runCancelledEffect(payload, cb, { task }) {
+function runCancelledEffect(env, task, payload, cb) {
   cb(task.taskQueue.mainTask.isCancelled)
 }
 
-function runAllEffect(effects, cb, { runEffect }) {
+function runAllEffect(env, task, effects, cb, { runEffect }) {
   const { childCallbacks, keys } = createAllStyleChildCallbacks(effects, cb)
 
   if (keys.length === 0) {
@@ -92,7 +91,7 @@ function runAllEffect(effects, cb, { runEffect }) {
   keys.forEach(key => runEffect(effects[key], childCallbacks[key]))
 }
 
-function runRaceEffect(effects, cb, { runEffect }) {
+function runRaceEffect(env, task, effects, cb, { runEffect }) {
   const { keys, childCallbacks, isCompleted } = createRaceStyleChildCallbacks(effects, cb)
   for (const key of keys) {
     if (isCompleted()) {
@@ -102,7 +101,7 @@ function runRaceEffect(effects, cb, { runEffect }) {
   }
 }
 
-function runCPSEffect({ fn, args }, cb) {
+function runCPSEffect(env, task, { fn, args }, cb) {
   try {
     const cpsCb = (err, res) => (err == null ? cb(res) : cb(err, true))
     fn(...args, cpsCb)
@@ -114,7 +113,7 @@ function runCPSEffect({ fn, args }, cb) {
   }
 }
 
-function runCallEffect({ context, fn, args }, cb, { runEffect }) {
+function runCallEffect(env, task, { context, fn, args }, cb, { runEffect }) {
   let result
   try {
     result = fn.apply(context, args)
@@ -129,25 +128,24 @@ function runCallEffect({ context, fn, args }, cb, { runEffect }) {
   }
 }
 
-export function runSetContextEffect({ prop, value }, cb, { task }) {
+export function runSetContextEffect(env, task, { prop, value }, cb) {
   task.taskContext[prop] = value
   cb()
 }
 
-export function runGetContextEffect(prop, cb, { task }) {
+export function runGetContextEffect(env, task, prop, cb) {
   cb(task.taskContext[prop])
 }
 
-export function runGetEnvEffect(payload, cb, { env }) {
+export function runGetEnvEffect(env, task, payload, cb) {
   cb(env)
 }
 
-export function runSelectEffect({ selector, args }, cb, { env }) {
+export function runSelectEffect(env, task, { selector, args }, cb) {
   cb(selector(env.getState(), ...args))
 }
 
-function runTakeEffect({ channel, pattern, maybe }, cb, { env }) {
-  channel = channel || env.channel
+function runTakeEffect(env, task, { channel = env.channel, pattern, maybe }, cb) {
   const takeCb = input => {
     if (input instanceof Error) {
       cb(input, true)
@@ -168,31 +166,21 @@ function runTakeEffect({ channel, pattern, maybe }, cb, { env }) {
   cb.cancel = takeCb.cancel
 }
 
-function runPutEffect(payload, cb, { env, runEffect }) {
-  const { channel = env.channel, action, resolve } = payload
-  asap(() => {
-    let result
+function runPutEffect(env, task, { channel = env.channel, action }, cb) {
+  env.scheduler.asap(() => {
     try {
-      result = channel.put(action)
+      cb(channel.put(action))
     } catch (err) {
       cb(err, true)
-      return
     }
-
-    if (resolve && is.promise(result)) {
-      runEffect(result, cb)
-    } else {
-      cb(result)
-    }
-    // Put effects cannot be cancelled
   })
 }
 
-function runFlushEffect(channel, cb) {
+function runFlushEffect(env, task, channel, cb) {
   channel.flush(cb)
 }
 
-function runActionChannelEffect({ pattern, buffer }, cb, { env }) {
+function runActionChannelEffect(env, task, { pattern, buffer }, cb) {
   const chan = channel(buffer)
   const match = makeMatcher(pattern)
 

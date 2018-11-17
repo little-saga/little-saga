@@ -1,4 +1,4 @@
-import { runSaga, noop, io, stdChannel } from '../../src'
+import { io, runSaga, stdChannel } from '../../src'
 
 const simpleRun = fn => runSaga({}, fn)
 
@@ -69,7 +69,8 @@ test('saga handles call effects and throw the rejected values inside the generat
 
   const expected = ['start', 'failure']
 
-  return runSaga({ channel: stdChannel().enhancePut(collect(actual)) }, genFnParent)
+  const channel = stdChannel().enhancePut(collect(actual))
+  return runSaga({ channel }, genFnParent)
     .toPromise()
     .then(() => {
       // saga dispatches appropriate actions
@@ -100,7 +101,8 @@ test("saga handles call's synchronous failures and throws in the calling generat
     }
   }
 
-  const task = runSaga({ channel: stdChannel().enhancePut(collect(actual)) }, genFnParent)
+  const channel = stdChannel().enhancePut(collect(actual))
+  const task = runSaga({ channel }, genFnParent)
 
   const expected = ['start parent', 'startChild', 'failure child', 'success parent']
 
@@ -128,7 +130,8 @@ test("saga handles call's synchronous failures and throws in the calling generat
     }
   }
 
-  const task = runSaga({ channel: stdChannel().enhancePut(collect(actual)) }, genFnParent)
+  const channel = stdChannel().enhancePut(collect(actual))
+  const task = runSaga({ channel }, genFnParent)
 
   const expected = ['start parent', 'child error', 'failure parent']
 

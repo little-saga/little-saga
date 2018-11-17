@@ -1,4 +1,4 @@
-import { always, noop } from '../utils'
+import { always, noop } from './utils'
 
 const BUFFER_OVERFLOW = "Channel's Buffer overflow!"
 

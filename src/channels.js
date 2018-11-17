@@ -1,20 +1,18 @@
-import { always, is, once, remove } from '../utils'
+import { always, is, once, remove } from './utils'
 import * as buffers from './buffers'
-import { asap } from '../scheduler'
 
 export const END = Symbol('END')
 export const MATCH = Symbol('MATCH')
-export const SAGA_ACTION = Symbol('SAGA_ACTION')
 
 export function channel(buffer = buffers.expanding()) {
   let closed = false
   let takers = []
 
   function checkForbiddenStates() {
-    if (closed && takers.length) {
+    if (closed && takers.length > 0) {
       throw new Error('Cannot have a closed channel with pending takers')
     }
-    if (takers.length && !buffer.isEmpty()) {
+    if (takers.length > 0 && !buffer.isEmpty()) {
       throw new Error('Cannot have pending takers with non empty buffer')
     }
   }
@@ -117,38 +115,6 @@ export function eventChannel(subscribe, buffer = buffers.none()) {
     flush: chan.flush,
     close,
   }
-}
-
-function enhanceable(chan) {
-  chan.enhancePut = fn => {
-    chan.put = fn(chan.put)
-    return chan
-  }
-
-  chan._clone = () => enhanceable({ ...chan })
-
-  chan._connect = fn => chan._clone().enhancePut(() => wrapSagaDispatch(fn))
-
-  return chan
-}
-
-const scheduleSagaPut = put => action => {
-  if (action[SAGA_ACTION]) {
-    put(action)
-  } else {
-    asap(() => put(action))
-  }
-}
-
-const wrapSagaDispatch = put => action => {
-  if (is.object(action) || is.array(action)) {
-    action[SAGA_ACTION] = true
-  }
-  put(action)
-}
-
-export function stdChannel() {
-  return enhanceable(multicastChannel()).enhancePut(scheduleSagaPut)
 }
 
 export function multicastChannel() {
