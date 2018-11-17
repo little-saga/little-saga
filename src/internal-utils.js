@@ -1,5 +1,9 @@
 import { is, noop } from './utils'
-import { TASK_CANCEL } from './symbols'
+import { IO, TASK_CANCEL } from './symbols'
+
+export function makeEffect(type, payload) {
+  return { [IO]: true, type, payload }
+}
 
 export function resolveContextAndFn(fnobj) {
   if (is.func(fnobj)) {

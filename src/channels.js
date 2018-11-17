@@ -3,17 +3,16 @@ import * as buffers from './buffers'
 
 export const END = Symbol('END')
 export const MATCH = Symbol('MATCH')
-export const SCHEDULED = Symbol('SCHEDULED')
 
 export function channel(buffer = buffers.expanding()) {
   let closed = false
   let takers = []
 
   function checkForbiddenStates() {
-    if (closed && takers.length) {
+    if (closed && takers.length > 0) {
       throw new Error('Cannot have a closed channel with pending takers')
     }
-    if (takers.length && !buffer.isEmpty()) {
+    if (takers.length > 0 && !buffer.isEmpty()) {
       throw new Error('Cannot have pending takers with non empty buffer')
     }
   }
@@ -116,36 +115,6 @@ export function eventChannel(subscribe, buffer = buffers.none()) {
     flush: chan.flush,
     close,
   }
-}
-
-export const markAsScheduled = put => action => {
-  if (is.object(action) || is.array(action)) {
-    action[SCHEDULED] = true
-  }
-  put(action)
-}
-
-function enhanceable(chan) {
-  chan.enhancePut = fn => {
-    chan.put = fn(chan.put)
-    return chan
-  }
-
-  chan.clone = () => enhanceable({ ...chan })
-
-  return chan
-}
-
-export function stdChannel(scheduler) {
-  const ensureScheduled = put => action => {
-    if (action[SCHEDULED]) {
-      put(action)
-    } else {
-      scheduler.asap(() => put(action))
-    }
-  }
-
-  return enhanceable(multicastChannel()).enhancePut(ensureScheduled)
 }
 
 export function multicastChannel() {

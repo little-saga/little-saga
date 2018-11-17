@@ -1,11 +1,11 @@
 import proc from './proc'
 import { createTaskIterator, reportErrorOnly } from './internal-utils'
-import { markAsScheduled, stdChannel } from './channels'
-import makeScheduler from './makeScheduler'
+import { stdChannel, markAsScheduled } from './stdChannel'
+import defaultScheduler from './defaultScheduler'
 
 export default function runSaga(options, fn, ...args) {
   const {
-    scheduler = makeScheduler(),
+    scheduler = defaultScheduler,
     taskContext = {},
     channel = stdChannel(scheduler),
     customEnv = {},

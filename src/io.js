@@ -1,7 +1,7 @@
 import { SELF_CANCELLATION } from './symbols'
 import { identity, is } from './utils'
-import { resolveContextAndFn } from './internal-utils'
-import { detach, makeEffect } from './io-helpers'
+import { makeEffect, resolveContextAndFn } from './internal-utils'
+import { detach } from './io-helpers'
 
 function takeEffectCreatorFactory(maybe) {
   return (channel, pattern) => {
