@@ -281,5 +281,5 @@ type PutFn = (message: any) => void
 interface Enhanceable {
   enhancePut(enhancer: (oldPut: PutFn) => PutFn): this
 }
-export function stdChannel(scheduler: Scheduler): MulticastChannel & Enhanceable
+export function stdChannel(scheduler?: Scheduler): MulticastChannel & Enhanceable
 // endregion
