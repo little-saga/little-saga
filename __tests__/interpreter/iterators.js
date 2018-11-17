@@ -1,4 +1,4 @@
-import { runSaga, deferred, io, makeScheduler, stdChannel } from '../../src'
+import { runSaga, deferred, io, stdChannel } from '../../src'
 
 test('saga nested iterator handling', () => {
   const actual = []
@@ -36,9 +36,8 @@ test('saga nested iterator handling', () => {
     'caught child error',
   ]
 
-  const scheduler = makeScheduler()
-  const channel = stdChannel(scheduler)
-  const task = runSaga({ scheduler, channel }, main)
+  const channel = stdChannel()
+  const task = runSaga({ channel }, main)
 
   Promise.resolve(1)
     .then(() => def1.resolve(1))

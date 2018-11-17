@@ -1,11 +1,10 @@
-import { buffers, io, makeScheduler, runSaga, stdChannel } from '../../src'
+import { buffers, io, runSaga, stdChannel } from '../../src'
 
 test('saga create channel for store actions', () => {
   const actual = []
-  const scheduler = makeScheduler()
-  const channel = stdChannel(scheduler)
+  const channel = stdChannel()
 
-  const task = runSaga({ scheduler, channel }, function* genFn() {
+  const task = runSaga({ channel }, function* genFn() {
     const chan = yield io.actionChannel('action')
     for (let i = 0; i < 10; i++) {
       yield Promise.resolve(1)
@@ -27,9 +26,8 @@ test('saga create channel for store actions', () => {
 
 test('saga create channel for store actions (with buffer)', () => {
   const buffer = buffers.expanding()
-  const scheduler = makeScheduler()
-  const channel = stdChannel(scheduler)
-  const task = runSaga({ scheduler, channel }, function* genFn() {
+  const channel = stdChannel()
+  const task = runSaga({ channel }, function* genFn() {
     return yield io.actionChannel('action', buffer)
   })
 

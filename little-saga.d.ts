@@ -274,7 +274,6 @@ export interface MulticastChannel<T = any> {
   take(cb: (message: T | typeof END) => void, matcher?: Predicate<T>): void
   put(message: T | typeof END): void
   close(): void
-  connect(dispatch: (action: T | typeof END) => void): this
 }
 export function multicastChannel<T>(): MulticastChannel<T>
 

@@ -1,10 +1,9 @@
-import { channel, END, io, makeScheduler, runSaga, stdChannel } from '../../src'
+import { channel, END, io, runSaga, stdChannel } from '../../src'
 
 test('saga take from default channel', () => {
   const typeSymbol = Symbol('action-symbol')
   const actual = []
-  const scheduler = makeScheduler()
-  const channel = stdChannel(scheduler)
+  const channel = stdChannel()
 
   function* genFn() {
     try {
@@ -21,7 +20,7 @@ test('saga take from default channel', () => {
     }
   }
 
-  const task = runSaga({ scheduler, channel }, genFn)
+  const task = runSaga({ channel }, genFn)
 
   const expected = [
     { type: 'action-*' },

@@ -1,5 +1,5 @@
 import EventEmitter from 'events'
-import { io, is, makeScheduler, noop, runSaga, stdChannel } from '../../src'
+import { io, is, noop, runSaga, stdChannel } from '../../src'
 
 const run = fn => runSaga({}, fn)
 
@@ -58,8 +58,7 @@ test('saga error handling', done => {
 test('saga output handling', async () => {
   let actual = []
   const emitter = new EventEmitter()
-  const scheduler = makeScheduler()
-  const channel = stdChannel(scheduler).enhancePut(put => {
+  const channel = stdChannel().enhancePut(put => {
     emitter.on('action', action => put(action))
     return action => emitter.emit('action', action)
   })
@@ -71,7 +70,7 @@ test('saga output handling', async () => {
     yield io.put({ type: 2 })
   }
 
-  await runSaga({ scheduler, channel }, genFn, 'arg').toPromise()
+  await runSaga({ channel }, genFn, 'arg').toPromise()
   const expected = ['arg', 2]
   expect(actual).toEqual(expected)
 })

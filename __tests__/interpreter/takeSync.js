@@ -1,5 +1,5 @@
 import EventEmitter from 'events'
-import { buffers, channel, END, io, runSaga, stdChannel, takeEvery, makeScheduler } from '../../src'
+import { buffers, channel, END, io, runSaga, stdChannel, takeEvery } from '../../src'
 
 test('synchronous sequential takes', () => {
   const actual = []
@@ -14,10 +14,9 @@ test('synchronous sequential takes', () => {
     actual.push(yield io.take('a2'))
   }
 
-  const scheduler = makeScheduler()
-  const channel = stdChannel(scheduler).enhancePut(put => (dispatch = put))
+  const channel = stdChannel().enhancePut(put => (dispatch = put))
 
-  runSaga({ scheduler, channel }, function*() {
+  runSaga({ channel }, function*() {
     yield io.fork(fnA)
     yield io.fork(fnB)
   })
@@ -33,10 +32,9 @@ test('synchronous sequential takes', () => {
 test('synchronous concurrent takes', () => {
   const actual = []
 
-  const scheduler = makeScheduler()
-  const channel = stdChannel(scheduler)
+  const channel = stdChannel()
 
-  runSaga({ scheduler, channel }, function* root() {
+  runSaga({ channel }, function* root() {
     // If a1 wins, then a2 cancellation means
     // it will not take the next 'a2' action,
     // dispatched immediately by the store after 'a1';
@@ -62,10 +60,9 @@ test('synchronous concurrent takes', () => {
 test('synchronous parallel takes', () => {
   const actual = []
 
-  const scheduler = makeScheduler()
-  const channel = stdChannel(scheduler)
+  const channel = stdChannel()
 
-  runSaga({ scheduler, channel }, function* root() {
+  runSaga({ channel }, function* root() {
     actual.push(yield io.all([io.take('a1'), io.take('a2')]))
   })
 
@@ -79,10 +76,10 @@ test('synchronous parallel takes', () => {
 
 test('synchronous parallel + concurrent takes', () => {
   const actual = []
-  const scheduler = makeScheduler()
-  const channel = stdChannel(scheduler)
 
-  runSaga({ scheduler, channel }, function* root() {
+  const channel = stdChannel()
+
+  runSaga({ channel }, function* root() {
     actual.push(
       yield io.all([
         io.race({
@@ -105,10 +102,9 @@ test('synchronous parallel + concurrent takes', () => {
 test('synchronous takes + puts', () => {
   const actual = []
 
-  const scheduler = makeScheduler()
-  const channel = stdChannel(scheduler)
+  const channel = stdChannel()
 
-  runSaga({ scheduler, channel }, function* root() {
+  runSaga({ channel }, function* root() {
     yield io.fork(function*() {
       while (true) {
         const action = yield io.take('a')
@@ -343,20 +339,18 @@ test('inter-saga fork/take back from forked child 1', async () => {
   }
 
   const emitter = new EventEmitter()
-  const scheduler = makeScheduler()
-  const channel = stdChannel(scheduler)
-  emitter.on('action', action => channel.put(action))
-  const task = runSaga(
-    { scheduler, channel, dispatch: action => emitter.emit('action', action) },
-    root,
-  )
+  const channel = stdChannel().enhancePut(rawPut => {
+    emitter.on('action', rawPut)
+    return action => emitter.emit('action', action)
+  })
+  const task = runSaga({ channel }, root)
 
   emitter.emit('action', { type: 'TEST' })
   emitter.emit('action', END)
 
   await task.toPromise()
 
-  // Sagas must take actions from each forked childs doing Sync puts
+  // Sagas must take actions from each forked children doing Sync puts
   expect(actual).toEqual([1, 2, 3])
 })
 
@@ -403,17 +397,12 @@ test('inter-saga fork/take back from forked child 3', async () => {
   }
 
   const emitter = new EventEmitter()
-  const scheduler = makeScheduler()
-  const channel = stdChannel(scheduler)
-  emitter.on('action', action => channel.put(action))
-  const task = runSaga(
-    {
-      scheduler,
-      channel,
-      dispatch: action => emitter.emit('action', action),
-    },
-    root,
-  )
+
+  const channel = stdChannel().enhancePut(rawPut => {
+    emitter.on('action', rawPut)
+    return action => emitter.emit('action', action)
+  })
+  const task = runSaga({ channel }, root)
 
   emitter.emit('action', { type: 'PING', val: 0 })
   emitter.emit('action', END)
@@ -427,13 +416,13 @@ test('inter-saga fork/take back from forked child 3', async () => {
 test('put causing sync dispatch response in store subscriber', () => {
   const actual = []
   const emitter = new EventEmitter()
-  const scheduler = makeScheduler()
-  const channel = stdChannel(scheduler).enhancePut(rawPut => {
+
+  const channel = stdChannel().enhancePut(rawPut => {
     emitter.on('action', rawPut)
     return action => emitter.emit('action', action)
   })
 
-  runSaga({ scheduler, channel }, function* root() {
+  runSaga({ channel }, function* root() {
     while (true) {
       const { a, b } = yield io.race({
         a: io.take('a'),

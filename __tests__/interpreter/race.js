@@ -1,14 +1,13 @@
-import { deferred, END, io, makeScheduler, stdChannel } from '../../src'
+import { deferred, END, io, stdChannel } from '../../src'
 import runSaga from '../../src/runSaga'
 
 test('saga race between effects handling', () => {
   let actual = []
   const timeout = deferred()
 
-  const scheduler = makeScheduler()
-  const channel = stdChannel(scheduler)
+  const channel = stdChannel()
 
-  const task = runSaga({ scheduler, channel }, function* genFn() {
+  const task = runSaga({ channel }, function* genFn() {
     actual.push(
       yield io.race({
         event: io.take('action'),
@@ -34,10 +33,8 @@ test('saga race between array of effects handling', () => {
 
   const timeout = deferred()
 
-  const scheduler = makeScheduler()
-  const channel = stdChannel(scheduler)
-
-  const task = runSaga({ scheduler, channel }, function* genFn() {
+  const channel = stdChannel()
+  const task = runSaga({ channel }, function* genFn() {
     actual.push(yield io.race([io.take('action'), timeout.promise]))
   })
 
@@ -55,11 +52,10 @@ test('saga race between array of effects handling', () => {
 
 test('saga race between effects: handle END', async () => {
   const actual = []
-  const scheduler = makeScheduler()
-  const channel = stdChannel(scheduler)
+  const channel = stdChannel()
   const timeout = deferred()
 
-  const task = runSaga({ scheduler, channel }, function* genFn() {
+  const task = runSaga({ channel }, function* genFn() {
     try {
       actual.push(
         yield io.race({
@@ -83,10 +79,9 @@ test('saga race between effects: handle END', async () => {
 test('saga race between sync effects', () => {
   const actual = []
 
-  const scheduler = makeScheduler()
-  const channel = stdChannel(scheduler)
+  const channel = stdChannel()
 
-  const task = runSaga({ scheduler, channel }, function* genFn() {
+  const task = runSaga({ channel }, function* genFn() {
     const xChan = yield io.actionChannel('x')
     const yChan = yield io.actionChannel('y')
 

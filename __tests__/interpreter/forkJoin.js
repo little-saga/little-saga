@@ -1,5 +1,5 @@
 import EventEmitter from 'events'
-import { deferred, io, is, makeScheduler, runSaga, stdChannel } from '../../src'
+import { deferred, io, is, runSaga, stdChannel } from '../../src'
 
 test('saga fork handling: generators', async () => {
   let task1
@@ -58,12 +58,11 @@ test('saga join handling : generators', () => {
   }
 
   const emitter = new EventEmitter()
-  const scheduler = makeScheduler()
-  const channel = stdChannel(scheduler).enhancePut(rawPut => {
+  const channel = stdChannel().enhancePut(rawPut => {
     emitter.on('action', rawPut)
     return action => emitter.emit('action', action)
   })
-  const task = runSaga({ scheduler, channel }, genFn)
+  const task = runSaga({ channel }, genFn)
 
   Promise.resolve(1)
     .then(() => defs[0].resolve(true))
@@ -101,9 +100,7 @@ test('saga fork/join handling : functions', () => {
     const syncTask = yield io.fork(syncFn)
 
     actual.push(yield defs[0].promise)
-    // TODO 这里和 redux-saga 行为不一致
-    const promise = yield io.join(task)
-    actual.push(yield promise)
+    actual.push(yield io.join(task))
     actual.push(yield io.join(syncTask))
   }
 
