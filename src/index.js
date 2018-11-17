@@ -12,4 +12,4 @@ export { buffers }
 export { default as io } from './io'
 export { default as runSaga } from './runSaga'
 export { default as makeScheduler } from './makeScheduler'
-export { defualt as defaultScheduler } from './defaultScheduler'
+export { default as defaultScheduler } from './defaultScheduler'
