@@ -10,12 +10,14 @@ export default function runSaga(options, fn, ...args) {
     channel = stdChannel(scheduler),
     customEnv = {},
     getState,
+    setState,
     cont = reportErrorOnly,
   } = options
 
   const env = {
     scheduler,
     getState,
+    setState,
     channel: channel.clone().enhancePut(markAsScheduled),
     ...customEnv,
   }

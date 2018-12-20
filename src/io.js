@@ -29,6 +29,8 @@ const io = {
   getContext: prop => makeEffect('GET_CONTEXT', prop),
   getEnv: prop => makeEffect('GET_ENV', prop),
   select: (selector = identity, ...args) => makeEffect('SELECT', { selector, args }),
+  update: (updater, ...args) =>
+    makeEffect('UPDATE', typeof updater === 'function' ? { updater, args } : { value: updater }),
   take: takeEffectCreatorFactory(false),
   takeMaybe: takeEffectCreatorFactory(true),
   put: (channel, action) => {

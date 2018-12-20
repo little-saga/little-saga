@@ -80,6 +80,7 @@ export type Effect =
   | GetContextEffect
   | GetEnvEffect
   | SelectEffect
+  | UpdateEffect
   | TakeEffect
   | PutEffect
   | FlushEffect
@@ -144,6 +145,15 @@ export interface SelectEffect {
   payload: { selector: (state: any) => any; args: any[] }
 }
 
+export interface UpdateEffect {
+  type: 'UPDATE'
+  payload: {
+    value: any
+    updater: (state: any) => any
+    args: any[]
+  }
+}
+
 export interface TakeEffect {
   type: 'TAKE'
   payload: {
@@ -197,6 +207,11 @@ export const io: {
     selector?: (state: S, ...args: ARGS) => any,
     ...args: ARGS
   ): SelectEffect
+  update<S, ARGS extends any[]>(
+    updater: (state: S, ...args: ARGS) => S,
+    ...args: ARGS
+  ): UpdateEffect
+  update<S>(value: S)
   take(pattern?: TakePattern<any>): TakeEffect
   take<T>(
     channel: Channel<T> | MulticastChannel<T> | EventChannel<T>,

@@ -128,21 +128,27 @@ function runCallEffect(env, task, { context, fn, args }, cb, { runEffect }) {
   }
 }
 
-export function runSetContextEffect(env, task, { prop, value }, cb) {
+function runSetContextEffect(env, task, { prop, value }, cb) {
   task.taskContext[prop] = value
   cb()
 }
 
-export function runGetContextEffect(env, task, prop, cb) {
+function runGetContextEffect(env, task, prop, cb) {
   cb(task.taskContext[prop])
 }
 
-export function runGetEnvEffect(env, task, payload, cb) {
+function runGetEnvEffect(env, task, payload, cb) {
   cb(env)
 }
 
-export function runSelectEffect(env, task, { selector, args }, cb) {
+function runSelectEffect(env, task, { selector, args }, cb) {
   cb(selector(env.getState(), ...args))
+}
+
+function runUpdateEffect(env, task, { updater, args, value }, cb) {
+  const nextState = updater == null ? value : updater(env.getState(), ...args)
+  env.setState(nextState)
+  cb(nextState)
 }
 
 function runTakeEffect(env, task, { channel = env.channel, pattern, maybe }, cb) {
@@ -214,6 +220,7 @@ export default {
   GET_CONTEXT: runGetContextEffect,
   GET_ENV: runGetEnvEffect,
   SELECT: runSelectEffect,
+  UPDATE: runUpdateEffect,
   TAKE: runTakeEffect,
   PUT: runPutEffect,
   FLUSH: runFlushEffect,
