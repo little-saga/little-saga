@@ -1,5 +1,7 @@
 little-saga 在一些功能上会和 redux-saga 保持同步，🔗 表示在 redux-saga 中的相关 pull request
 
+## (unreleased)
+
 ## v0.6.1 (unreleased)
 
 - 新增 io.update
