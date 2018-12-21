@@ -32,7 +32,8 @@ const rootTask = runSaga(options, fn, ...args)
 | taskContext | `{}`                                                                              | root task 的初始 context <br/>saga 运行过程中可以通过 getContext/setContext effect 来存取该 context 对象。                                                                                              |
 | channel     | `stdChannel()`: 一个全新 stdChannel 实例                                          | saga 运行时执行 put/take 的默认 channel <br/> 可以传入一个自定义的 stdChannel 实例来替换默认值，使得 saga 连接到外部的输入输出。详见「[使用 stdChannel](/docs/using-stdchannel.md)」                    |
 | customEnv   | `{}`                                                                              | 添加到 saga 运行环境对象 `env` 中的额外字段 <br/>saga 运行时通过 `yield io.getEnv()` 可以获取到 `customEnv`                                                                                             |
-| getState    | `undefined`                                                                       | 定义 select-effect 的回调函数 <br/>每次执行 `yield select()` 时，`getState` 将会被调用，调用形式为 `getState()`                                                                                         |
+| getState    | `undefined`                                                                       | 定义 select-effect 的回调函数 <br/>每次执行 `yield io.select()` 时，`getState` 将会被调用，调用形式为 `getState()`                                                                                      |
+| setState    | `undefined`                                                                       | 定义 update-effect 的回调函数 <br/>每次执行 `yield io.update()` 时该函数将被调用，用于更新状态                                                                                                          |
 | cont        | `reportErrorOnly`：如果发生错误的话，该函数会打印错误，否则会忽略正常返回的结果。 | root task 的后继（continuation）<br/>当 root task 完成时（或出错时），cont 将被调用，调用形式为 `cont(result, isErr)`，result 表示 root task 返回的结果或是发生的错误，isErr 表示 result 是否错误对象。 |
 
 ### effect 类型与 effect 创建器
@@ -68,6 +69,8 @@ little-saga 支持的 effect 创建具体列表如下：
 - `io.getContext(prop)`
 - `io.getEnv()`
 - `io.select(selector)`
+- `io.update(value)`
+- `io.update(updater, ...args)`
 - `io.take(pattern)`
 - `io.take(channel, pattern)`
 - `io.takeMaybe(pattern)`
@@ -88,6 +91,7 @@ little-saga 支持的 effect 创建具体列表如下：
 - `io.setContext` 的接口在 little-saga 中为 `io.setContext(prop, value)`，与 redux-saga 中不一样
 - little-saga 移除了 `io.putResolve`
 - little-saga 新增了 `io.getEnv()`
+- little-saga 新增了 `io.update()`
 
 ### `io.getEnv()`
 
@@ -99,6 +103,13 @@ little-saga 支持的 effect 创建具体列表如下：
 - `channel`：执行 put/take 的默认 channel
 - `scheduler`：saga 运行环境所使用的调度器
 - 以及来自 `runSaga#options.customEnv` 对象所提供的所有字段
+
+### `io.update()`
+
+`UPDATE` effect 用于更新状态，io.update 支持两种不同的调用方式：
+
+- `io.update(nextValue)`：将状态更新为 `nextValue`
+- `io.update(updater, ...args)`：使用 updater 来更新状态。updater 是一个函数，被调用的形式为 `updater(state, ...args)`，`updater(...)` 的返回值将作为新的状态。
 
 ### channels & buffers
 

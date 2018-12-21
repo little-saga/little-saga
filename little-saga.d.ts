@@ -234,6 +234,7 @@ interface RunSagaOptions {
   channel: MulticastChannel
   customEnv: any
   getState(): any
+  setState(nextState): any
   cont: Callback
 }
 
