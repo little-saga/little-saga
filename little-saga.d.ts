@@ -184,7 +184,7 @@ export interface ActionChannelEffect {
   }
 }
 
-type TakePattern<T> = '*' | string | ((message: T) => boolean) | any[]
+type TakePattern<T> = '*' | string | symbol | ((message: T) => boolean) | any[]
 
 export const io: {
   fork<ARGS extends any[]>(fn: Func<ARGS>, ...args: ARGS): ForkEffect
