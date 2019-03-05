@@ -2,7 +2,7 @@ little-saga 在一些功能上会和 redux-saga 保持同步，🔗 表示在 re
 
 ## (unreleased)
 
-## v0.6.1 (unreleased)
+## v0.6.1
 
 - 新增 io.update
 
