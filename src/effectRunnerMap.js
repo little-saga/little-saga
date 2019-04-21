@@ -19,7 +19,7 @@ function runForkEffect(env, task, { fn, args, detached }, cb) {
       if (subTask.isRunning) {
         task.taskQueue.addTask(subTask)
         cb(subTask)
-      } else if (subTask.error) {
+      } else if (subTask.isAborted) {
         task.taskQueue.abort(subTask.error)
       } else {
         cb(subTask)
