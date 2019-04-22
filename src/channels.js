@@ -29,8 +29,7 @@ export function channel(buffer = buffers.expanding()) {
     if (takers.length === 0) {
       return buffer.put(input)
     }
-    const cb = takers[0]
-    takers.splice(0, 1)
+    const cb = takers.shift()
     cb(input)
   }
 
