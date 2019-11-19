@@ -1,12 +1,12 @@
 [![Build Status](https://img.shields.io/travis/little-saga/little-saga/master.svg?style=flat-square)](https://travis-ci.org/little-saga/little-saga) [![NPM Package](https://img.shields.io/npm/v/little-saga.svg?style=flat-square)](https://www.npmjs.org/package/little-saga)
 
-## little-saga v0.6
+## little-saga
 
-从 v0.6 开始，little-saga 的定位变为 **通用的、可嵌入的 saga 运行环境**。little-saga 的概念和 API 仍与 redux-saga 保持一致，但 little-saga 的应用场景与 redux-saga 不同。
+**通用的、可嵌入的 saga 运行环境**。little-saga 的概念和 API 与 redux-saga 基本保持一致，但两者的应用场景有所不同，使用 little-saga 请注意其与 redux-saga 的区别。
 
-[点击这里](https://github.com/little-saga/little-saga/tree/v0.5.4) 查看 v0.5.x 版本。
+[点击这里](https://github.com/little-saga/little-saga/tree/v0.5.4) 查看老版本的文档.
 
-## React hooks
+## 👍 React hooks
 
 [`@little-saga/use-saga`](https://github.com/little-saga/use-saga)：使用 React hooks 特性在一个组件的生命周期内运行 little-saga。推荐配合该类库在 React 组件中使用 little-saga 😊
 
