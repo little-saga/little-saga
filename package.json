@@ -36,20 +36,20 @@
     ]
   },
   "devDependencies": {
-    "@babel/cli": "^7.7.0",
-    "@babel/core": "^7.7.2",
-    "@babel/plugin-proposal-class-properties": "^7.7.0",
-    "@babel/plugin-syntax-object-rest-spread": "^7.2.0",
-    "@babel/plugin-transform-modules-commonjs": "^7.7.0",
+    "@babel/cli": "^7.8.3",
+    "@babel/core": "^7.8.3",
+    "@babel/plugin-proposal-class-properties": "^7.8.3",
+    "@babel/plugin-syntax-object-rest-spread": "^7.8.3",
+    "@babel/plugin-transform-modules-commonjs": "^7.8.3",
     "babel-core": "7.0.0-bridge.0",
     "babel-jest": "^24.9.0",
     "cross-env": "^6.0.3",
-    "husky": "^3.1.0",
+    "husky": "^4.0.10",
     "jest": "^24.9.0",
-    "lint-staged": "^9.4.3",
+    "lint-staged": "^9.5.0",
     "prettier": "1.19.1",
     "rimraf": "^3.0.0",
-    "rollup": "^1.27.2",
+    "rollup": "^1.29.0",
     "rollup-plugin-babel": "4.3.3"
   },
   "lint-staged": {
