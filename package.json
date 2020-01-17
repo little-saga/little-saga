@@ -2,7 +2,7 @@
   "name": "little-saga",
   "license": "MIT",
   "description": "⚡ Universal and embeddable saga run-time.",
-  "version": "0.6.2",
+  "version": "0.6.3",
   "repository": "https://github.com/little-saga/little-saga.git",
   "scripts": {
     "build": "cross-env BABEL_ENV=es rollup -c rollup.config.js",
