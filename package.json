@@ -42,15 +42,15 @@
     "@babel/plugin-syntax-object-rest-spread": "^7.8.3",
     "@babel/plugin-transform-modules-commonjs": "^7.8.3",
     "babel-core": "7.0.0-bridge.0",
-    "babel-jest": "^24.9.0",
-    "cross-env": "^6.0.3",
+    "babel-jest": "^25.2.6",
+    "cross-env": "^7.0.2",
     "husky": "^4.0.10",
-    "jest": "^24.9.0",
-    "lint-staged": "^9.5.0",
-    "prettier": "1.19.1",
+    "jest": "^25.2.7",
+    "lint-staged": "^10.1.2",
+    "prettier": "2.0.2",
     "rimraf": "^3.0.0",
-    "rollup": "^1.29.0",
-    "rollup-plugin-babel": "4.3.3"
+    "rollup": "^2.3.3",
+    "rollup-plugin-babel": "4.4.0"
   },
   "lint-staged": {
     "*.js": [
