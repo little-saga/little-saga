@@ -1,5 +1,11 @@
 [![Build Status](https://img.shields.io/travis/little-saga/little-saga/master.svg?style=flat-square)](https://travis-ci.org/little-saga/little-saga) [![NPM Package](https://img.shields.io/npm/v/little-saga.svg?style=flat-square)](https://www.npmjs.org/package/little-saga)
 
+# NOT LONGER MAINTAINED
+
+# little-saga 已不再维护，请勿在生产环境中使用
+
+（little-saga 作为学习资料还是挺不错的）
+
 ## little-saga
 
 **通用的、可嵌入的 saga 运行环境**。little-saga 的概念和 API 与 redux-saga 基本保持一致，但两者的应用场景有所不同，使用 little-saga 请注意其与 redux-saga 的区别。
